@@ -7,6 +7,7 @@
   %sum = alloca float, align 4
   %j = alloca i32, align 4
   %m = alloca i32, align 4
+  %test = getelementptr inbounds (%struct.dim3* @blockIdx, i32 0, i32 0), align 4, !dbg !983
   store float* %A, float** %1, align 8
   call void @llvm.dbg.declare(metadata !{float** %1}, metadata !976), !dbg !977
   store float* %B, float** %2, align 8
@@ -16,7 +17,7 @@
   store i32 %dim, i32* %4, align 4
   call void @llvm.dbg.declare(metadata !{i32* %4}, metadata !980), !dbg !977
   call void @llvm.dbg.declare(metadata !{i32* %i}, metadata !981), !dbg !983
-  %5 = load i32* getelementptr inbounds (%struct.dim3* @blockIdx, i32 0, i32 0), align 4, !dbg !983
+  %5 = load i32* getelementptr inbounds (%struct.dim3* @blockIdx, i32 0, i32 0), align 4, !dbg !983 只看最后的idx是什么
   %6 = load i32* getelementptr inbounds (%struct.dim3* @blockDim, i32 0, i32 0), align 4, !dbg !983
   %7 = mul i32 %5, %6, !dbg !983
   %8 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !983

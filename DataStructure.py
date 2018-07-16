@@ -1,19 +1,62 @@
 import re
 
 
-class Thread(object):
+# if is a memory pointer, value start with ("%")
+# memory-index: data_type: memory-index value: memory based value is_get: true memory_index: int
+class DataType(object):
+
+    def __init__(self, data_type):
+        super(DataType, self).__init__()
+        self.data_type = data_type
+        self.value = None  # value.start_with("%")
+        self.is_getelementptr = False
+        self.memory_index = None  # only active when is_getelementptr is True
+
+    def copy_and_replace(self, other_type):
+        other_type.data_type = self.data_type
+        other_type.value = self.value
+        other_type.is_getelementptr = self.is_getelementptr
+        other_type.memory_index = self.memory_index
+
+    def set_value(self, value):
+        self.value = value
+
+    def get_value(self):
+        return self.value
+
+    def get_type(self):
+        return self.data_type
+
+    def set_is_getelementptr(self, new_bool):
+        self.is_getelementptr = new_bool
+
+    def set_memory_index(self, index):
+        self.memory_index = index
+
+
+class Thread(DataType):
 
     def __init__(self, location, block_dim):
-        super(Thread, self).__init__()
-        self.x, self.y, self.z = location
+        super(Thread, self).__init__("build-in")
+        type_lst = list()
+        for item in location:
+            tmp_data = DataType('i32')
+            tmp_data.set_value(item)
+            type_lst.append(tmp_data)
+        self.set_value(type_lst)
         self.limit_x, self.limit_y, self.limit_z = block_dim
 
 
-class Block(object):
+class Block(DataType):
 
     def __init__(self, location, grid_dim):
-        super(Block, self).__init__()
-        self.x, self.y, self.z = location
+        super(Block, self).__init__("build-in")
+        type_lst = list()
+        for item in location:
+            tmp_data = DataType('i32')
+            tmp_data.set_value(item)
+            type_lst.append(tmp_data)
+        self.set_value(type_lst)
         self.limit_x, self.limit_y, self.limit_z = grid_dim
 
 
@@ -104,6 +147,9 @@ class Environment(object):
     def binding_value(self, target_dict):
         for key in target_dict:
             self.env[key] = target_dict[key]
+
+    def has_given_key(self, key):
+        return key in self.env
 
 
 class StackSet(object):
