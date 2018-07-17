@@ -110,7 +110,7 @@ def calculation_factory(cac_flag):
         number_two = execute_item(arguments[1], kernel_codes, global_env, local_env)
         if number_one.is_depend_on_running_time or number_two.is_depend_on_running_time:
             tmp_result.set_is_depend_on_running_time(True)
-            return tmp_result
+            return tmp_result, None, None, None
         if cac_flag == 0:
             tmp_result.set_value(num(number_one.get_value()) + num(number_two.get_value()))
         elif cac_flag == 1:
