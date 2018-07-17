@@ -11,15 +11,20 @@ class DataType(object):
         self.value = None  # value.start_with("%")
         self.is_getelementptr = False
         self.memory_index = None  # only active when is_getelementptr is True
+        self.is_depend_on_running_time = False  # if this value can only be specify during running time
 
     def copy_and_replace(self, other_type):
         other_type.data_type = self.data_type
         other_type.value = self.value
         other_type.is_getelementptr = self.is_getelementptr
         other_type.memory_index = self.memory_index
+        other_type.is_depend_on_running_time = self.is_depend_on_running_time
 
     def set_value(self, value):
         self.value = value
+
+    def set_type(self, data_type):
+        self.data_type = data_type
 
     def get_value(self):
         return self.value
@@ -32,6 +37,9 @@ class DataType(object):
 
     def set_memory_index(self, index):
         self.memory_index = index
+
+    def set_is_depend_on_running_time(self, new_bool):
+        self.is_depend_on_running_time = new_bool
 
 
 class Thread(DataType):
@@ -126,7 +134,7 @@ class KernelCodes(object):
         self.current_line = nxt
 
     def is_over(self):
-        return len(self.codes) - 1 == self.current_line
+        return len(self.codes) - 1 <= self.current_line
 
 
 class Environment(object):

@@ -2,8 +2,14 @@ import re
 from DataStructure import *
 
 
-def detect_if_is_syncthreads(kernel_codes):
-    statement = kernel_codes.get_current_statement()
+def num(s):
+    try:
+        return int(s)
+    except ValueError:
+        return float(s)
+
+
+def detect_if_is_syncthreads(statement):
     return statement.find("call void @__syncthreads()") != -1
 
 
@@ -17,11 +23,17 @@ def alloc_type_for_var(arguments, kernel_codes, main_memory, global_env, local_e
 def is_memory(data_type):
     if data_type.value is None:
         return False
-    return data_type.value[0] == '%' or data_type.value[0] == '@'
+    try:
+        return data_type.value[0] == '%' or data_type.value[0] == '@'
+    except:
+        return False
 
 
 def is_global_memory(data_type):
-    return data_type.value[0] == '%'
+    try:
+        return data_type.value[0] == '%'
+    except:
+        return False
 
 
 def is_target_memory(data_type, main_memory):
@@ -44,11 +56,11 @@ def get_element_ptr(arguments, kernel_codes, main_memory, global_env, local_env)
     if is_memory(target):
         result_tmp = DataType('memory-index')
         result_tmp.set_is_getelementptr(True)
-        result_tmp.set_memory_index(int(tmp_index.get_value()))
+        result_tmp.set_memory_index(num(tmp_index.get_value()))
         result_tmp.set_value(target.get_value())
         return result_tmp, None, None, None
     else:
-        return target.get_value()[int(tmp_index.get_value())], None, None, None
+        return target.get_value()[num(tmp_index.get_value())], None, None, None
 
 
 def store(arguments, kernel_codes, main_memory, global_env, local_env):
@@ -56,7 +68,7 @@ def store(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.split(',')
     source = execute_command(arguments[0], kernel_codes, main_memory, global_env, local_env)[0]
     target = execute_command(arguments[1], kernel_codes, main_memory, global_env, local_env)[0]
-    if is_target_memory(target, main_memory):
+    if is_target_memory(target, main_memory) and target.memory_index is not None:
         return source, "write", target.memory_index, is_global_memory(target)
     else:
         var_lst = arguments[1].strip()
@@ -70,30 +82,141 @@ def store(arguments, kernel_codes, main_memory, global_env, local_env):
 
 def load(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.strip()
-    arguments = arguments.split(',')
-    result = execute_command(arguments[1], kernel_codes, main_memory, global_env, local_env)
-    if is_target_memory(result, main_memory):
+    split_index = arguments.find(' ')
+    target_command = arguments[split_index + 1:]
+    if target_command.find('getelementptr') != -1:
+        result = execute_command(arguments[split_index + 1:], kernel_codes, main_memory, global_env, local_env)[0]
+    else:
+        result = execute_item(target_command.split(',')[0], kernel_codes, global_env, local_env)
+    if is_target_memory(result, main_memory) and result.memory_index is not None:
+        result.set_is_depend_on_running_time(True)
         return result, "read", result.memory_index, is_global_memory(result)
     return result, None, None, None
 
+
+def call_function(arguments, kernel_codes, main_memory, global_env, local_env):
+    return None, None, None, None
+
+
+def calculation_factory(cac_flag):
+    #  cac_flag = 0 -> +, 1 -> -, 2 -> *, 3 -> \, 4 -> %
+    def __cal(arguments, kernel_codes, main_memory, global_env, local_env):
+        arguments = arguments.replace("nsw", "")
+        arguments = arguments.strip()
+        arguments = arguments.split(',')
+        var_lst = arguments[0].strip().split(' ')
+        tmp_result = DataType(var_lst[0].strip())
+        number_one = execute_item(var_lst[1].strip(), kernel_codes, global_env, local_env)
+        number_two = execute_item(arguments[1], kernel_codes, global_env, local_env)
+        if number_one.is_depend_on_running_time or number_two.is_depend_on_running_time:
+            tmp_result.set_is_depend_on_running_time(True)
+            return tmp_result
+        if cac_flag == 0:
+            tmp_result.set_value(num(number_one.get_value()) + num(number_two.get_value()))
+        elif cac_flag == 1:
+            tmp_result.set_value(num(number_one.get_value()) - num(number_two.get_value()))
+        elif cac_flag == 2:
+            tmp_result.set_value(num(number_one.get_value()) * num(number_two.get_value()))
+        elif cac_flag == 3:
+            tmp_result.set_value(num(number_one.get_value()) / num(number_two.get_value()))
+        elif cac_flag == 4:
+            tmp_result.set_value(num(number_one.get_value()) % num(number_two.get_value()))
+        return tmp_result, None, None, None
+    return __cal
+
+
+def single_elem_calculation_factory(cac_flag):
+    #  cal_flag: 0->sext
+    def __cal(arguments, kernel_codes, main_memory, global_env, local_env):
+        arguments = arguments.strip()
+        arguments = arguments.split(' ')
+        old_data = execute_item(arguments[1], kernel_codes, global_env, local_env)
+        new_data = DataType('..')
+        old_data.copy_and_replace(new_data)
+        new_data.set_type(arguments[3])
+        return new_data, None, None, None
+    return __cal
+
+
+def compare_expression(arguments, kernel_codes, main_memory, global_env, local_env):
+    result_tmp = DataType('bool')
+    oper_dict = {
+        'eq': lambda x, y: x == y,
+        'ne': lambda x, y: x != y,
+        'gt': lambda x, y: x > y,
+        'ge': lambda x, y: x >= y,
+        'lt': lambda x, y: x < y,
+        'le': lambda x, y: x <= y,
+    }
+    arguments = arguments.strip()
+    split_index = arguments.find(' ')
+    operator, actual_arguments = arguments[: split_index], arguments[split_index + 1:]
+    if len(operator) > 2:
+        operator = operator[1:]
+    split_index = actual_arguments.find(' ')
+    actual_arguments = actual_arguments[split_index + 1:]
+    actual_arguments = actual_arguments.split(',')
+    number_one = execute_item(actual_arguments[0], kernel_codes, global_env, local_env)
+    number_two = execute_item(actual_arguments[1], kernel_codes, global_env, local_env)
+    if number_two.is_depend_on_running_time or number_one.is_depend_on_running_time:
+        result_tmp.set_is_depend_on_running_time(True)
+    else:
+        result_tmp.set_value(oper_dict[operator](num(number_one.get_value()), num(number_two.get_value())))
+    return result_tmp, None, None, None
+
+
+def jump(arguments, kernel_codes, main_memory, global_env, local_env):
+    arguments = arguments.strip()
+    split_index = arguments.find(' ')
+    if arguments[:split_index].find('label') != -1:
+        new_line = arguments[split_index + 1:].split(',')[0]
+        new_line = new_line[1:]
+        kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(new_line))
+    else:
+        new_line = arguments[split_index + 1:].strip()
+        new_line = new_line.split(',')
+        bool_res = execute_item(new_line[0], kernel_codes, global_env, local_env)
+        if_true = new_line[1][new_line[1].find('%') + 1:]
+        if_false = new_line[2][new_line[2].find('%') + 1:]
+        if bool(bool_res.get_value()):
+            kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(if_true))
+        else:
+            kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(if_false))
+    return None, None, None, None
 
 
 _method_dict = {
     'alloca': alloc_type_for_var,
     'getelementptr': get_element_ptr,
     'store': store,
+    'load': load,
+    'call': call_function,
+    'add': calculation_factory(0),
+    'mul': calculation_factory(2),
+    'srem': calculation_factory(4),
+    'sext': single_elem_calculation_factory(0),
+    'icmp': compare_expression,
+    'br': jump,
 }
 
 
 def execute_item(statement, kernel_codes, global_env, local_env):
     statement = statement.strip()
     split_index = statement.find(' ')
-    data_type = statement[: split_index].strip()
-    data_token = statement[split_index:].strip()
+    if split_index == -1:
+        data_type = None
+        data_token = statement
+    else:
+        data_type = statement[: split_index].strip()
+        data_token = statement[split_index:].strip()
     if global_env.has_given_key(data_token):
         return global_env.get_value(data_token)
     if local_env.has_given_key(data_token):
         return local_env.get_value(data_token)
+    if re.match(r"^\d+$", data_token):
+        result_tmp = DataType("i32")
+        result_tmp.set_value(num(data_token))
+        return result_tmp
     result_tmp = DataType(data_type)
     result_tmp.set_value(data_token)
     return result_tmp
@@ -118,8 +241,7 @@ def execute_assign(statement, kernel_codes, main_memory, global_env, local_env):
     return return_value, action, current_index, is_global
 
 
-def execute_statement_and_get_action(kernel_codes, main_memory, global_env, local_env):
-    current_stmt = kernel_codes.get_current_statement_and_set_next()
+def execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env):
     if len(re.findall(r"(@|%)\w+\s*=\s*(.*)", current_stmt, re.DOTALL)) != 0:
         return execute_assign(current_stmt, kernel_codes, main_memory, global_env, local_env)
     else:
