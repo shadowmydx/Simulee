@@ -47,6 +47,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                     local_env_dict[str(thread_indexes)].add_value('kernel_code', KernelCodes(raw_kernel_codes))
                 local_env = local_env_dict[str(thread_indexes)]
                 kernel_codes = local_env.get_value('kernel_code')
+                current_line = kernel_codes.get_current_line()
                 if kernel_codes.is_over():
                     unfinished_total_threads[str(thread_indexes)] = False
                     continue
@@ -61,12 +62,13 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
                     if current_action is None:
                         continue
+                    saved_action = Action((current_line, current_action, block_indexes, thread_indexes))
                     if is_global:
-                        global_memory.list[current_index].set_by_order(current_action,
+                        global_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_global_memory[current_index])
                         current_visited_global_memory_index.push(current_index)
                     else:
-                        shared_memory.list[current_index].set_by_order(current_action,
+                        shared_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_shared_memory[current_index])
                         current_visited_shared_memory_index.push(current_index)
         shared_parser(shared_memory)
@@ -90,24 +92,24 @@ if __name__ == "__main__":
     # test_shared_size = 256
     # codes = open('./codes.ll', 'r').read()
     test_block = Block((-1, -1, 0), (2, 1, 1))
-    test_thread = Thread((-1, -1, 0), (10, 1, 1))
-    # test_thread = Thread((-1, -1, 0), (128, 1, 1))
+    # test_thread = Thread((-1, -1, 0), (10, 1, 1))
+    test_thread = Thread((-1, -1, 0), (128, 1, 1))
     num_elements = DataType('i32')
     num_elements.set_value(100)
-    # num_elements.set_value(2)
-    # args = {
-    #     "%input_array": DataType("i32*"),
-    #     "%num_elements": num_elements,
-    #     "main_memory": "%input_array"
-    # }
-    # args['%input_array'].set_value("%input_array")
+    num_elements.set_value(2)
     args = {
-        "%x": DataType("i32*"),
-        "%dim": num_elements,
-        "main_memory": "%x"
+        "%input_array": DataType("i32*"),
+        "%num_elements": num_elements,
+        "main_memory": "%input_array"
     }
-    args["%x"].set_value("%x")
+    args['%input_array'].set_value("%input_array")
+    # args = {
+    #     "%x": DataType("i32*"),
+    #     "%dim": num_elements,
+    #     "main_memory": "%x"
+    # }
+    # args["%x"].set_value("%x")
     test_global_size = 100
     test_shared_size = 100
-    codes = open('./test2.ll', 'r').read()
+    codes = open('./tests.ll', 'r').read()
     construct_memory_execute_mode(test_block, test_thread, test_global_size, test_shared_size, codes, args, lambda x:x, None)

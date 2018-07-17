@@ -133,6 +133,9 @@ class KernelCodes(object):
     def set_next_statement(self, nxt):
         self.current_line = nxt
 
+    def get_current_line(self):
+        return self.current_line
+
     def is_over(self):
         return len(self.codes) - 1 <= self.current_line
 
