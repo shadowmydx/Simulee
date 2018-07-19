@@ -205,6 +205,8 @@ class Environment(object):
         self.env.pop(key)
 
     def get_value(self, key):
+        if key not in self.env:
+            return None
         return self.env[key]
 
     def binding_value(self, target_dict):

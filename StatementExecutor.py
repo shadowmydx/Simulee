@@ -94,7 +94,27 @@ def load(arguments, kernel_codes, main_memory, global_env, local_env):
     return result, None, None, None
 
 
+def parse_arguments(target_args):
+    result = list()
+    # todo
+    return result
+
+
 def call_function(arguments, kernel_codes, main_memory, global_env, local_env):
+    arguments = arguments.strip()
+    split_index = arguments.find(' ')
+    target_function_pattern = r"(?P<function_name>[^(]+)\((?P<argus>.*)\)"
+    target_function_pattern = re.compile(target_function_pattern, re.DOTALL)
+    arguments = arguments[split_index + 1:]
+    matcher = target_function_pattern.search(arguments)
+    target_function = global_env.get_value(matcher.group('function_name'))
+    if target_function is None:
+        return None, None, None, None
+    argus_value = matcher.group('argus')
+    argus_value = parse_arguments(argus_value)
+    argus_value = [execute_command(single_value[1], kernel_codes, main_memory, global_env, local_env)
+                   for single_value in argus_value]
+    kernel_codes.prepared_launch_function(local_env, target_function.codes, argus_value)
     return None, None, None, None
 
 
