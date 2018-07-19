@@ -112,8 +112,9 @@ class KernelCodes(object):
         super(KernelCodes, self).__init__()
         self.codes = [item for item in kernel_codes.split('\n') if len(item) != 0]
         self.label = dict()
-        self.calling_stack = list()
-        self.reserved_env = list()
+        self.calling_code = None
+        self.reserved_env = None
+        self.father_code = None
         for index in xrange(len(self.codes)):
             current_item = self.codes[index]
             tmp_res = re.findall(r"; <label>:(\d+)", current_item)
@@ -121,38 +122,47 @@ class KernelCodes(object):
                 self.label[str(tmp_res[0])] = index
         self.current_line = 0
 
+    def get_current_execution_code(self):
+        start = self
+        while start.calling_code is not None:
+            start = start.calling_code
+        return start
+
     def prepared_launch_function(self, current_env, other_codes, arguments):
-        self.calling_stack.append(other_codes)
+        current_execution = self.get_current_execution_code()
+        current_execution.calling_code = other_codes
+        other_codes.father_code = current_execution
         tmp_env = Environment()
         tmp_env.binding_value(current_env.env)
         current_env.binding_value(arguments)
-        self.reserved_env.append(tmp_env)
+        current_execution.reserved_env = tmp_env
+
+    def restore_after_execution_function(self, current_env):
+        current_execution = self.get_current_execution_code()
+        current_father = current_execution.father_code
+        current_env.binding_value(current_father.reserved_env.env)
+        current_father.calling_code = None
+        current_father.reserved_env = None
 
     def get_label_by_mark(self, mark):
-        if len(self.calling_stack) != 0:
-            return self.calling_stack[-1].get_label_by_mark(mark)
-        return self.label[str(mark)]
+        current_execution = self.get_current_execution_code()
+        return current_execution.label[str(mark)]
 
     def get_current_statement_and_set_next(self):
-        if len(self.calling_stack) != 0:
-            current_codes = self.calling_stack[-1]
-            return current_codes.get_current_statement_and_set_next()
-        result_stmt = self.codes[self.current_line]
-        self.current_line += 1
+        current_execution = self.get_current_execution_code()
+        result_stmt = current_execution.codes[current_execution.current_line]
+        current_execution.current_line += 1
         return result_stmt
 
     def get_current_statement(self):
-        if len(self.calling_stack) != 0:
-            return self.calling_stack[-1].get_current_statement()
-        return self.codes[self.current_line]
+        current_execution = self.get_current_execution_code()
+        return current_execution.codes[current_execution.current_line]
 
     def set_next_statement(self, nxt):
-        if len(self.calling_stack) != 0:
-            self.calling_stack[-1].set_next_statement(nxt)
-            return
-        self.current_line = nxt
+        current_execution = self.get_current_execution_code()
+        current_execution.current_line = nxt
 
-    def get_current_line(self):
+    def get_current_line_in_current_codes(self):
         return self.current_line
 
     def is_over(self):
