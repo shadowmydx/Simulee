@@ -40,7 +40,7 @@ def is_target_memory(data_type, main_memory):
     if data_type.value == main_memory:
         return True
     if not is_global_memory(data_type) and is_memory(data_type):
-        return True # is shared memory
+        return True  # is shared memory
     return False
 
 
@@ -96,7 +96,7 @@ def load(arguments, kernel_codes, main_memory, global_env, local_env):
 
 def parse_arguments(target_args):
     result = list()
-    # todo
+    # todo: parse argument string list ['type token|command', ...]
     return result
 
 
