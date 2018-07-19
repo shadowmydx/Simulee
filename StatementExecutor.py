@@ -140,6 +140,20 @@ def call_function(arguments, kernel_codes, main_memory, global_env, local_env):
     return None, None, None, None
 
 
+def return_statement(arguments, kernel_codes, main_memory, global_env, local_env):
+    if arguments.find('void') != -1:
+        kernel_codes.restore_after_execution_function(local_env)
+        return None, None, None, None
+    else:
+        arguments = arguments.strip()
+        arguments = arguments.split(',')[0]
+        split_index = arguments.find(' ')
+        arguments = arguments[split_index + 1:].strip()
+        result = execute_item(arguments, kernel_codes, global_env, local_env)
+        kernel_codes.restore_after_execution_function(local_env)
+        return result
+
+
 def calculation_factory(cac_flag):
     #  cac_flag = 0 -> +, 1 -> -, 2 -> *, 3 -> \, 4 -> %
     def __cal(arguments, kernel_codes, main_memory, global_env, local_env):
@@ -239,6 +253,7 @@ _method_dict = {
     'sext': single_elem_calculation_factory(0),
     'icmp': compare_expression,
     'br': jump,
+    'ret': return_statement,
 }
 
 

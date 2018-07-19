@@ -140,6 +140,8 @@ class KernelCodes(object):
     def restore_after_execution_function(self, current_env):
         current_execution = self.get_current_execution_code()
         current_father = current_execution.father_code
+        if current_father is None:
+            return
         current_env.binding_value(current_father.reserved_env.env)
         current_father.calling_code = None
         current_father.reserved_env = None
@@ -172,10 +174,11 @@ class KernelCodes(object):
 
 class Function(object):
 
-    def __init__(self, target_codes, func_name, argument_lst):
+    def __init__(self, target_codes, func_name, argument_lst, type_lst):
         super(Function, self).__init__()
         self.codes = KernelCodes(target_codes)
         self.argument_lst = argument_lst
+        self.type_lst = type_lst
         self.function_name = func_name
 
     @staticmethod
@@ -188,9 +191,12 @@ class Function(object):
         for single_function in function_pattern.finditer(content):
             function_name = single_function.group('function_name')
             argument = single_function.group('argument')
+            argument = [item.strip() for item in argument.split(',') if len(item.strip()) != 0]
             body = single_function.group('body')
-            argument = [item.split(' ')[1] for item in argument.split(',')]
-            target_function = Function(body, function_name, argument)
+            argument_lst = [item.split(' ') for item in argument]
+            type_lst = [item[0] for item in argument_lst]
+            argument_lst = [item[1] for item in argument_lst]
+            target_function = Function(body, function_name, argument_lst, type_lst)
             target_env.add_value(function_name, target_function)
 
 

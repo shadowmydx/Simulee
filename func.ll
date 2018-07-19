@@ -74,4 +74,66 @@ define internal double @_ZL11_sum_reduceIdET_PS0_(double* %buffer) uwtable secti
   ret double %42, !dbg !5501
 }
 
-define adfadf @adsfas(adsfasdf) {}
+define internal void @_ZL8_vec_sumIdEvPT_S1_i(double* %v, double* %sum, i32 %dim) uwtable noinline {
+  %1 = alloca double*, align 8
+  %2 = alloca double*, align 8
+  %3 = alloca i32, align 4
+  %i = alloca i32, align 4
+  %ans = alloca double, align 8
+  store double* %v, double** %1, align 8
+  call void @llvm.dbg.declare(metadata !{double** %1}, metadata !4393), !dbg !4394
+  store double* %sum, double** %2, align 8
+  call void @llvm.dbg.declare(metadata !{double** %2}, metadata !4395), !dbg !4394
+  store i32 %dim, i32* %3, align 4
+  call void @llvm.dbg.declare(metadata !{i32* %3}, metadata !4396), !dbg !4394
+  call void @llvm.dbg.declare(metadata !{i32* %i}, metadata !4397), !dbg !4399
+  %4 = load i32* getelementptr inbounds (%struct.dim3* @blockIdx, i32 0, i32 0), align 4, !dbg !4399
+  %5 = load i32* getelementptr inbounds (%struct.dim3* @blockDim, i32 0, i32 0), align 4, !dbg !4399
+  %6 = mul i32 %4, %5, !dbg !4399
+  %7 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !4399
+  %8 = add i32 %6, %7, !dbg !4399
+  store i32 %8, i32* %i, align 4, !dbg !4399
+  %9 = load i32* %i, align 4, !dbg !4400
+  %10 = load i32* %3, align 4, !dbg !4400
+  %11 = icmp slt i32 %9, %10, !dbg !4400
+  br i1 %11, label %12, label %21, !dbg !4400
+
+; <label>:12                                      ; preds = %0
+  %13 = load i32* %i, align 4, !dbg !4401
+  %14 = sext i32 %13 to i64, !dbg !4401
+  %15 = load double** %1, align 8, !dbg !4401
+  %16 = getelementptr inbounds double* %15, i64 %14, !dbg !4401
+  %17 = load double* %16, align 8, !dbg !4401
+  %18 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !4401
+  %19 = zext i32 %18 to i64, !dbg !4401
+  %20 = getelementptr inbounds [256 x double]* @_ZZL8_vec_sumIdEvPT_S1_iE8row_data, i32 0, i64 %19, !dbg !4401
+  store double %17, double* %20, align 8, !dbg !4401
+  br label %25, !dbg !4401
+
+; <label>:21                                      ; preds = %0
+  %22 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !4402
+  %23 = zext i32 %22 to i64, !dbg !4402
+  %24 = getelementptr inbounds [256 x double]* @_ZZL8_vec_sumIdEvPT_S1_iE8row_data, i32 0, i64 %23, !dbg !4402
+  store double 0.000000e+00, double* %24, align 8, !dbg !4402
+  br label %25
+
+; <label>:25                                      ; preds = %21, %12
+  call void @__syncthreads(), !dbg !4403
+  call void @llvm.dbg.declare(metadata !{double* %ans}, metadata !4404), !dbg !4405
+  %26 = call double @_ZL11_sum_reduceIdET_PS0_(double* getelementptr inbounds ([256 x double]* @_ZZL8_vec_sumIdEvPT_S1_iE8row_data, i32 0, i32 0)), !dbg !4405
+  store double %26, double* %ans, align 8, !dbg !4405
+  %27 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !4406
+  %28 = icmp eq i32 %27, 0, !dbg !4406
+  br i1 %28, label %29, label %34, !dbg !4406
+
+; <label>:29                                      ; preds = %25
+  %30 = load double* %ans, align 8, !dbg !4407
+  %31 = load double** %2, align 8, !dbg !4407
+  %32 = load double* %31, align 8, !dbg !4407
+  %33 = fadd double %32, %30, !dbg !4407
+  store double %33, double* %31, align 8, !dbg !4407
+  br label %34, !dbg !4407
+
+; <label>:34                                      ; preds = %29, %25
+  ret void, !dbg !4408
+}
