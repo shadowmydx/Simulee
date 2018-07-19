@@ -162,11 +162,34 @@ class KernelCodes(object):
         current_execution = self.get_current_execution_code()
         current_execution.current_line = nxt
 
-    def get_current_line_in_current_codes(self):
-        return self.current_line
+    def get_current_line(self):
+        current_execution = self.get_current_execution_code()
+        return current_execution.current_line
 
     def is_over(self):
         return len(self.codes) - 1 <= self.current_line
+
+
+class Function(object):
+
+    def __init__(self, target_codes, func_name, argument_lst):
+        super(Function, self).__init__()
+        self.codes = KernelCodes(target_codes)
+        self.argument_lst = argument_lst
+        self.function_name = func_name
+
+    @staticmethod
+    def read_function_from_file(target_file, target_env):
+        content = open(target_file, 'r').read()
+        function_pattern = r"define[^@]+(?P<function_name>\w+)\((?P<argument>.+)\)[^{]+{(?P<body>[^}]+)}"
+        function_pattern = re.compile(function_pattern, re.DOTALL)
+        for single_function in function_pattern.finditer(content):
+            function_name = single_function.group('function_name')
+            argument = single_function.group('argument')
+            body = single_function.group('body')
+            argument = [item.split(' ')[1] for item in argument.split(',')]
+            target_function = Function(body, function_name, argument)
+            target_env.add_value(function_name, target_function)
 
 
 class Environment(object):
