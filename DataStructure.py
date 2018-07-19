@@ -167,7 +167,7 @@ class KernelCodes(object):
         return current_execution.current_line
 
     def is_over(self):
-        return len(self.codes) - 1 <= self.current_line
+        return len(self.codes) <= self.current_line
 
 
 class Function(object):
@@ -181,7 +181,9 @@ class Function(object):
     @staticmethod
     def read_function_from_file(target_file, target_env):
         content = open(target_file, 'r').read()
-        function_pattern = r"define[^@]+(?P<function_name>\w+)\((?P<argument>.+)\)[^{]+{(?P<body>[^}]+)}"
+        content = re.sub(r'call void @llvm\.\w+\.\w+\([^\n]*[\n]', "\n", content)
+        print content
+        function_pattern = r"define([^@]*)(?P<function_name>[@|\w]+)\((?P<argument>[^)]+)\)([^{]*){(?P<body>[^}]+)}"
         function_pattern = re.compile(function_pattern, re.DOTALL)
         for single_function in function_pattern.finditer(content):
             function_name = single_function.group('function_name')
@@ -239,3 +241,7 @@ class StackSet(object):
         else:
             self.used_item[str(value)] = True
             self.list.append(value)
+
+
+if __name__ == '__main__':
+    Function.read_function_from_file("./func.ll", Environment())
