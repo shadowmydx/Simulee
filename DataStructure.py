@@ -176,16 +176,15 @@ class Function(object):
 
     def __init__(self, target_codes, func_name, argument_lst, type_lst):
         super(Function, self).__init__()
-        self.codes = KernelCodes(target_codes)
         self.argument_lst = argument_lst
         self.type_lst = type_lst
         self.function_name = func_name
+        self.raw_codes = target_codes
 
     @staticmethod
     def read_function_from_file(target_file, target_env):
         content = open(target_file, 'r').read()
         content = re.sub(r'call void @llvm\.\w+\.\w+\([^\n]*[\n]', "\n", content)
-        print content
         function_pattern = r"define([^@]*)(?P<function_name>[@|\w]+)\((?P<argument>[^)]+)\)([^{]*){(?P<body>[^}]+)}"
         function_pattern = re.compile(function_pattern, re.DOTALL)
         for single_function in function_pattern.finditer(content):
@@ -250,4 +249,22 @@ class StackSet(object):
 
 
 if __name__ == '__main__':
-    Function.read_function_from_file("./func.ll", Environment())
+    test_block = Block((-1, -1, 0), (2, 1, 1))
+    test_thread = Thread((-1, -1, 0), (128, 1, 1))
+    num_elements = DataType('i32')
+    num_elements.set_value(100)
+    global_env = Environment()
+    shared_memory = DataType("[256 x double]*")
+    shared_memory.set_value("@_ZZL8_vec_sumIdEvPT_S1_iE8row_data")
+    global_env.add_value("@_ZZL8_vec_sumIdEvPT_S1_iE8row_data", shared_memory)
+    args = {
+        "%v": DataType("double*"),
+        "%dim": num_elements,
+        "%sum": DataType("double*"),
+        "main_memory": "%v"
+    }
+    args["%v"].set_value("%v")
+    from MainProcess import construct_memory_execute_mode
+    Function.read_function_from_file("./func.ll", global_env)
+    raw_code = global_env.get_value("@_ZL8_vec_sumIdEvPT_S1_i")
+    construct_memory_execute_mode(test_block, test_thread, 100, 1000, raw_code.raw_codes, args, None, None, global_env)
