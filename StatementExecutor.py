@@ -76,13 +76,17 @@ def get_element_ptr(arguments, kernel_codes, main_memory, global_env, local_env)
         return target.get_value()[num(tmp_index.get_value())], None, None, None
 
 
+# todo
+# need distinguish target is a register or memory
 def store(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.strip()
     arguments = arguments.split(',')
     source = execute_command(arguments[0], kernel_codes, main_memory, global_env, local_env)[0]
     target = execute_command(arguments[1], kernel_codes, main_memory, global_env, local_env)[0]
-    if is_target_memory(target, main_memory) and target.memory_index is not None:
-        return source, "write", target.memory_index, is_global_memory(target)
+    if is_target_memory(target, main_memory) and target.memory_index is not None and target.is_getelementptr is True:
+        if arguments[1].find("**") == -1:
+            return source, "write", target.memory_index, is_global_memory(target)
+        return source, None, None, None
     else:
         var_lst = arguments[1].strip()
         var_lst = var_lst.split(' ')
@@ -93,17 +97,22 @@ def store(arguments, kernel_codes, main_memory, global_env, local_env):
         return source, None, None, None
 
 
+# todo
+# need distinguish result is a register or memory
 def load(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.strip()
     split_index = arguments.find(' ')
     target_command = arguments[split_index + 1:]
+    target_type = arguments[: split_index]
     if target_command.find('getelementptr') != -1:
         result = execute_command(arguments[split_index + 1:], kernel_codes, main_memory, global_env, local_env)[0]
     else:
         result = execute_item(target_command.split(',')[0], kernel_codes, global_env, local_env)
-    if is_target_memory(result, main_memory) and result.memory_index is not None:
+    if is_target_memory(result, main_memory) and result.memory_index is not None and result.is_getelementptr is True:
         result.set_is_depend_on_running_time(True)
-        return result, "read", result.memory_index, is_global_memory(result)
+        if target_type.find("**") == -1:
+            return result, "read", result.memory_index, is_global_memory(result)
+        return result, None, None, None
     return result, None, None, None
 
 

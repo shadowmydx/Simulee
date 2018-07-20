@@ -72,7 +72,7 @@ class Action(object):
 
     def __init__(self, actions):
         super(Action, self).__init__()
-        self.line, self.action, self.block, self.thread = actions
+        self.current_stmt, self.line, self.action, self.block, self.thread = actions
 
 
 class SingleMemoryItem(object):
@@ -253,10 +253,10 @@ if __name__ == '__main__':
     test_thread = Thread((-1, -1, 0), (128, 1, 1))
     num_elements = DataType('i32')
     num_elements.set_value(100)
-    global_env = Environment()
-    shared_memory = DataType("[256 x double]*")
-    shared_memory.set_value("@_ZZL8_vec_sumIdEvPT_S1_iE8row_data")
-    global_env.add_value("@_ZZL8_vec_sumIdEvPT_S1_iE8row_data", shared_memory)
+    global_env_test = Environment()
+    shared_memory_test = DataType("[256 x double]*")
+    shared_memory_test.set_value("@_ZZL8_vec_sumIdEvPT_S1_iE8row_data")
+    global_env_test.add_value("@_ZZL8_vec_sumIdEvPT_S1_iE8row_data", shared_memory_test)
     args = {
         "%v": DataType("double*"),
         "%dim": num_elements,
@@ -265,6 +265,6 @@ if __name__ == '__main__':
     }
     args["%v"].set_value("%v")
     from MainProcess import construct_memory_execute_mode
-    Function.read_function_from_file("./func.ll", global_env)
-    raw_code = global_env.get_value("@_ZL8_vec_sumIdEvPT_S1_i")
-    construct_memory_execute_mode(test_block, test_thread, 100, 1000, raw_code.raw_codes, args, None, None, global_env)
+    Function.read_function_from_file("./func.ll", global_env_test)
+    raw_code = global_env_test.get_value("@_ZL8_vec_sumIdEvPT_S1_i")
+    construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, args, None, None, global_env_test)

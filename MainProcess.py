@@ -63,7 +63,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
                     if current_action is None:
                         continue
-                    saved_action = Action((current_line, current_action, block_indexes, thread_indexes))
+                    saved_action = Action((current_stmt, current_line, current_action, block_indexes, thread_indexes))
                     if is_global:
                         global_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_global_memory[current_index])
@@ -111,6 +111,6 @@ if __name__ == "__main__":
     }
     args["%x"].set_value("%x")
     test_global_size = 100
-    test_shared_size = 100
+    test_shared_size = 256
     codes = open('./test2.ll', 'r').read()
     construct_memory_execute_mode(test_block, test_thread, test_global_size, test_shared_size, codes, args, lambda x:x, None)
