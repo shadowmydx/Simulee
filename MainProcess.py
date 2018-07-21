@@ -76,6 +76,52 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
     global_parser(global_memory)
 
 
+def get_key_from_action(single_action):
+    return str(single_action.block) + " " + str(single_action.thread)
+
+
+def show_dict(target_dict):
+    for key in target_dict:
+        print key + ":  " + target_dict[key]
+
+
+def has_not_equal_key(dict_one, dict_two):
+    result = False
+    for key in dict_one:
+        if key not in dict_two:
+            return True
+    return result
+
+
+def parse_target_memory_and_checking_sync(target_memory):
+    memory_lst = target_memory.list
+    for single_index in xrange(len(memory_lst)):
+        single_memory_item = memory_lst[single_index]
+        visit_lst = single_memory_item.visit_lst
+        for single_visit_order in visit_lst:
+            visit_read_dict = dict()
+            visit_write_dict = dict()
+            has_write = False
+            for single_action in single_visit_order:
+                if single_action.action == 'write':
+                    has_write = True
+                    visit_write_dict[get_key_from_action(single_action)] = single_action.current_stmt
+                if single_action.action == 'read':
+                    visit_read_dict[get_key_from_action(single_action)] = single_action.current_stmt
+            if has_write:
+                if len(visit_write_dict) >= 2:
+                    print 'detect w&w synchronisation issue'
+                    print 'write:'
+                    show_dict(visit_write_dict)
+                if len(visit_read_dict) >= 1 and len(visit_write_dict) >= 1 and \
+                        has_not_equal_key(visit_read_dict, visit_write_dict):
+                    print 'detect r&w synchronisation issue'
+                    print 'read:'
+                    show_dict(visit_read_dict)
+                    print 'write:'
+                    show_dict(visit_write_dict)
+
+
 if __name__ == "__main__":
     # test_block = Block((-1, -1, 0), (2, 2, 1))
     # test_thread = Thread((-1, -1, 0), (2, 2, 1))
