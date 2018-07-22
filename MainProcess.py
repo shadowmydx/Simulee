@@ -53,7 +53,8 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                     unfinished_total_threads[str(thread_indexes)] = False
                     continue
                 if kernel_codes.should_halt():
-                    print 'halt here because of __syncthreads().'
+                    print "halt here because of __syncthreads() " + " in " + str(thread_indexes) + " in block " \
+                          + str(block_indexes)
                     continue
                 current_stmt = kernel_codes.get_current_statement_and_set_next()
                 print 'execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes)

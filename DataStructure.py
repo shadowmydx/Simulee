@@ -299,4 +299,4 @@ if __name__ == '__main__':
     Function.read_function_from_file("./func.ll", global_env_test)
     raw_code = global_env_test.get_value("@_ZL8_vec_sumIdEvPT_S1_i")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, args,
-                                  parse_target_memory_and_checking_sync, None, global_env_test)
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync, global_env_test)
