@@ -106,6 +106,27 @@ class SharedMemory(object):
             self.list.append(SingleMemoryItem(index))
 
 
+class SyncThreads(object):
+
+    def __init__(self, total_threads, over_dict):
+        super(SyncThreads, self).__init__()
+        self.total_threads, self.over_dict = total_threads, over_dict  # over_dict: if there is a barrier divergence
+        self.current_reach_thread = dict()  # key: threads number; value: kernel_codes
+
+    def reach_one(self, threads, kernel_codes):
+        threads = str(threads)
+        self.current_reach_thread[threads] = kernel_codes
+        kernel_codes.set_halt(True)
+
+    def can_continue(self):
+        if len(self.current_reach_thread) == self.total_threads:
+            for key in self.current_reach_thread:
+                self.current_reach_thread[key].set_halt(False)
+            self.current_reach_thread.clear()
+            return True
+        return False
+
+
 class KernelCodes(object):
 
     def __init__(self, kernel_codes):
@@ -115,6 +136,7 @@ class KernelCodes(object):
         self.calling_code = None
         self.reserved_env = None
         self.father_code = None
+        self.is_halt = False
         for index in xrange(len(self.codes)):
             current_item = self.codes[index]
             tmp_res = re.findall(r"; <label>:(\d+)", current_item)
@@ -127,6 +149,14 @@ class KernelCodes(object):
         while start.calling_code is not None:
             start = start.calling_code
         return start
+
+    def set_halt(self, halt_or_not):
+        current_execution = self.get_current_execution_code()
+        current_execution.is_halt = halt_or_not
+
+    def should_halt(self):
+        current_execution = self.get_current_execution_code()
+        return current_execution.is_halt
 
     def prepared_launch_function(self, current_env, other_codes, arguments):
         current_execution = self.get_current_execution_code()

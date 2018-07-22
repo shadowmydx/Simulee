@@ -35,6 +35,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
         unfinished_total_threads = dict()
         for thread_indexes in generator_for_dimension_var(threads):
             unfinished_total_threads[str(thread_indexes)] = True
+        synchronization = SyncThreads(len(unfinished_total_threads), unfinished_total_threads)
         while not is_all_thread_finished(unfinished_total_threads):
             for thread_indexes in generator_for_dimension_var(threads):
                 global_env.add_value("@threadIdx", Thread(thread_indexes,
@@ -51,13 +52,18 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                 if kernel_codes.is_over():
                     unfinished_total_threads[str(thread_indexes)] = False
                     continue
+                if kernel_codes.should_halt():
+                    print 'halt here because of __syncthreads().'
+                    continue
                 current_stmt = kernel_codes.get_current_statement_and_set_next()
                 print 'execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes)
                 if detect_if_is_syncthreads(current_stmt):
-                    while current_visited_global_memory_index.size() != 0:
-                        visit_order_for_global_memory[current_visited_global_memory_index.pop()] += 1
-                    while current_visited_shared_memory_index.size() != 0:
-                        visit_order_for_shared_memory[current_visited_shared_memory_index.pop()] += 1
+                    synchronization.reach_one(thread_indexes, kernel_codes)
+                    if synchronization.can_continue():
+                        while current_visited_global_memory_index.size() != 0:
+                            visit_order_for_global_memory[current_visited_global_memory_index.pop()] += 1
+                        while current_visited_shared_memory_index.size() != 0:
+                            visit_order_for_shared_memory[current_visited_shared_memory_index.pop()] += 1
                 else:
                     return_value, current_action, current_index, is_global = \
                         execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
