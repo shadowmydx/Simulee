@@ -721,6 +721,11 @@ define float @_ZL3minff(float %value1, float %value2) {
   ret float %value1
 }
 
+define float @_ZL3maxff(float %value1, float %value2) {
+  ret float %value1
+}
+
+
 define i32 @_Z13get_block_minPKfPi(float* %values, i32* %index) uwtable section "__device__" {
   %1 = alloca float*, align 8
   %2 = alloca i32*, align 8

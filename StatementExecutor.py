@@ -70,7 +70,9 @@ def get_element_ptr(arguments, kernel_codes, main_memory, global_env, local_env)
     if is_memory(target):
         result_tmp = DataType('memory-index')
         result_tmp.set_is_getelementptr(True)
-        if not tmp_index.is_depend_on_running_time:
+        if target.memory_index is not None and not tmp_index.is_depend_on_running_time:
+            result_tmp.set_memory_index(num(tmp_index.get_value()) + num(target.memory_index))
+        elif not tmp_index.is_depend_on_running_time:
             result_tmp.set_memory_index(num(tmp_index.get_value()))
         else:
             result_tmp.set_memory_index(None)
