@@ -10,7 +10,7 @@ class DataType(object):
         self.data_type = data_type
         self.value = None  # value.start_with("%")
         self.is_getelementptr = False
-        self.memory_index = None  # only active when is_getelementptr is True
+        self.memory_index = None  # only active when is_getelementptr is True and memory_index not depend on running time
         self.is_depend_on_running_time = False  # if this value can only be specify during running time
 
     def copy_and_replace(self, other_type):
@@ -137,12 +137,25 @@ class KernelCodes(object):
         self.reserved_env = None
         self.father_code = None
         self.is_halt = False
+        self.label_queue = LabelQueue(2)
+        self.line_to_label = dict()
+        self.need_return_token = None
+        self.return_value = None
         for index in xrange(len(self.codes)):
             current_item = self.codes[index]
             tmp_res = re.findall(r"; <label>:(\d+)", current_item)
             if len(tmp_res) != 0:
                 self.label[str(tmp_res[0])] = index
+                self.line_to_label[str(index)] = str(tmp_res[0])
         self.current_line = 0
+
+    def set_return_value(self, result):
+        current_execution = self.get_current_execution_code()
+        current_execution.return_value = result
+
+    def set_need_return_token(self, token):
+        current_execution = self.get_current_execution_code()
+        current_execution.need_return_token = token
 
     def get_current_execution_code(self):
         start = self
@@ -172,6 +185,9 @@ class KernelCodes(object):
         current_father = current_execution.father_code
         if current_father is None:
             return
+        if current_father.need_return_token is not None:
+            current_father.reserved_env.env[current_father.need_return_token] = current_execution.return_value
+            current_father.need_return_token = None
         current_env.binding_value(current_father.reserved_env.env)
         current_father.calling_code = None
         current_father.reserved_env = None
@@ -180,8 +196,14 @@ class KernelCodes(object):
         current_execution = self.get_current_execution_code()
         return current_execution.label[str(mark)]
 
+    def get_recently_label(self):
+        current_execution = self.get_current_execution_code()
+        return current_execution.label_queue.get_top()
+
     def get_current_statement_and_set_next(self):
         current_execution = self.get_current_execution_code()
+        if str(current_execution.current_line) in current_execution.line_to_label:
+            self.label_queue.en_queue(current_execution.line_to_label[str(current_execution.current_line)])
         result_stmt = current_execution.codes[current_execution.current_line]
         current_execution.current_line += 1
         return result_stmt
@@ -276,6 +298,24 @@ class StackSet(object):
         else:
             self.used_item[str(value)] = True
             self.list.append(value)
+
+
+class LabelQueue(object):
+
+    def __init__(self, total_size):
+        super(LabelQueue, self).__init__()
+        self.total_size = total_size
+        self.list = list()
+
+    def en_queue(self, item):
+        if len(self.list) == self.total_size:
+            self.list.pop(0)
+            self.total_size -= 1
+        self.list.append(item)
+        self.total_size += 1
+
+    def get_top(self):
+        return self.list[0]
 
 
 if __name__ == '__main__':

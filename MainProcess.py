@@ -61,6 +61,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                 if detect_if_is_syncthreads(current_stmt):
                     synchronization.reach_one(thread_indexes, kernel_codes)
                     if synchronization.can_continue():
+                        print 'last thread located here: ' + str(thread_indexes) + ", in block " + str(block_indexes)
                         while current_visited_global_memory_index.size() != 0:
                             visit_order_for_global_memory[current_visited_global_memory_index.pop()] += 1
                         while current_visited_shared_memory_index.size() != 0:
