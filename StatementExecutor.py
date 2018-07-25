@@ -160,7 +160,7 @@ def parse_arguments(target_args):
 def call_function(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.strip()
     split_index = arguments.find(' ')
-    target_function_pattern = r"(?P<function_name>[^(]+)\((?P<argus>.*)\)"
+    target_function_pattern = r".*?(?P<function_name>[@][^(]+)\((?P<argus>.*)\)"
     target_function_pattern = re.compile(target_function_pattern, re.DOTALL)
     arguments = arguments[split_index + 1:]
     matcher = target_function_pattern.search(arguments)
@@ -277,7 +277,14 @@ def jump(arguments, kernel_codes, main_memory, global_env, local_env):
         bool_res = execute_item(new_line[0], kernel_codes, main_memory, global_env, local_env)
         if_true = new_line[1][new_line[1].find('%') + 1:]
         if_false = new_line[2][new_line[2].find('%') + 1:]
-        if bool(bool_res.get_value()):
+        if bool_res.is_depend_on_running_time:
+            current_stmt = kernel_codes.get_current_statement()
+            if kernel_codes.is_already_here(current_stmt):
+                kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(if_false))
+            else:
+                kernel_codes.add_current_stmt_to_depending_branch(current_stmt)
+                kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(if_true))
+        elif bool(bool_res.get_value()):
             kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(if_true))
         else:
             kernel_codes.set_next_statement(kernel_codes.get_label_by_mark(if_false))
@@ -288,7 +295,7 @@ def phi(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.strip()
     split_index = arguments.find(' ')
     should_handle = arguments[split_index + 1:].strip()
-    argus_pattern = r"\[ (?P<value1>[^\s]+), (?P<label1>[^\s+]) \], \[ (?P<value2>[^\s+]), (?P<label2>[^\s]+) \]"
+    argus_pattern = r"\[\s*(?P<value1>[^\s]+),\s*(?P<label1>[^\s]+)\s*\],\s*\[\s*(?P<value2>[^\s]+),\s*(?P<label2>[^\s]+)\s*\]"
     argus_pattern = re.compile(argus_pattern)
     matcher = argus_pattern.search(should_handle)
     recent_label = '%' + kernel_codes.get_recently_label()

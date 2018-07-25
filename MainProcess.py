@@ -118,12 +118,12 @@ def parse_target_memory_and_checking_sync(target_memory):
                     visit_read_dict[get_key_from_action(single_action)] = single_action.current_stmt
             if has_write:
                 if len(visit_write_dict) >= 2:
-                    print 'detect w&w synchronisation issue'
+                    print 'detect w&w synchronisation issue in ' + str(single_index)
                     print 'write:'
                     show_dict(visit_write_dict)
                 if len(visit_read_dict) >= 1 and len(visit_write_dict) >= 1 and \
                         has_not_equal_key(visit_read_dict, visit_write_dict):
-                    print 'detect r&w synchronisation issue'
+                    print 'detect r&w synchronisation issue in ' + str(single_index)
                     print 'read:'
                     show_dict(visit_read_dict)
                     print 'write:'

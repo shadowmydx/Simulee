@@ -3,6 +3,8 @@ from MainProcess import construct_memory_execute_mode
 from MainProcess import parse_target_memory_and_checking_sync
 
 
+# nv-svc fix bugs
+# plus: 168 - 175 has sync bugs. return index[0] while index[0] = -f
 if __name__ == '__main__':
     test_block = Block((-1, -1, 0), (2, 1, 1))
     test_thread = Thread((-1, -1, 0), (3, 1, 1))
