@@ -335,6 +335,7 @@ _method_dict = {
     'udiv': calculation_factory(3),
     'srem': calculation_factory(4),
     'ashr': calculation_factory(5),
+    'lshr': calculation_factory(5),
     'sext': single_elem_calculation_factory(0),
     'zext': single_elem_calculation_factory(0),
     'bitcast': single_elem_calculation_factory(0),

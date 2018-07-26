@@ -51,6 +51,9 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                 current_line = kernel_codes.get_current_line()
                 if kernel_codes.is_over():
                     unfinished_total_threads[str(thread_indexes)] = False
+                    if synchronization.has_halt_threads():
+                        print "Has barrier divergence issue in " + str(synchronization.get_a_hold_stmt())
+                        return
                     continue
                 if kernel_codes.should_halt():
                     print "halt here because of __syncthreads() " + " in " + str(thread_indexes) + " in block " \

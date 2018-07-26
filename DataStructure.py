@@ -126,6 +126,13 @@ class SyncThreads(object):
             return True
         return False
 
+    def has_halt_threads(self):
+        return len(self.current_reach_thread) != 0
+
+    def get_a_hold_stmt(self):
+        for key in self.current_reach_thread:
+            return self.current_reach_thread[key].get_previous_statement()
+
 
 class MemoryContainer(object):
 
@@ -250,6 +257,10 @@ class KernelCodes(object):
         current_execution = self.get_current_execution_code()
         return current_execution.codes[current_execution.current_line]
 
+    def get_previous_statement(self):
+        current_execution = self.get_current_execution_code()
+        return current_execution.codes[current_execution.current_line - 1]
+
     def set_next_statement(self, nxt):
         current_execution = self.get_current_execution_code()
         current_execution.current_line = nxt
@@ -357,7 +368,7 @@ class LabelQueue(object):
         return self.list[0]
 
 
-if __name__ == '__main__':
+def main_test():
     test_block = Block((-1, -1, 0), (2, 1, 1))
     test_thread = Thread((-1, -1, 0), (128, 1, 1))
     num_elements = DataType('i32')
