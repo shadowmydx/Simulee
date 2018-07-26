@@ -91,6 +91,9 @@ def store(arguments, kernel_codes, main_memory, global_env, local_env):
     target = execute_command(arguments[1], kernel_codes, main_memory, global_env, local_env)[0]
     if is_target_memory(target, main_memory) and target.memory_index is not None and target.is_getelementptr is True:
         if arguments[1].find("**") == -1:
+            target_memory = global_env.get_value("memory_container")
+            if target_memory.has_target_memory(target.value):
+                target_memory.add_value_to_memory(target, source)
             return source, "write", target.memory_index, is_global_memory(target)
         return source, None, None, None
     else:
@@ -118,10 +121,20 @@ def load(arguments, kernel_codes, main_memory, global_env, local_env):
             and result.is_depend_on_running_time is False:  # haven't been loaded to register
         result.set_is_depend_on_running_time(True)
         if target_type.find("**") == -1:
-            return result, "read", result.memory_index, is_global_memory(result)
+            result_tmp = None
+            target_memory = global_env.get_value("memory_container")
+            if target_memory.has_target_memory(result.value):
+                result_tmp = target_memory.get_value_from_memory(result)
+            if result_tmp is None:
+                result_tmp = DataType(target_type[: len(target_type) - 1])
+                result_tmp.set_is_depend_on_running_time(True)
+            return result_tmp, "read", result.memory_index, is_global_memory(result)
         return result, None, None, None
-    if is_memory(result):
+    if is_memory(result) and target_type.find("**") == -1:  # load data instead of address
         result.set_is_depend_on_running_time(True)
+        result_tmp = DataType(target_type[: len(target_type) - 1])
+        result_tmp.set_is_depend_on_running_time(True)
+        return result_tmp, None, None, None
     return result, None, None, None
 
 

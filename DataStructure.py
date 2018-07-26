@@ -127,6 +127,33 @@ class SyncThreads(object):
         return False
 
 
+class MemoryContainer(object):
+
+    def __init__(self):
+        super(MemoryContainer, self).__init__()
+        self.container = dict()
+
+    def add_new_memory(self, key):
+        self.container[key] = dict()
+
+    def add_value_to_memory(self, address, data):
+        start_index = 0
+        if address.memory_index is not None:
+            start_index = address.memory_index
+        self.container[address.value][str(start_index)] = data
+
+    def get_value_from_memory(self, address):
+        start_index = 0
+        if address.value not in self.container:
+            return None
+        if address.memory_index is not None:
+            start_index = address.memory_index
+        return self.container[address.value][str(start_index)]
+
+    def has_target_memory(self, key):
+        return key in self.container
+
+
 class KernelCodes(object):
 
     def __init__(self, kernel_codes):

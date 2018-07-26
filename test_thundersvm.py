@@ -20,6 +20,9 @@ if __name__ == '__main__':
     shared_memory_test = DataType("[256 x i32]*")
     shared_memory_test.set_value("@_ZZ19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_E10shared_mem")
     global_env_test.add_value("@_ZZ19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_E10shared_mem", shared_memory_test)
+    memory_container = MemoryContainer()
+    memory_container.add_new_memory("@_ZZ19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_E10shared_mem")
+    global_env_test.add_value("memory_container", memory_container)
     # i32* %label, float* %f_values, float* %alpha, float* %alpha_diff, i32* %working_set, i32 %ws_size, float %C,
     # float* %k_mat_rows, float* %k_mat_diag, i32 %row_len, float %eps, float* %diff_and_bias
     args = {
