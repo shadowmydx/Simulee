@@ -164,7 +164,10 @@ if __name__ == "__main__":
     args = {
         "%x": DataType("i32*"),
         "%dim": num_elements,
-        "main_memory": "%x"
+        "main_memory": {
+            "global": "%x",
+            "shared": None
+        }
     }
     args["%x"].set_value("%x")
     test_global_size = 100

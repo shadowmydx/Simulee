@@ -381,7 +381,10 @@ def main_test():
         "%v": DataType("double*"),
         "%dim": num_elements,
         "%sum": DataType("double*"),
-        "main_memory": "%v"
+        "main_memory": {
+            "global": "%v",
+            "shared": "@_ZZL8_vec_sumIdEvPT_S1_iE8row_data"
+        }
     }
     args["%v"].set_value("%v")
     from MainProcess import construct_memory_execute_mode

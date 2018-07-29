@@ -50,9 +50,9 @@ def is_global_memory(data_type):
 
 
 def is_target_memory(data_type, main_memory):
-    if data_type.value == main_memory:
+    if data_type.value == main_memory['global']:
         return True
-    if not is_global_memory(data_type) and is_memory(data_type):
+    if data_type.value == main_memory['shared']:
         return True  # is shared memory
     return False
 

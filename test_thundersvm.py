@@ -38,7 +38,10 @@ if __name__ == '__main__':
         "%row_len": row_len,
         "%eps": eps_float,
         "%diff_and_bias": DataType("float*"),
-        "main_memory": "NONE"
+        "main_memory": {
+            'global': None,
+            'shared': "@_ZZ19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_E10shared_mem",
+        }
     }
     args["%label"].set_value("%label")
     args["%f_values"].set_value("%f_values")
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     args["%k_mat_rows"].set_value("%k_mat_rows")
     args["%k_mat_diag"].set_value("%k_mat_diag")
     args["%diff_and_bias"].set_value("%diff_and_bias")
-    Function.read_function_from_file("./thundersvm.ll", global_env_test)
+    Function.read_function_from_file("./thundersvm/thundersvm.ll", global_env_test)
     raw_code = global_env_test.get_value("@_Z19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, args,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
