@@ -16,8 +16,13 @@ def is_all_thread_finished(thread_dict):
     return True
 
 
+def print_stmt(target_stmt, should_print=True):
+    if should_print:
+        print target_stmt
+
+
 def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw_kernel_codes, arguments,
-                                  shared_parser, global_parser, global_env=None):
+                                  shared_parser, global_parser, global_env=None, should_print=True):
     main_memory = arguments['main_memory']
     global_memory = GlobalMemory(global_size)
     if global_env is None:
@@ -56,11 +61,12 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         return
                     continue
                 if kernel_codes.should_halt():
-                    print "halt here because of __syncthreads() " + " in " + str(thread_indexes) + " in block " \
-                          + str(block_indexes)
+                    print_stmt("halt here because of __syncthreads() " + " in " + str(thread_indexes) + " in block " +
+                               str(block_indexes), should_print)
                     continue
                 current_stmt = kernel_codes.get_current_statement_and_set_next()
-                print 'execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes)
+                print_stmt('execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
+                           should_print)
                 if detect_if_is_syncthreads(current_stmt):
                     synchronization.reach_one(thread_indexes, kernel_codes)
                     if synchronization.can_continue():

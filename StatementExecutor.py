@@ -27,9 +27,14 @@ def detect_if_is_syncthreads(statement):
 
 
 def alloc_type_for_var(arguments, kernel_codes, main_memory, global_env, local_env):
-    arguments = arguments.split(',')
+    arguments = arguments.split(', align')
     type_name = arguments[0].strip()
     new_type = DataType(type_name)
+    if type_name.find("{") != -1:
+        new_type_name = type_name[1: len(type_name) - 1]
+        new_type_lst = new_type_name.split(",")
+        new_type_lst = [DataType(item.strip()) for item in new_type_lst]
+        new_type.set_value(new_type_lst)
     return new_type, None, None, None
 
 

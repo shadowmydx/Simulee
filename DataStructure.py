@@ -299,6 +299,36 @@ class Function(object):
             target_function = Function(body, function_name, argument_lst, type_lst)
             target_env.add_value(function_name, target_function)
 
+    @staticmethod
+    def parse_function_body(target_content, start_index):
+        start_count = 1
+        result_content = ''
+        while start_count != 0:
+            if target_content[start_index] == '{':
+                start_count += 1
+            elif target_content[start_index] == '}':
+                start_count -= 1
+            result_content += target_content[start_index]
+            start_index += 1
+        return result_content[: len(result_content) - 1]
+
+    @staticmethod
+    def read_function_from_file_include_struct(target_file, target_env):
+        content = open(target_file, 'r').read()
+        content = re.sub(r'call void @llvm\.\w+\.\w+\([^\n]*[\n]', "\n", content)
+        function_pattern = r"define([^@]*)(?P<function_name>[@|\w]+)\((?P<argument>[^)]+)\)([^{]*){"
+        function_pattern = re.compile(function_pattern, re.DOTALL)
+        for single_function in function_pattern.finditer(content):
+            function_name = single_function.group('function_name')
+            argument = single_function.group('argument')
+            argument = [item.strip() for item in argument.split(',') if len(item.strip()) != 0]
+            body = Function.parse_function_body(content, single_function.end() + 1)
+            argument_lst = [item.split(' ') for item in argument]
+            type_lst = [item[0] for item in argument_lst]
+            argument_lst = [item[1] for item in argument_lst]
+            target_function = Function(body, function_name, argument_lst, type_lst)
+            target_env.add_value(function_name, target_function)
+
 
 class Environment(object):
 
@@ -393,3 +423,6 @@ def main_test():
     raw_code = global_env_test.get_value("@_ZL8_vec_sumIdEvPT_S1_i")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, args,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync, global_env_test)
+
+if __name__ == '__main__':
+    Function.read_function_from_file_include_struct("./kaldi-new-bug/cu-kernels.ll", Environment())
