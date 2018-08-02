@@ -42,3 +42,18 @@ void _add_diag_vec_mat(float alpha, float *mat, int stride, int rows, int cols,
     mat[index] = alpha * vec[j] * mat2[index2] + beta * mat[index];
   }
 }
+
+__global__
+void _copy_from_tp(float* A, const float* B, int dmat_cols, int dmat_rows, int dmat_stride) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;  // col index
+  int j = blockIdx.y * blockDim.y + threadIdx.y;  // row index
+  if (i < dmat_cols && j < dmat_rows) {
+    int index_B = (j * (j + 1) / 2) + i;
+    int index_A = j * dmat_stride + i;
+    if (i <= j) {
+      A[index_A] = B[index_B];
+    } else {
+      A[index_A] = 0.0;
+    }
+  }
+}

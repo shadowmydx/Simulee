@@ -97,10 +97,32 @@ def test_add_diag_vec_mat():
                                   global_current_env, True)
 
 
+def test_copy_from_tp():
+    test_block = Block((-1, -1, 0), (2, 2, 2))
+    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_from_tpPfPKfiii"), {
+        "%dmat_rows": 5,
+        "%dmat_cols": 5,
+        "%dmat_stride": 0,
+    })
+    arguments["main_memory"] = {
+        'global': "%A",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z17_add_diag_vec_matfPfiiiPKfS1_iif")
+    construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, True)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
     # test_copy_upp_low()
-    test_add_diag_vec_mat()
+    # test_add_diag_vec_mat()
+    test_copy_from_tp()
     print 'over'
 
