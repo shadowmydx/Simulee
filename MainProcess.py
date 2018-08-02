@@ -28,6 +28,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
     if global_env is None:
         global_env = Environment()
     for block_indexes in generator_for_dimension_var(blocks):
+
         global_env.add_value("@blockIdx", Block(block_indexes, (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
         global_env.add_value("@gridDim", Block((blocks.limit_x, blocks.limit_y, blocks.limit_z),
                                                (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
