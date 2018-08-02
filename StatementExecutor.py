@@ -337,6 +337,7 @@ _method_dict = {
     'fmul': calculation_factory(2),
     'div': calculation_factory(3),
     'fdiv': calculation_factory(3),
+    'sdiv': calculation_factory(3),
     'udiv': calculation_factory(3),
     'srem': calculation_factory(4),
     'ashr': calculation_factory(5),
