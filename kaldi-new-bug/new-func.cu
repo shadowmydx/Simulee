@@ -1,3 +1,5 @@
+#define CU1DBLOCK 256
+
 __global__
 void _copy_low_upp(float* A, int rows, int stride) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -55,5 +57,59 @@ void _copy_from_tp(float* A, const float* B, int dmat_cols, int dmat_rows, int d
     } else {
       A[index_A] = 0.0;
     }
+  }
+}
+
+
+__global__
+void _copy_from_mat(float* mat_out, const float* mat_in,
+                           int d_out_stride, int d_out_rows, int d_out_cols, int d_in_stride) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;  // col-index
+  int j = blockIdx.y * blockDim.y + threadIdx.y;  // row-index.
+  int index_out = i + j * d_out_stride;
+  int index_in = i + j * d_in_stride;
+  if (i < d_out_cols && j < d_out_rows)
+    mat_out[index_out] = mat_in[index_in];
+}
+
+
+__global__
+void _trace_mat_mat_trans(const float* A, const float* B, int dA_rows, int dA_cols, int dA_stride,
+                                 int B_stride, float* value) {
+  __shared__ float ssum[CU1DBLOCK];
+  // linear thread id;
+  const int tid = threadIdx.y * blockDim.x + threadIdx.x;
+  const int j = blockIdx.x * blockDim.x + threadIdx.x;
+  const int grid_height = gridDim.y * blockDim.y;
+  int i = blockIdx.y * blockDim.y + threadIdx.y;
+
+  // Grid reduce
+  float tsum = 0.0;
+  if (j < dA_cols) {
+    while (i < dA_rows) {
+      tsum += A[i * dA_stride + j] * B[i * B_stride + j];
+      i += grid_height;
+    }
+  }
+  ssum[tid] = tsum;
+  __syncthreads();
+
+  // Block reduce
+  for (int shift = CU1DBLOCK / 2; shift > warpSize; shift >>= 1) {
+    if (tid < shift)
+      ssum[tid] += ssum[tid + shift];
+    __syncthreads();
+  }
+
+  // Warp reduce. Implicitly synchronized within a warp.
+  if (tid < warpSize) {
+    for (int shift = warpSize; shift > 0; shift >>= 1) {
+      ssum[tid] += ssum[tid + shift];
+    }
+  }
+
+  // output 1 sum per thread block
+  if (tid == 0) {
+    value[blockIdx.y * gridDim.x + blockIdx.x] = ssum[0];
   }
 }

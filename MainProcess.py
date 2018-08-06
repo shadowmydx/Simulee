@@ -25,8 +25,11 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                                   shared_parser, global_parser, global_env=None, should_print=True):
     main_memory = arguments['main_memory']
     global_memory = GlobalMemory(global_size)
+    warp_size = DataType("i32")
+    warp_size.set_value(32)
     if global_env is None:
         global_env = Environment()
+    global_env.add_value("@warpSize", warp_size)
     for block_indexes in generator_for_dimension_var(blocks):
 
         global_env.add_value("@blockIdx", Block(block_indexes, (blocks.limit_x, blocks.limit_y, blocks.limit_z)))

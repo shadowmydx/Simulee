@@ -155,6 +155,8 @@ class MemoryContainer(object):
             return None
         if address.memory_index is not None:
             start_index = address.memory_index
+        if str(start_index) not in self.container[address.value]:
+            return None
         return self.container[address.value][str(start_index)]
 
     def has_target_memory(self, key):
