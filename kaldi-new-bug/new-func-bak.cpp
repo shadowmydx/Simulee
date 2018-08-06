@@ -57,3 +57,21 @@ void _copy_from_tp(float* A, const float* B, int dmat_cols, int dmat_rows, int d
     }
   }
 }
+// (2 0 1) (1 1 0) w&w
+/*
+(2 0 1):
+i = 2, j = 0, index_B = 2, index_A = 2
+(1 1 0):
+i = 1, j = 1, index_B = 1, index_A = 2
+*/
+
+__global__
+void _copy_from_mat(float* mat_out, const float* mat_in,
+                           int d_out_stride, int d_out_rows, int d_out_cols, int d_in_stride) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int j = blockIdx.y * blockDim.y + threadIdx.y;
+  int index_out = i + j * d_out_stride;
+  int index_in = i + j * d_in_stride;
+  if (i < d_out_cols && j < d_out_rows)
+    mat_out[index_out] = mat_in[index_in];
+}

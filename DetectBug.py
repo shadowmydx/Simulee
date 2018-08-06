@@ -118,11 +118,34 @@ def test_copy_from_tp():
                                   global_current_env, True)
 
 
+def test_copy_from_mat():
+    test_block = Block((-1, -1, 0), (2, 2, 1))
+    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z14_copy_from_matPfPKfiiii"), {
+        "%d_out_stride": 1,
+        "%d_out_rows": 5,
+        "%d_out_cols": 5,
+        "%d_in_stride": 1,
+    })
+    arguments["main_memory"] = {
+        'global': "%mat_out",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z14_copy_from_matPfPKfiiii")
+    construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
     # test_copy_upp_low()
     # test_add_diag_vec_mat()
     test_copy_from_tp()
+    # test_copy_from_mat()
     print 'over'
 

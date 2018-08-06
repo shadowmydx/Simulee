@@ -161,23 +161,32 @@ if __name__ == "__main__":
     test_thread = Thread((-1, -1, 0), (128, 1, 1))
     num_elements = DataType('i32')
     num_elements.set_value(100)
-    # num_elements.set_value(2)
-    # args = {
-    #     "%input_array": DataType("i32*"),
-    #     "%num_elements": num_elements,
-    #     "main_memory": "%input_array"
-    # }
-    # args['%input_array'].set_value("%input_array")
+    num_elements.set_value(2)
     args = {
-        "%x": DataType("i32*"),
-        "%dim": num_elements,
+        "%input_array": DataType("i32*"),
+        "%num_elements": num_elements,
         "main_memory": {
-            "global": "%x",
+            "global": "%input_array",
             "shared": None
         }
     }
-    args["%x"].set_value("%x")
+    args['%input_array'].set_value("%input_array")
+    # args = {
+    #     "%x": DataType("i32*"),
+    #     "%dim": num_elements,
+    #     "main_memory": {
+    #         "global": "%x",
+    #         "shared": None
+    #     }
+    # }
+    # args["%x"].set_value("%x")
     test_global_size = 100
     test_shared_size = 256
-    codes = open('./test2.ll', 'r').read()
-    construct_memory_execute_mode(test_block, test_thread, test_global_size, test_shared_size, codes, args, lambda x:x, None)
+    codes = open('./tests.ll', 'r').read()
+    test_global_env = Environment()
+    memory_container = MemoryContainer()
+
+    test_global_env.add_value("memory_container", memory_container)
+    construct_memory_execute_mode(test_block, test_thread, test_global_size, test_shared_size, codes, args,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  test_global_env, False)
