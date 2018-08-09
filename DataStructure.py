@@ -72,7 +72,7 @@ class Action(object):
 
     def __init__(self, actions):
         super(Action, self).__init__()
-        self.current_stmt, self.line, self.action, self.block, self.thread = actions
+        self.current_stmt, self.line, self.action, self.block, self.thread, self.thread_dim = actions
 
 
 class SingleMemoryItem(object):

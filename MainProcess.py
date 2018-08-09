@@ -84,7 +84,8 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
                     if current_action is None:
                         continue
-                    saved_action = Action((current_stmt, current_line, current_action, block_indexes, thread_indexes))
+                    saved_action = Action((current_stmt, current_line, current_action, block_indexes, thread_indexes,
+                                           (threads.limit_x, threads.limit_y, threads.limit_z)))
                     if is_global:
                         global_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_global_memory[current_index])
@@ -98,12 +99,16 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
 
 
 def get_key_from_action(single_action):
-    return str(single_action.block) + " " + str(single_action.thread)
+    return str(single_action.block) + "+" + str(single_action.thread) + "+" + str(single_action.thread_dim)
+
+
+def get_dim_from_action_key(action_key):
+    return action_key.split("+")[2].strip()
 
 
 def show_dict(target_dict):
     for key in target_dict:
-        print key + ":  " + target_dict[key]
+        print key + ":  " + str(target_dict[key])
 
 
 def has_not_equal_key(dict_one, dict_two):
@@ -112,6 +117,62 @@ def has_not_equal_key(dict_one, dict_two):
         if key not in dict_two:
             return True
     return result
+
+
+def has_equal_key(dict_one, dict_two):
+    for key in dict_one:
+        if key in dict_two:
+            return True
+    return False
+
+
+def is_in_same_warp(action_key_one, action_key_two, warp_size):
+    def calculate_linear_index(thread_idx, block_dim):
+        return (thread_idx[2] * block_dim[0] * block_dim[1]) + thread_idx[1] * block_dim[0] + thread_idx[0]
+    action_one = [eval(item) for item in action_key_one.split("+")]
+    action_two = [eval(item) for item in action_key_two.split("+")]
+    if action_one[0] != action_two[0]:
+        return False
+    block_dim_size = action_one[2]
+    thread_idx_one = action_one[1]
+    thread_idx_two = action_two[1]
+    index_action_one = calculate_linear_index(thread_idx_one, block_dim_size)
+    index_action_two = calculate_linear_index(thread_idx_two, block_dim_size)
+    return index_action_one / warp_size == index_action_two / warp_size
+
+
+def has_write_write_sync_issue(target_write_dict):
+    result_dict = dict()
+    if len(target_write_dict) < 2:
+        return result_dict
+    for each_key in target_write_dict:
+        for other_key in target_write_dict:
+            if each_key == other_key:
+                continue
+            if is_in_same_warp(each_key, other_key, 32):
+                if has_equal_key(target_write_dict[each_key][1], target_write_dict[other_key][1]):
+                    result_dict[each_key] = target_write_dict[each_key]
+                    result_dict[other_key] = target_write_dict[other_key]
+            else:
+                result_dict[each_key] = target_write_dict[each_key]
+                result_dict[other_key] = target_write_dict[other_key]
+    return result_dict
+
+
+def has_read_write_sync_issue(target_read_dict, target_write_dict):
+    result_write_dict = dict()
+    result_read_dict = dict()
+    if not (len(target_read_dict) >= 1 and len(target_write_dict) >= 1 and
+            has_not_equal_key(target_read_dict, target_write_dict)):
+        return result_read_dict, result_write_dict
+    for each_key in target_read_dict:
+        for other_key in target_write_dict:
+            if each_key == other_key:
+                continue
+            if not is_in_same_warp(each_key, other_key, 32):
+                result_read_dict[each_key] = target_read_dict[each_key]
+                result_write_dict[other_key] = target_write_dict[other_key]
+    return result_read_dict, result_write_dict
 
 
 def parse_target_memory_and_checking_sync(target_memory):
@@ -126,21 +187,48 @@ def parse_target_memory_and_checking_sync(target_memory):
             for single_action in single_visit_order:
                 if single_action.action == 'write':
                     has_write = True
-                    visit_write_dict[get_key_from_action(single_action)] = single_action.current_stmt
+                    current_key = get_key_from_action(single_action)
+                    if current_key not in visit_write_dict:
+                        visit_write_dict[current_key] = list(), dict()
+                    if single_action.current_stmt not in visit_write_dict[current_key][1]:
+                        visit_write_dict[current_key][0].append(single_action.current_stmt)
+                        visit_write_dict[current_key][1][single_action.current_stmt] = True
                 if single_action.action == 'read':
-                    visit_read_dict[get_key_from_action(single_action)] = single_action.current_stmt
+                    current_key = get_key_from_action(single_action)
+                    if current_key not in visit_read_dict:
+                        visit_read_dict[current_key] = list(), dict()
+                    if single_action.current_stmt not in visit_read_dict[current_key][1]:
+                        visit_read_dict[current_key][0].append(single_action.current_stmt)
+                        visit_read_dict[current_key][1][single_action.current_stmt] = True
             if has_write:
-                if len(visit_write_dict) >= 2:
+                write_write_issue = has_write_write_sync_issue(visit_write_dict)
+                if len(write_write_issue) != 0:
+                    print '-------------------------------------------------------------------------------'
                     print 'detect w&w synchronisation issue in ' + str(single_index)
                     print 'write:'
-                    show_dict(visit_write_dict)
-                if len(visit_read_dict) >= 1 and len(visit_write_dict) >= 1 and \
-                        has_not_equal_key(visit_read_dict, visit_write_dict):
+                    show_dict(write_write_issue)
+                    print '-------------------------------------------------------------------------------'
+                read_write_issue = has_read_write_sync_issue(visit_read_dict, visit_write_dict)
+                if len(read_write_issue[0]) != 0:
+                    print '-------------------------------------------------------------------------------'
                     print 'detect r&w synchronisation issue in ' + str(single_index)
                     print 'read:'
-                    show_dict(visit_read_dict)
+                    show_dict(read_write_issue[0])
                     print 'write:'
-                    show_dict(visit_write_dict)
+                    show_dict(read_write_issue[1])
+                    print '-------------------------------------------------------------------------------'
+
+                # if len(visit_write_dict) >= 2:
+                #     print 'detect w&w synchronisation issue in ' + str(single_index)
+                #     print 'write:'
+                #     show_dict(visit_write_dict)
+                # if len(visit_read_dict) >= 1 and len(visit_write_dict) >= 1 and \
+                #         has_not_equal_key(visit_read_dict, visit_write_dict):
+                #     print 'detect r&w synchronisation issue in ' + str(single_index)
+                #     print 'read:'
+                #     show_dict(visit_read_dict)
+                #     print 'write:'
+                #     show_dict(visit_write_dict)
 
 
 if __name__ == "__main__":
@@ -164,7 +252,7 @@ if __name__ == "__main__":
     test_thread = Thread((-1, -1, 0), (128, 1, 1))
     num_elements = DataType('i32')
     num_elements.set_value(100)
-    num_elements.set_value(2)
+    # num_elements.set_value(2)
     args = {
         "%input_array": DataType("i32*"),
         "%num_elements": num_elements,
