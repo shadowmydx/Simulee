@@ -135,10 +135,16 @@ def load(arguments, kernel_codes, main_memory, global_env, local_env):
                 result_tmp.set_is_depend_on_running_time(True)
             return result_tmp, "read", result.memory_index, is_global_memory(result)
         return result, None, None, None
-    if is_memory(result) and target_type.find("**") == -1:  # load data instead of address
+    # load data instead of address (data is one type, address is another type)
+    if is_memory(result) and target_type.find("**") == -1:
+        result_tmp = None
         result.set_is_depend_on_running_time(True)
-        result_tmp = DataType(target_type[: len(target_type) - 1])
-        result_tmp.set_is_depend_on_running_time(True)
+        target_memory = global_env.get_value("memory_container")
+        if target_memory.has_target_memory(result.value):
+            result_tmp = target_memory.get_value_from_memory(result)
+        if result_tmp is None:
+            result_tmp = DataType(target_type[: len(target_type) - 1])
+            result_tmp.set_is_depend_on_running_time(True)
         return result_tmp, None, None, None
     return result, None, None, None
 

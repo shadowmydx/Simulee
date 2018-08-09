@@ -113,3 +113,22 @@ void _trace_mat_mat_trans(const float* A, const float* B, int dA_rows, int dA_co
     value[blockIdx.y * gridDim.x + blockIdx.x] = ssum[0];
   }
 }
+
+
+__global__
+void _splice(float* y, const float* x, const int* off,
+                    int d_out_cols, int d_out_rows, int d_out_stride, 
+					int d_in_cols, int d_in_rows, int d_in_stride) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int j = blockIdx.y * blockDim.y + threadIdx.y;
+  int index = i + j * d_out_stride;
+  if (i < d_out_cols && j < d_out_rows) {
+    int src_col = i % d_in_cols;
+    int src_row = j + off[i / d_in_cols];
+    if (src_row < 0)
+      src_row = 0;
+    if (src_row >= d_in_rows)
+      src_row = d_in_rows - 1;
+    y[index] = x[src_col + src_row * d_in_stride];
+  }
+}
