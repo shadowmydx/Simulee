@@ -329,6 +329,21 @@ def phi(arguments, kernel_codes, main_memory, global_env, local_env):
         return execute_command(matcher.group("value2"), kernel_codes, main_memory, global_env, local_env)
 
 
+def select(arguments, kernel_codes, main_memory, global_env, local_env):
+    arguments = arguments.strip()
+    condition, value_one, value_two = arguments.split(',')[: 3]
+    condition_value = execute_item(condition, kernel_codes, main_memory, global_env, local_env)
+    value_one_real = execute_item(value_one, kernel_codes, main_memory, global_env, local_env)
+    value_two_real = execute_item(value_two, kernel_codes, main_memory, global_env, local_env)
+    if condition_value.is_depend_on_running_time:
+        result_tmp = DataType(value_one_real.get_type())
+        result_tmp.set_is_depend_on_running_time(True)
+        return result_tmp, None, None, None
+    if condition_value.get_value():
+        return value_one_real, None, None, None
+    return value_two_real, None, None, None
+
+
 _method_dict = {
     'alloca': alloc_type_for_var,
     'getelementptr': get_element_ptr,
@@ -346,6 +361,7 @@ _method_dict = {
     'sdiv': calculation_factory(3),
     'udiv': calculation_factory(3),
     'srem': calculation_factory(4),
+    'urem': calculation_factory(4),
     'ashr': calculation_factory(5),
     'lshr': calculation_factory(5),
     'sext': single_elem_calculation_factory(0),
@@ -357,6 +373,7 @@ _method_dict = {
     'br': jump,
     'ret': return_statement,
     'phi': phi,
+    'select': select,
 }
 
 
