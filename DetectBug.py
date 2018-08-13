@@ -41,7 +41,7 @@ def parse_function(target_file):
 
 def test_copy_low_upp():
     test_block = Block((-1, -1, 0), (1, 1, 1))
-    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    test_thread = Thread((-1, -1, 0), (3, 2, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 5, "%stride": 0})
     arguments["main_memory"] = {
@@ -53,12 +53,12 @@ def test_copy_low_upp():
     raw_code = global_current_env.get_value("@_Z13_copy_low_uppPfii")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_current_env, True)
+                                  global_current_env, False)
 
 
 def test_copy_upp_low():
     test_block = Block((-1, -1, 0), (1, 1, 1))
-    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    test_thread = Thread((-1, -1, 0), (2, 3, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_upp_lowPfii"), {"%rows": 5, "%stride": 0})
     arguments["main_memory"] = {
@@ -67,15 +67,15 @@ def test_copy_upp_low():
     }
     generate_memory_container(["@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"], global_current_env)
 
-    raw_code = global_current_env.get_value("@_Z13_copy_low_uppPfii")
+    raw_code = global_current_env.get_value("@_Z13_copy_upp_lowPfii")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_current_env, True)
+                                  global_current_env, False)
 
 
 def test_add_diag_vec_mat():
-    test_block = Block((-1, -1, 0), (2, 2, 2))
-    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    test_block = Block((-1, -1, 0), (2, 2, 1))
+    test_thread = Thread((-1, -1, 0), (3, 2, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z17_add_diag_vec_matfPfiiiPKfS1_iif"), {
         "%rows": 5,
@@ -95,12 +95,12 @@ def test_add_diag_vec_mat():
     raw_code = global_current_env.get_value("@_Z17_add_diag_vec_matfPfiiiPKfS1_iif")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_current_env, True)
+                                  global_current_env, False)
 
 
 def test_copy_from_tp():
     test_block = Block((-1, -1, 0), (1, 1, 1))
-    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    test_thread = Thread((-1, -1, 0), (3, 2, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_from_tpPfPKfiii"), {
         "%dmat_rows": 10,
@@ -116,12 +116,12 @@ def test_copy_from_tp():
     raw_code = global_current_env.get_value("@_Z13_copy_from_tpPfPKfiii")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_current_env, True)
+                                  global_current_env, False)
 
 
 def test_copy_from_mat():
-    test_block = Block((-1, -1, 0), (2, 2, 1))
-    test_thread = Thread((-1, -1, 0), (3, 2, 2))
+    test_block = Block((-1, -1, 0), (1, 1, 1))
+    test_thread = Thread((-1, -1, 0), (3, 2, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z14_copy_from_matPfPKfiiii"), {
         "%d_out_stride": 1,
@@ -200,14 +200,106 @@ def test_slice():
                                   global_current_env, False)
 
 
+def test_convnet_kReflectH():
+    test_block = Block((-1, -1, 0), (1, 1, 1))
+    test_thread = Thread((-1, -1, 0), (34, 4, 1))
+    global_current_env = parse_function("./cuda-convnet2-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z9kReflectHPfS_iiiib"), {
+        "%imgSize": 5,
+        "%numCases": 5,
+        "%numColors": 1,
+        "%imgsPerThread": 1,
+        "%checkCaseBounds": 1,
+    })
+    arguments["main_memory"] = {
+        'global': "%target",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z9kReflectHPfS_iiiib")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_convnet_kTile():
+    test_block = Block((-1, -1, 0), (2, 2, 1))  # important
+    test_thread = Thread((-1, -1, 0), (34, 1, 1))
+    global_current_env = parse_function("./cuda-convnet2-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z5kTilePKfPfjjjj"), {
+        "%srcWidth": 5,
+        "%srcHeight": 5,
+        "%tgtWidth": 5,
+        "%tgtHeight": 5,
+    })
+    arguments["main_memory"] = {
+        'global': "%tgt",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z5kTilePKfPfjjjj")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_convnet_kDotProduct_r():
+    test_block = Block((-1, -1, 0), (2, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (3, 3, 1))
+    global_current_env = parse_function("./cuda-convnet2-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z13kDotProduct_rPfS_S_j"), {
+        "%numElements": 5,
+    })
+    arguments["main_memory"] = {
+        'global': None,
+        'shared': "@_ZZ13kDotProduct_rPfS_S_jE5shmem",
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z13kDotProduct_rPfS_S_j")
+    construct_memory_execute_mode(test_block, test_thread, 256, 512, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_thundersvm_c_smo_solve_kernel():
+    test_block = Block((-1, -1, 0), (1, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (34, 1, 1))
+    global_current_env = parse_function("./thundersvm-new-bug/new-fun.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i"), {
+        "%ws_size": 8,
+        "%Cp": 1.0,
+        "%Cn": 1.0,
+        "%row_len": 2,
+        "%eps": 1.0,
+        "%max_t_iter": 3,
+    })
+    arguments["main_memory"] = {
+        'global': "%alpha",
+        'shared': "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem",
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i")
+    construct_memory_execute_mode(test_block, test_thread, 256, 512, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
     # test_copy_upp_low()
     # test_add_diag_vec_mat()
-    test_copy_from_tp()
+    # test_copy_from_tp()
     # test_copy_from_mat()
     # test_trace_mat_mat_trans()
     # test_slice()
+    # test_convnet_kReflectH()
+    # test_convnet_kTile()
+    # test_convnet_kDotProduct_r()
+    test_thundersvm_c_smo_solve_kernel()
     print 'over'
 

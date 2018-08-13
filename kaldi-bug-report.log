@@ -1,0 +1,29 @@
+for _copy_low_upp, dimA.rows = 5, dimA.stride = 0, say grid is (1 1 1), block is (3 2 1)
+consider thread (2 1 0) and thread (2 0 0):
+for thread (2 1 0), i = 2, j = 1, index_1 = 1, index_2 = 2
+for thread (2 0 0), i = 2, j = 0, index_1 = 0, index_2 = 2
+
+A[index_2] = A[index_1] could be compiled to:
+
+%3 = getelmentptr A, index_2
+%4 = getlementprt A, index_1
+%5 = load Real* %4
+store Real %5, Real* %3
+Although thread (2 1 0) and thread (2 0 0) are in the same warp, it will execute store Real %5, Real* %3 at
+the same time. Will it cause data race behavior?
+
+
+for _copy_upp_low, dimA.rows = 5, dimA.stride = 0, given the same setup for grid and block, thread (0 2 0) and thread (0 1 0) will face same issue as _copy_low_upp
+
+
+for _add_diag_vec_mat, set mat_dim.rows = 5, mat_dim.cols = 5, mat_dim.stride = 1,  mat2_row_stride = 1, mat2_col_stride = 1, say grid is (1 1 1), block 
+is (3 2 1).
+consider thread (0 1 0) and thread (1 0 0):
+for thread (0 1 0), i = 0, j = 1, index = 1, index2 = 1, mat[1] = alpha * vec[1] * mat2[1] + beta * mat[1]
+for thread (1 0 0), i = 1, j = 0, index = 1, index2 = 1, mat[1] = alpha * vec[0] * mat2[1] + beta * mat[1]
+for the same reason, the two threads in the same warp execute the same store statement, is there any chance of data race here?
+
+
+
+
+
