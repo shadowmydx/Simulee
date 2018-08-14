@@ -1,0 +1,1018 @@
+===============================================================
+commit comment:   [src] Fix issue with CUDA device initialization if 'wait' specified.  Thx: @olix20 (#2295)
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   [src] Fix CPU swap methods of CuVector and CuPackedMatrix (#2254)
+
+Bug symptoms; get wrong side effect after execution the code
+Bug root cause: swap wrong variable
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   [src] Small fix to cu-kernels.cu RE compression kernel
+
+Bug symptoms: get wrong return value in given condition
+Bug root cause: should use int instead of int16_t(short)
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   [src,egs] Various cosmetic and minor fixes
+
+Bug symptoms; get wrong side effect after execution the code
+Bug root cause: forget to handle a corner case
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   [src] Fixes to compression and matrix-extend code; started work on CUDA stuff.
+
+Bug symptoms: get wrong return value
+Bug root cause: accesses is container of access, should use access.command_index instead of accesses.command_index
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   [src] Remove CuDevice destructor (avoid cuda-memcheck warnings) (#2185)
+
+Bug symptoms: 3rd lib tool may failed after execute the code
+Bug root cause: call cudaDeviceReset() too early
+Bug type: host retrieve resource of kernel function::program crash::early call device reset
+===============================================================
+
+===============================================================
+commit comment:   [src] Fix CU_SAFE_CALL wrapper so it correctly prints CuBLAS error codes (#1900)
+
+Bug symptoms: can't print cublas error codes
+Bug root cause: should use CUBLAS_SAFE_CALL instead of CU_SAFE_CALL
+Bug type: host retrieve resource of kernel function::miss error information::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   [src] fix a small bug: logging cuda elapsed time (#1623)
+
+Bug symptoms: can't get correct running time of cuda
+Bug root cause: forget add CuDevice::Instantiate().AccuProfile(__func__, tim); after calling kernel function
+Bug type: host retrieve resource of kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixes to CUDA problems introduced by recent commits: fix normalize code crash; compile problem on nvcc 8.0; fix thread-sync errors. (#1228)
+This fixes a synchronization problem introduced by PR #1217 (merged yesterday) that can cause crashes in TDNN training.
+
+Bug symptoms: cause crashes in TDNN training
+Bug root cause: __syncthreads() inside if condition block
+Bug type: kernel function execution::program crash::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fixes to fast LSTM code, regarding self-repair sum.
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   new kernel: norm per row
+move propagate of norm componet to cu math
+move to cu math
+fix cu math bug
+CuMatrix::NormalizePerRow<float>,
+16
+0.015
+0.001  13.16x
+CuMatrix::NormalizePerRow<float>,
+32
+0.062
+0.005  13.54x
+CuMatrix::NormalizePerRow<float>,
+64
+0.239
+0.019  12.77x
+CuMatrix::NormalizePerRow<float>,
+128
+0.748
+0.074  10.16x
+CuMatrix::NormalizePerRow<float>,
+256
+2.255
+0.289  7.79x
+CuMatrix::NormalizePerRow<float>,
+512
+5.399
+1.001  5.39x
+CuMatrix::NormalizePerRow<float>,  1024  10.010
+2.731  3.67x
+CuMatrix::NormalizePerRow<double>,
+16
+0.015
+0.001  12.45x
+CuMatrix::NormalizePerRow<double>,
+32
+0.059
+0.005  12.69x
+CuMatrix::NormalizePerRow<double>,
+64
+0.236
+0.018  12.81x
+CuMatrix::NormalizePerRow<double>,
+128
+0.701
+0.072  9.78x
+CuMatrix::NormalizePerRow<double>,
+256
+1.738
+0.279  6.23x
+CuMatrix::NormalizePerRow<double>,
+512
+4.415
+0.903  4.89x
+CuMatrix::NormalizePerRow<double>,  1024
+7.392
+2.154  3.43x
+fix small bug.
+strictly follow the original impl.
+fix kernel bug
+add comment to the cuda kernel function
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Nov 26 17:34:51 2016 -0500
+Merge pull request #1218 from kangshiyin/double-precision
+Fix bugs for DOUBLE_PRECISION = 1
+
+// D:\git-project\kaldi\src\base\kaldi-math.h
+// typedef double  BaseFloat;
+Bug symptoms: may failed in some given condition
+Bug root cause: should use BaseFloat instead of float
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   cuda kernel for backprop of lstm
+working on kernel code
+compilable kernel code
+fix bug
+pass unit test and deriv test
+make nnet3 compilable.
+speed test for backprop lstm
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix stride bug in cuda_calc_group_pnorm_deriv
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix stride bug in _calc_group_max_deriv
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix bug in log-softmax kernel [regarding matrices with different strides]
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   move pnorm back prop to cumatrix
+fix bug
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Shrink in-value of ClipGradientComponent toward some smaller value when clipping proportion exceeds some threshold (#803)
+(also minor bug fix in profiling in cu-vector.cc)
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   re-impl softmax: less __syncthreads() / arithmetic op / global mem access
+New: For CuMatrix::Softmax<float>, for dim = 16, speed was 0.0153621 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 16, speed was 0.0138999 gigaflops.
+New: For CuMatrix::Softmax<float>, for dim = 32, speed was 0.0614275 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 32, speed was 0.0507328 gigaflops.
+New: For CuMatrix::Softmax<float>, for dim = 64, speed was 0.235765 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 64, speed was 0.203548 gigaflops.
+New: For CuMatrix::Softmax<float>, for dim = 128, speed was 0.729239 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 128, speed was 0.725481 gigaflops.
+New: For CuMatrix::Softmax<float>, for dim = 256, speed was 2.30126 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 256, speed was 1.71863 gigaflops.
+New: For CuMatrix::Softmax<float>, for dim = 512, speed was 5.0565 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 512, speed was 3.69659 gigaflops.
+New: For CuMatrix::Softmax<float>, for dim = 1024, speed was 10.2482 gigaflops.
+Old: For CuMatrix::Softmax<float>, for dim = 1024, speed was 6.38335 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 16, speed was 0.0143354 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 16, speed was 0.013143 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 32, speed was 0.0590478 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 32, speed was 0.0495458 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 64, speed was 0.228611 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 64, speed was 0.193465 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 128, speed was 0.668961 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 128, speed was 0.676449 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 256, speed was 2.1013 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 256, speed was 1.51862 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 512, speed was 4.13055 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 512, speed was 3.1547 gigaflops.
+New: For CuMatrix::Softmax<double>, for dim = 1024, speed was 6.43429 gigaflops.
+Old: For CuMatrix::Softmax<double>, for dim = 1024, speed was 5.02974 gigaflops.
+minor changes
+
+Bug symptoms: lower time performance
+Bug root cause: too many synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Jun 26 11:57:18 2016 -0700
+Merge pull request #865 from kangshiyin/fix-inf
+Standard way to represent inf
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   generalize group_max vec_reduce mat_col_reduce to *_transform_reduce
+loop unroll by template
+generalize to group transform reduce
+_transform_reduce for vec, mat-col and group
+fix min bug
+fix bug
+fix template param bug
+
+Bug symptoms: get wrong result in given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon May 30 13:13:46 2016 -0400
+Merge pull request #821 from kangshiyin/div-rows-vec
+Fix #819 on CuMatrix::DivRowsVec
+
+Bug symptoms; program crash
+Bug root cause: can access any place of shared memory while it only has 16 sizes
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   fix bug on _div_rows_vec; faster DivRowsVec on large float matrix
+New: For CuMatrix::DivRowsVec<float>, for dim = 16, speed was 0.0180391 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 16, speed was 0.017677 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 32, speed was 0.0686798 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 32, speed was 0.0682798 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 64, speed was 0.290613 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 64, speed was 0.273113 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 128, speed was 1.12576 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 128, speed was 1.08792 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 256, speed was 3.79354 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 256, speed was 3.48151 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 512, speed was 9.247 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 512, speed was 8.70703 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 1024, speed was 16.535 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 1024, speed was 12.8467 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 2048, speed was 21.0912 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 2048, speed was 14.6946 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 4096, speed was 21.8187 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 4096, speed was 15.1197 gigaflops.
+New: For CuMatrix::DivRowsVec<float>, for dim = 8192, speed was 20.9238 gigaflops.
+Old: For CuMatrix::DivRowsVec<float>, for dim = 8192, speed was 15.2273 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 16, speed was 0.0171395 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 16, speed was 0.0173988 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 32, speed was 0.0708914 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 32, speed was 0.0745867 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 64, speed was 0.302615 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 64, speed was 0.279866 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 128, speed was 1.12123 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 128, speed was 1.15183 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 256, speed was 3.73959 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 256, speed was 3.61588 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 512, speed was 6.75394 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 512, speed was 6.86088 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 1024, speed was 10.2967 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 1024, speed was 9.63553 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 2048, speed was 11.3301 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 2048, speed was 10.9322 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 4096, speed was 11.063 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 4096, speed was 10.7829 gigaflops.
+New: For CuMatrix::DivRowsVec<double>, for dim = 8192, speed was 10.6967 gigaflops.
+Old: For CuMatrix::DivRowsVec<double>, for dim = 8192, speed was 10.6246 gigaflops.
+
+Bug symptoms: lower time performance on some given condition
+Bug root cause: unnecessary synchronization, re-implemented with none synchronization version
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   _vector_reduce kernel template for CuVector Sum, Max and Min.
+Add test to choose min length of vectors to be reduced on GPU.
+New:
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 16, speed was 0.000886179 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 32, speed was 0.00119834 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 64, speed was 0.00182674 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 128, speed was 0.00721178 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 256, speed was 0.0166563 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 1024, speed was 0.0626621 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 2048, speed was 0.108495 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 4096, speed was 0.162914 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 8192, speed was 0.248687 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 16384, speed was 0.491677 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 32768, speed was 0.931507 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 65536, speed was 1.75797 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 16, speed was 0.00116685 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 32, speed was 0.00229885 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 64, speed was 0.00430313 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 128, speed was 0.00840191 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 256, speed was 0.0156417 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 1024, speed was 0.051799 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 2048, speed was 0.09064 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 4096, speed was 0.122844 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 8192, speed was 0.241084 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 16384, speed was 0.468114 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 32768, speed was 0.859946 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 65536, speed was 1.53817 gigaflops.
+Old:
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 16, speed was 0.000461866 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 32, speed was 0.000936284 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 64, speed was 0.00180461 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 128, speed was 0.00350883 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 256, speed was 0.00700597 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 1024, speed was 0.0273135 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 2048, speed was 0.0529984 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 4096, speed was 0.0930953 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 8192, speed was 0.149376 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 16384, speed was 0.197131 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 32768, speed was 0.492249 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<float>, for dim = 65536, speed was 0.657485 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 16, speed was 0.000406633 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 32, speed was 0.000836551 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 64, speed was 0.00167463 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 128, speed was 0.00338708 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 256, speed was 0.00668978 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 1024, speed was 0.0253556 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 2048, speed was 0.0510465 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 4096, speed was 0.081494 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 8192, speed was 0.156451 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 16384, speed was 0.311666 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 32768, speed was 0.545834 gigaflops.
+LOG (TestCuVectorSum():cu-vector-speed-test.cc:72) For CuVector::Sum<double>, for dim = 65536, speed was 0.914985 gigaflops.
+fix vector sum bug.
+del old kernels
+correct way for inline.
+only do this when we have cuda.
+
+Bug symptoms: lower time performance in some given condition
+Bug root cause: should add a limit to avoid too many blocks comes to reality
+Bug type: kernel function execution::lower time performance::dimention
+===============================================================
+
+===============================================================
+commit comment:   cudamatrix: adding cudaDeviceReset() to CuDevice destructor.
+- this releases all the GPU resources at the end of a process,
+while the resources should be released by the OS anyway.
+- it sholud fix the issue of Matt Haynes,
+
+Bug symptoms: unexpected side effect after execution
+Bug root cause: should add cudaDeviceReset() in destructor
+Bug type: host retrieve resource of kernel function::program crash::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   minor bug-fix in cudamatrix code (forgot to check error status)
+
+Bug symptoms: can't get correct error information
+Bug root cause: forgot to check error status
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   chain-leaky-hmm branch: adding leaky-hmm options to script, and various bug-fixes in code; adding example scripts
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix an overflow-related failure of chain training, identified by Xiang Li.
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle a corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fixes to chain derivative computation to prevent case when alphas become close to infinity, generating NaNs in derivatives
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   cudamatrix: fixes to kernels that were using __syncthreads incorrectly (not sure if will fix a problem remi.fran6 was experiencing).
+
+Bug symptoms: may hang or has unexpected behave when execute to such line
+Bug root cause: barrier divergence caused by insert __syncthreads() into branch
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   some fixes to previous commit regarding cudamatrix optimizations
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle a corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix bug in cudamatrix/cu-device.cc whereby if it failed to get a GPU it would print a non-informative error message.
+
+Bug symptoms; will print a non-informative error message
+Bug root cause: cudaGetErrorString((cudaError_t)ret) will return non-informative error message when situation comes to failed to get a GPU
+Bug type: host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   chain branch: some changes to reduce memory consumption (so we can use longer sequences).  Modifying graph creation for better minimization, and the forward-backward to use less memory for the nnet-output derivatives.
+
+Bug symptoms: lower space performance while execute atomic_add_thresholded()
+Bug root cause: specify too large memory that no fully use
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   chain branch: various changes to get decoding working; various mostly minor fixes; change threshold in randomized pruning for beta.
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle a corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   chain branch: finish denominator computation and training interface.  bug fixes and more testing.
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle a corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   added TDNN+CTC swbd recipe and bug fix in src/cudamatrix/cu-allocator.cc
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   Bug fix to CuMatrix:AddRowRanges() and kAddRowRanges command in nnet3 (Changes from Dan)
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle a corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Adding memory-caching code for CUDA, to avoid the overhead of the device allocator.  This is smarter than the caching code that we previously added and deleted.
+
+Bug symptoms: lower performance on space usage
+Bug root cause: should add cache to improve performance
+Bug type: host prepare resource for kernel function::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fixes regarding the update of cudamatrix code to use the version 2 CuBLAS API
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   fix memory leak and indentation
+
+Bug symptoms: memory leak
+Bug root cause: forget to release memory
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Adding more functions to sparse matrix; Fixing small bugs in nnet3; nnet3 now compiles again. Code has not been tested yet, will add unit test tomorrow
+
+Bug symptoms: get wrong return value in given condition
+Bug root cause: should use NnetGenerationOptions instead of NnetGenerationConfig
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   trunk: minor fix to last trunk commit RE cu-device.cc
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@5243 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: lower performance on time
+Bug root cause: host && device can run that part async, should delete cudaThreadSynchronize()
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   (trunk) Adding error check and report which is helpfull in cases the CUDA_VISIBLE_DEVICES variable is set to weird values, causing enumeration of devices to fail even if there are devices
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@5095 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: missing error information
+Bug root cause: should add error checking code
+Bug type: host retrieve resource of kernel function::miss error information::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   (trunk) Cudamatrix fixes, contributed by Kirill Katsnelson <kirill.katsnelson@smartaction.com>
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4957 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle 2 corner cases
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk,nnet1 : bugfix in LSTM forwarding (missing state reset), bugfix in train_scheduler.sh
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4878 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to reset prev_nnet_state_
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk: minor changes to matrix libraries to deal more gracefully with zero-sized inputs; cosmetic change to show-transitions; bug fix to feature-fbank.cc (thanks to feiteng li)
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4827 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   kaldi/trunk:fixes to cuda-kernels due to mismatch between input matrix and number of input strides.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4460 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk,nnet1:
+- fixing a bug in _diff_sigmoid, _diff_tanh. The matrix arguments of a kernel now have individual strides
+- better diagnostic log-prints of nested networks in parallel components
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4445 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk: Fixed the kernel for Lookup function and added speed-test in testing code.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4424 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk: changes to Dan's neural net setup, with new preconditioning method (speed roughly doubled if you use train_pnorm_online.sh, which uses the new preconditioning method).  Various bug-fixes, optimizations and cleanups in matrix code, cuda-matrix code and thread code.  Still tuning this so recipes not checked in yet.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4077 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk/src/cudamatrix: various test-code improvements and minor cosmetic fixes
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@4054 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk: add extra CU_SAFE_CALL(cuGetLastError()) calls in cudamatrix/.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3993 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   trunk: AddMat function has fixed
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3847 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk,cuda: fixing CuMatrix::AddMat(.) to use 2strides; adding CuMatrix::EqualElementMask(.) which produces per-element equality mask (handy for backpropagation through max-pooling)
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3400 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk: fix to cu-device.cc regarding memory allocation in cudamatrix (as last fix, but corrected).
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3366 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::program crash::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk,cudamatrix: bugfix, we should use GPU memory caching via CuDevice for CuArray too...
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3309 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: lower space performance in some cases
+Bug root cause; should use GPU memory caching via CuDevice for CuArray
+Bug type: host prepare resource for kernel function::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   trunk: Fixing bug in cu-device.cc that stopped GPU from working if you got it after retry.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3227 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fix to CompObjfAndDeriv (GPU code) to handle zero-length vector; script improvement.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3217 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to handle some corner cases
+Bug type: kernel function execution::program crash::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk,cudamatrix : added reset of cuda error state by cudaGetLastError(), when allocator runs out of gpu memory before releasing
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@3197 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host retrieve resource of kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fix out-of-bounds bug in cuda kernels that was causing occasional crashes in DNN training with GPUs.  +minor code cleanup.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3147 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: program sometimes crash
+Bug root cause: index located error cause access unauthorized memory
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: fix memory leak in CuDevice; more parameter checking in CompObjfAndDeriv.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3113 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: memory leak
+Bug root cause: forget to release memory
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: various modifications and bug fixed to support CUDA training in Dan's recipe.  Modify CUDA device selection code (cleanup, and make error-status controllable).
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3105 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Modify CUDA matrix allocation so that it caches freed memory and returns cached answers if they are of the size required... this is to work around the extremee slowness of cudaMalloc and cudaMallocPitch on some platforms.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3104 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: lower time performance
+Bug root cause: cudaMalloc and cudaMallocPitch on some platforms will execute extreme slowness
+Bug type: host prepare resource for kernel function::lower time performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: fixing CopyLowerToUpper and CopyLowerToUpper
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3033 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: a lot of cleanups/changes/bugfixes/extra functionality for cudamatrix/matrix.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3030 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: various minor fixes/improvements to CUDA functions and test code.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3021 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fixes to vector summation function, Sum()
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3020 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: cudamatrix changes including bug fixes and moving AssertEqual, ApproxEqual to headers; add different form of preconditioned update (doesn't work great, may remove).
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@3008 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host retrieve resource of kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk: Fix to compilation error for cudamatrix; fix to function FrobeniusNorm() in class SpMatrix
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@2957 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host retrieve resource of kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   trunk/nnet : fixing memory leak in destructor of CuRand (big thanks goes to Dan)
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@2952 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: memory leak
+Bug root cause: forget to release memory
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Rework CuBlockMatrix to make initialization more efficient; add memory checking code; fix memory leaks in packed-matrix copy; compilation fix in nnet2/nnet-update.cc
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2947 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: memory leak
+Bug root cause: forget to release memory
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: cudamatrix bug-fixes and more tests; modifying scripts to use single-threaded program for GPU (multi-threaded code is not easily compatible with CUDA).
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2936 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: add test for cuda-matrix copy across types; fix bugs in cross-type cuda-matrix copying, and streamline that code.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2935 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: various cudamatrix optimizations and fixes.  neural net training job now running with cudamatrix (training script not yet fully tested).
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2931 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: lower time performance in some given condition
+Bug root cause: new combination of dimention provide better performance
+Bug type: kernel function execution::lower time performance::dimention
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fixing more errors; nnet-component-test now passes.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2925 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: various fixes.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2924 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fixes and extension to CopyRows()/CopyCols() for matrix/cudamatrix
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2923 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: fixing the bug where src.dim() is passed into cuda kernel instead of this->dim()
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2921 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fixing cudamatrix code RE softmax
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2909 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Extensions, fixes, optimizations and additional tests in cudamatrix library.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2905 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Various cudamatrix fixes and new tests.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2901 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: merge trunk; more CUDA bug-fixes, more tests; add CuVector::Max().  Register GPU on some nnet binaries.
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2900 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: fixed the SoftMax() bug in CuVector. Not yet further optimized though
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2890 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: unexpected side effect in _vec_soft_max() kernel function
+Bug root cause: forget to add __syncthread()
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: re-wrote the _vec_sum() function, within each loop only reads adjacent memories
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2889 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: lower time performance on kernel function
+Bug root cause: each loop reads long range memory.
+  while (i < dim) {
+    tmp_sum += v[i];
+    i += 256;//blockDim.x * gridDim.x;
+  }
+Bug type: kernel function execution::lower time performance::memory access
+===============================================================
+
+===============================================================
+commit comment:   cudamatrix: adding function AddSpVec and corresponding tests, implement SetRandn() for CuPackedMatrix, fix some test routines, fix AddMatVec
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2887 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2: Fixed bug in Sum() on CuVector class
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2882 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Various cudamatrix fixes; changing CUBLOCK to CU2DBLOCK and adding CU1DBLOCK
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2858 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   sandbox/dan2 Fixed tests for all conditions (CUDA/NOCUDA)
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/sandbox/dan2@2849 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fixing and extending the cudamatrix library
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@1989 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   some fixes to cu-device.cc to operate under Compute Exclusive Mode
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@1403 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: lower space performance on some platform
+Bug root cause: If not operating under Compute Exclusive Mode, or using a version of CUDA where such a check cannot be
+                performed, select the GPU with most free memory.
+Bug type: host prepare resource for kernel function::lower space performance::portability
+===============================================================
+
+===============================================================
+commit comment:   add the error state reset, when selecting the GPU
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@1388 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: can't get correct error information
+Bug root cause: should use cudaGetLastError() to make sure error state is clear
+Bug type; host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   fix
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@1165 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fixing a bug
+git-svn-id: https://svn.code.sf.net/p/kaldi/code/trunk@1020 5e6a8d80-dfce-4ca6-a32a-6e07a63d50c8
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+
+

@@ -1,0 +1,25 @@
+bug location: host prepare resource for kernel function | kernel function execution | host retrieve resource of kernel function
+
+Test case always failed | Test case sometimes failed | program crash | lower time performance | lower space performance | miss error information
+
+wrong implement logic | synchronization | memory leak | access unauthorized memory | portability | device resource allocation | memory access |
+partition camping | calculation | improved new lib function | memory scope | branch divergence | data type | dimension | error status refresh | 
+early call device reset | 
+exception catching=wrong implement logic(E)
+compile error=program crash(C)
+reach device limit=device resource allocation
+
+
+program crash: may or may not crash depend on input; report error in some condition after execution; 
+
+
+
+
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+Bug type: kernel function execution::program crash::access unauthorized memory
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+Bug type: host retrieve resource of kernel function::program crash::memory leak
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+
+阶段：程序运行时，发生bug得时间点。定义宏：虽然宏定义于执行前，但由于该宏于kernel function执行时方执行，因此对宏得定义错误属于kernel
+function execution

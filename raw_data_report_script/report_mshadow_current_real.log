@@ -1,0 +1,212 @@
+===============================================================
+commit comment:   fix bad Plan name exp (#320)
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix reduce kernel + use gemmStridedBatched (#287)
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix the launch param of reduce kernel and range (#285)
+* fix the launch param of reduce kernel and range
+* fix lint
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Adding __syncwarp() from CUDA 9 to unsafe warp-synchronous code (#263)
+
+Bug symptoms: lower time performance
+Bug root cause: __syncthreads() is too big here
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fixing "too many resources requested" in MapReduceKeepLowest kernel (#240)
+
+Bug symptoms: launch kernel function failed
+Bug root cause: request too many resources
+Bug type: kernel function execution::program crash::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fix warnings, build adjustments in CMake (#209)
+* Fix warnings, build adjustments in CMake
+* fix cuda variable-declaration order problems
+* Remove gpu flavors below 30, no longer compatible
+
+Bug symptoms: may return wrong value due to unsuitable data type
+Bug root cause: should use unsigned instead of int
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   Add post kernel check + add more known gpu archs + fix warning (#196)
+* Add post kernel check
+* Revise
+* Revise message
+* Add more known gpu archs
+* Add 52
+* Fix warning
+
+Bug symptoms: can't get correct error information
+Bug root cause: forget to parse error information after kernel function execution
+Bug type: host prepare resource for kernel function::miss error information::error status refresh
+===============================================================
+
+===============================================================
+commit comment:   Add transpose_indices
+Fix SortByKey on CPU
+Use float for start/stop/step
+Add index_fill
+Remove debugging output
+remove debugging info
+fix error
+fix doc + lint
+fix lint
+update comment
+
+Bug symptoms: may return wrong value due to unsuitable data type
+Bug root cause: should use float instead of int
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   Accelerate batched_gemm in GPU using CuBLAS version
+Fix lint
+Adding workspace
+Fix build error
+Fix build error on GPU
+Fix comment
+Update comment
+
+Bug symptoms: build error on GPU
+Bug root cause: should using different version to handle such situation
+Bug type: host prepare resource for kernel function::program crash(C)::portability
+===============================================================
+
+===============================================================
+commit comment:   half pascal fix
+
+Bug symptoms: may return wrong value
+Bug root cause: define micro should have different condition
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   [EMBED] Add quick optimization to take grad
+fix
+
+Bug symptoms: lower time performance
+Bug root cause: old implement has less optimization
+Bug type: kernel function execution::lower time performance::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix compile error with vs2013
+
+Bug symptoms: will have compile error with vs2013
+Bug root cause: On vs2013, should need another step before calling __half2float
+Bug type: host prepare resource for kernel function::program crash(C)::portability
+===============================================================
+
+===============================================================
+commit comment:   fix bug of Softmax3DKernel for multiouput
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fixed crash
+
+Bug symptoms: program crash when execute kernel function Softmax3DKernel
+Bug root cause: pass reference value from host side to kernel function
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   [BUGFIX] SoftmaxGrad Kernel
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix softmax
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix cuda arch
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix sumrows
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   mshadow fix
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host retrieve resource of kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix stream
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix mshadow nvml
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix softmax
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix some macro
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+

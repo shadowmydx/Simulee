@@ -1,0 +1,3320 @@
+===============================================================
+commit comment:   Handle NaN values for complex types
+* Fixes #2130 and handle NaNs for complex types
+* Adds a comment to explain an unusually large value to use in one unit test
+* Fixes signature mismatch between template declarations and specializations for `cabs` & `isNan`
+* Changes NaN value initializations to static BinaryOp<>::init() calls
+* Fixes index order check on CPU kernel and added tests for checking index order in the case of `idx == m_idx`
+* MinMaxOp all: Added back the index order check condition with correct parenthesizing
+* CUDA: Removed static specifier on template specialized cabs() and isNaN()
+* OpenCL: Switched order of IS_NAN and gt/lt conditions for assigning new min/max value in operator
+* OpenCL: Changed is_nan check to inline function for indexed reduce
+* Style changes to is_nan check  in MinMaxOp related operations, especially conditions in if-else blocks that use is_nan calls.
+* Style fixes in MinMaxOp related code sections
+
+Bug symptoms: failed on given test case that contains 'NaN' value
+Bug root cause: forget to process NaN value
+Bug type0: Normal::corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix input validation in DeviceManager::setActiveDevice
+
+Bug symptoms: unknown
+Bug root cause: CUDA-Capable devices should be fully used by change "if (device > numDevices)" to "if (device >= numDevices)"
+Bug type0: Performance::device usage
+Bug type: host prepare resource for kernel function::lower time performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fix regions corner case in CUDA/OpenCL backends
+Fixes #1650
+When entire input image is one big component(all 1's) or
+there is only one component(apart from background-0's),
+both CUDA/OpenCL mistook that for background. This change
+addes a check for this corner case.
+
+Bug symptoms: In the case of a binary image fully composed of 1, the resulting array is only composed of 0,
+              while it should be entirely composed of 1
+Bug root cause: If the number of label assignments is two, then either the entire input image is one big component(1's) or
+                it has only one component other than background(0's). Either way, no further post-processing of labels is required.
+Bug type0: Normal::corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixes for parameter overflow for NVIDIA devices.
+- Ensure the kernels are compiled quicker for non linear kernels.
+
+Bug symptoms: Report error while compiling generated cuda code
+Bug root cause: parameter overflow for generated kernel function.
+Bug type0: unknown
+Bug type: host prepare resource for kernel function::program crash::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fix fast for CUDA 9. Use CUB library for reductions
+FAST was failing on CUDA 9 because of insufficient synchronization in the
+reduction of the non_max_count function. The reduction is now implemented
+using BlockReduce from CUB.
+This also adds CUB as a dependency which is brought in as a submodule.
+
+Bug symptoms: Poor performance on FAST's execution.
+Bug root cause: Insufficient synchronization in the reduction of the non_max_count function.
+Bug type0: Performance::running time::insufficient synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Use the gpu-architecture flag for jit kernels. Fixes TX1 failures
+This fix addresses the "failed to load builtin" errors on the TX1
+hardware.
+
+Bug symptoms: Report error while trying to build generated cuda code on TX1 hardware
+Bug root cause: Compile option missing --gpu-architecture=compute_%d%d for TX1 hardware
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   fix max grid limitation for where kernel
+
+Bug type: kernel function execution::Test case always failed::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fix issue with launching too many blocks along y when using JIT
+
+TODO：important
+Bug symptoms: poor performance
+Bug root cause: launching too many blocks along y
+Bug type0: Performance::running time::partition camping
+Bug type: host prepare resource for kernel function::lower time performance::partition camping
+===============================================================
+
+===============================================================
+commit comment:   Fix pixel tests in fast kernels
+
+Bug symptoms: return wrong boolean value while source and target value equal.
+Bug root cause: use >= while should use >
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix mismatched new/delete in cuda jit
+
+Bug symptoms: may cause segment fault
+Bug root cause: unique_ptr should handle char * instead of char
+Bug type0: Normal::type mismatch
+Bug type: host prepare resource for kernel function::program crash::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix potential memory leak
+Earlier to this change, memory allocated by malloc call was
+being freed by delete call.
+
+Bug symptoms: memory leak
+Bug root cause: use delete while should use free()
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Fix WITH_GRAPHICS build checks in CUDA/OpenCL backends
+
+Bug symptoms: compile pass while don't have necessary Free_image lib
+Bug root cause: forget to check if there is a lib in the env while compiling
+Bug type0: Normal::corner case
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Bugfix to select in CUDA and OpenCL
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on global memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Fixes for Windows for CUDA after C++11 introduction
+
+Bug symptoms: compile failed on windows
+Bug root cause: windows can't use option -std=c++11
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Fix gfx manager initialization to be thread safe
+
+Bug symptoms: unexpected side effect after call getGfxInteropManager() twice
+Bug root cause: forget to add call_once to getGfxInteropManager()
+Bug type0: Sync::data race
+Bug type: host prepare resource for kernel function::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   fix cuda backend sub-managers initilization order
+
+Bug symptoms: cuda memory manager may not setup so that it will receive null while calling getInstance()
+Bug root cause: should add a check logic to make sure cuda memory manager is setting up.
+Bug type0: Memory::null check
+Bug type: host prepare resource for kernel function::program crash::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Dec 19 14:11:39 2016 -0500
+Merge pull request #1680 from 9prady9/perf_fix_fftconv
+performance fixes in fftconvolve kernels
+
+Bug symptoms: bad performance on fft kernels
+Bug root cause; (c1.x+c1.y) * (c2.x+c2.y) - c1.x*c2.x - c1.y*c2.y can be transform to c1.x*c2.y + c1.y*c2.x
+Bug type0: Performance::running time::calculation
+Bug type: kernel function execution::lower time performance::calculation
+===============================================================
+
+===============================================================
+commit comment:   FIX CUDA 6.5 or older does not have libdevice compute_50
+
+Bug symptoms: Crash
+Bug root cause: older version of CUDA use wrong buffer and wrong bc_buffer_len
+Bug type0: Normal::portability
+Bug type: kernel function execution::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Fix else case in compute to libdevice table
+
+Bug symptoms: fail to support some platforms
+Bug root cause: didn't handle situation of lower version
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Fixed picking the right libdevice for device compute
+
+Bug symptoms: fail to apply right setup to each version of libdevice
+Bug root cause: use same setup for all libdevice version
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Fix syncthreads in cuda nearest neighbour
+
+Bug symptoms: may hang or has unexpected behave when execute to such line
+Bug root cause: barrier divergence caused by insert __syncthreads() into branch
+Bug type0: Sync::barrier divergence
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Sep 20 20:58:50 2016 -0400
+Merge pull request #1595 from pavanky/minmaxfix
+Bugfixes to image morph and nearest neighbors
+
+Bug symptoms: may hang or has unexpected behave when execute to such line
+Bug root cause: barrier divergence caused by insert __syncthreads() into branch
+Bug type0: Sync::barrier divergence
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing regions after bug caused by the change in maxval
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing bug in nearest neighbour for CUDA backend
+
+Bug symptoms: may hang or has unexpected behave when execute to such line
+Bug root cause: barrier divergence caused by insert __syncthreads() into branch
+Bug type0: Sync::barrier divergence
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Change the initial values for min and max operations
+- Fixes issues with erode and dilate at corner cases
+
+Bug symptoms: will fail on some corner case
+Bug root case: forget to consider corner case
+Bug type0: Normal::corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: AARCH64 (TX1 64-bit OS) does not define __arm__ - Requires __aarch64__
+
+Bug symptoms: report support driver invalid
+Bug root case: forget to add condition !defined("__aarch64__")
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 12 21:38:23 2016 -0500
+Merge pull request #1587 from pavanky/bug_fixes
+Vector field example and bug fixes
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on global memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 12 21:38:12 2016 -0500
+Merge pull request #1584 from pavanky/homography
+Bugfixes to homography
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   CUDA: Bugfixes and cleanup of homography kernel
+
+Bug symptoms: return wrong value
+Bug root cause: data race in kernel function due to lacking of __syncthreads()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixed issue with array.device when array is nonlinear
+- Added appropriate test
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+
+===============================================================
+commit comment:   Date:
+Wed Sep 7 18:54:13 2016 -0500
+Merge pull request #1572 from pavanky/bilateral
+Performance fixes to bilateral filter
+
+Bug symptoms: bilateral slower on CUDA compared to OpenCL
+Bug root cause: exp cuda device function is slower than __expf improved the cuda which lead to a lower performance
+                compare to OpenCL. And there is redundant multiplication calculation in the for loop
+Bug type0: Performance::running time::improved new lib function
+Bug type: kernel function execution::lower time performance::improved new lib function
+===============================================================
+
+===============================================================
+commit comment:   fix init values for morphological ops in cuda/opencl along edges
+
+Bug symptoms: wrong init logic result in wrong returned value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Add shared(cuda)/local(opencl) memory limit check for bilateral
+
+Bug symptoms: kernel function may not start due to shared memory over the limit
+Bug root cause: forget to check if shared memory over the limit
+Bug type0: Memory::shared memory::limit check
+Bug type: kernel function execution::program crash::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   BUG: Fixing strides for interp in CUDA backend
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on global memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Fixing approx2 to accept bilinear and bicubic enums
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing boundary conditions for approx2
+- Also includes code cleanup
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix ambiguous symbols from windows gl.h
+
+Bug symptoms: compile error while try to include windows gl.h
+Bug root cause : ambiguous symbols
+Bug type0: Normal::portability
+Bug type: kernel function execution::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   GL Header fix for cuda_gl_interop on ARM/Tegra
+
+Bug symptoms: unknown
+Bug root cause : should use different header logic handle ARM/Tegra
+Bug type0: Normal::portability
+Bug type: kernel function execution::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Aug 30 07:24:19 2016 -0500
+Merge pull request #1556 from shehzan10/libdevice-off-fix
+BUGFIX: Fix type when libdevice is off
+
+Bug symptoms: compile error when libdevice is off
+Bug root cause: wrong grammar by "#define #define NVVM_SPECIALIZE_TYPE(T, fn, fname)"
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix boundary conditions for approx2
+and add tests
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   updates to tests and fixes for opencl,cuda backends
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing initial values in morph functions for all backends
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   CMake Error when CUDA Compute 6x and CUDA < 8
+
+Bug symptoms: compile error
+Bug root cause: error out if Compute 6x is enabled but CUDA version is less than 8
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing bugs with variables going out of scope
+And that is why you have to be careful with pointers
+
+Bug symptoms: segment fault
+Bug root cause: push stack variable reference into vector beyond its scope
+Bug type0: Memory::scope
+Bug type: host retrieve resource of kernel function::program crash::memory scope
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing bug in sign function for cuda backend
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing bugs in CUDA JIT
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Use dimensions of A in CUDA sparse blas
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixes for CUDA computes for 6x
+
+Bug symptoms: unknown
+Bug root cause:should add new support compute version
+Bug type0: Normal::portability
+Bug type: kernel function execution::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   cleanup and optimization optimize loops in kernels.
+
+Bug symptoms: lower performance on moments_kernel function
+Bug root cause: previous implement use break in for loop according to A condition. new implement use return before for
+                loop execute. Although return statement also cause branch divergence, but unlike break version, it won't
+                need execute remaining code.
+Bug type0: Performance::running time::branch divergence
+Bug type: kernel function execution::lower time performance::branch divergence
+===============================================================
+
+===============================================================
+commit comment:   dynamically-sized shared memory. varname corrections
+
+Bug symptoms: cannot handle some input when specify static-sized shared memory
+Bug root cause: should use dynamically-sized shared memory to handle more situation
+Bug type0: Memory::shared memory::dynamical
+Bug type: kernel function execution::Test case always failed::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Add missing syncthreads to scan_by_key
+
+Bug symptoms: return wrong value
+Bug root cause: data race in kernel function due to lacking of __syncthreads()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   FEAT Add fallback to CUDA OpenGL Interop
+This comes into play when devices are not graphics capable but OpenGL is
+available.
+On Windows, when all devices are in TCC mode or not connected to display, CUDA
+throws an error
+`CUDA Error (63): OS call failed or operation not supported on this OS`.
+On Linux, if all devices are in TCC mode, the graphics part will still run as
+long as OpenGL is available.
+
+Bug symptoms: application will crash in some devices
+Bug root cause: there are some devices that are not graphics capable
+Bug type0: Normal::portability
+Bug type: kernel function execution::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   Handle errors for CUDA and OpenCL specific functions
+
+Bug symptoms: may crash due to some situations
+Bug root cause: forget to catch exception in some function
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Mar 15 08:32:30 2016 -0400
+Merge pull request #1333 from shehzan10/hotfix-3.3.1
+Bugfixes to diag extract and CUDA FFTs
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX diagonal extract length is min instead of max of dims
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: fixed issue in indexing after calling resetDims
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Getting device ptr now forces JIT evaluation.
+- Added relevant tests
+
+Bug symptoms: unexpected action from program
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX cuFFT plans when using multiple devices
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Ensure set operations work on vectors only
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixes for using MKL on OSX
+
+Bug symptoms: compile error when using MKL on OSX
+Bug root cause: should add new include when on OSX
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash(C)::portability
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing array.write for all backends
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: host retrieve resource of kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Adding function to check if memory usage is approaching the limits
+
+Bug symptoms: may crash when request too many memory
+Bug root cause: forget to check if the request has been over limit
+Bug type0: Memory::limit check
+Bug type: host prepare resource for kernel function::program crash::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Feb 11 20:30:10 2016 -0500
+Merge pull request #1265 from pavanky/internals
+Bug Fixes and exposing Array internals
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixes to internal functions
+- Was using incorrect number of elements for the total
+- Fixed copy because right now isOwner() does not mean isLinear()
+- Potentially improves performance when isLinear() is not isOwner()
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixed issues with offsets in moddims after using indexing
+
+Bug symptoms: return uncompleted value
+Bug root cause: forget to set data dims for return object
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing offsets when writing to Arrays for CPU and CUDA backends
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Feb 4 11:41:28 2016 -0500
+Merge pull request #1262 from pavanky/memory_manager_fixes
+Memory manager and CPU random fixes
+
+Bug symptoms: undefined behavior when throw error while shutting down
+Bug root cause: throw err in wrong place
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Jan 31 18:06:47 2016 -0500
+Merge pull request #1250 from pavanky/misc_fixes
+Fixes to memory manager, additional CUDA computes, tests
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong index calculation
+Bug type0: Index calculation::wrong index
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Jan 31 18:06:38 2016 -0500
+Merge pull request #1251 from pavanky/bug_fixes
+Bug fixes for select and replace
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong index calculation
+Bug type0: Index calculation::wrong index
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: incorrect index for 3rd dimension in select / replace
+Affects both CUDA and OpenCL abckends
+
+Bug symptoms: return wrong value in some given arguments
+Bug root cause: wrong index calculation
+Bug type0: Index calculation::wrong index
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fix Tests: ORB, Meanshift, basic_c, solve
+* Fix vector in fast_pyramid - use resize instead of reserve
+* Fix meanshift test. Use proper types and arrays
+* Fix memory leak in basic_c
+* Enable solve tests that were disabled for windows opencl
+
+Bug symptoms: get wrong side effect by execute target function in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX Fix CUDA device management and free at destructor
+
+Bug symptoms: may crash while trying to delete device management object
+Bug root cause: forget to add try-catch statement
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX Fix how streams are created in setActiveDevice (CUDA)
+Ref 968ae4e80ce8e6263fdc3f4381ae8b895df44bc4
+
+Bug symptoms: get wrong side effect by execute target function in some given condition
+Bug root cause: should not create any streams in streams[device] while it already holds one
+Bug type0: Normal::wrong logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Jan 13 20:36:40 2016 -0500
+Merge pull request #1229 from shehzan10/imageio16-test
+Image IO 16-bit tests, Bug fixes
+
+Bug symptoms: may crash
+Bug root cause: forget to add try-catch statement
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+
+===============================================================
+commit comment:   Add try/catch around cuda::setDevice in Pinned Memory Manager
+
+Bug symptoms: may crash
+Bug root cause: forget to add try-catch statement
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Handle CUDA devices locked in exclusive mode
+* When the default device 0 is exclusively locked, ArrayFire will try to pick
+a different device
+* When the user uses setDevice to set a device that is locked, then ArrayFire
+will error out
+* Handle such a case when freeing memory in memory manager destructor
+Signed-off-by: Shehzan Mohammed <shehzan@arrayfire.com>
+
+Bug symptoms: may crash
+Bug root cause: forget to add try-catch statement
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Fixing issue where garbageCollect was only called on current device
+
+Bug symptoms: get wrong side effect by execute target function in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing CUDA platform manager to sort devices in a more saner manner.
+
+Bug symptoms: get wrong side effect by execute target function in some given condition
+Bug root cause: should use stable_sort instead of sort to sort device vector
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Jan 3 03:05:53 2016 -0500
+Merge pull request #1207 from shehzan10/memory
+Exceptions and Memory Management
+
+Bug symptoms: get wrong side effect by execute target function in some given condition
+Bug root cause: should use stable_sort instead of sort to sort device vector
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   CUDA Kernels: Use ints instead of dim_t in index calculations #1411
+
+Bug symptoms: unwrap much slower on CUDA compared to OpenCL on same GPU
+Bug root cause: Caused by using dim_t (x64: long long int) in CUDA Kernels. Causes performance regression
+Bug type0: Performance::running time::data type
+Bug type: kernel function execution::lower time performance::data type
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Dec 11 14:21:04 2015 -0500
+Merge pull request #1153 from 9prady9/perf_fix_homography
+Replaced cudaMemcpy with async version calls in homography
+
+Bug symptoms: lower performance while tryting copy data to device
+Bug root cause: should copy data as async way to get a better performance
+Bug type0: Performance::running time::insufficient synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fix bug in identity cuda plaguing compute 5.2
+* This is similar to the bug in triangle fixed in 144a2db
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: should use long long instead of unsigned to get more bits to represent index
+Bug type0: Normal::type mismatch
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   Replaced cudaMemcpy with async version calls in homography
+
+Bug symptoms: lower performance while tryting copy data to device
+Bug root cause: should copy data as async way to get a better performance
+Bug type0: Performance::running time::insufficient synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fix memory leak in cuda random. Additionally allow seeds per device
+
+Bug symptoms: memory leak
+Bug root cause: should free state object if it is not null while trying to delete stateManager object
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Fixed and improved CUDA's homography
+* Added missing __syncthreads()
+* Removed need of some global memory arrays
+
+Bug symptoms: unexpected side effect in buildLinearSystem() kernel function
+Bug root cause: forget to add __syncthread()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Getting the device pointer performs memory copy when needed
+- This includes when data is being accessed by other arrays
+- Added necessary tests
+
+Bug symptoms: get wrong side effect by execute target function in some given condition
+Bug root cause: should handle more situation while copying data to device
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 10 19:50:36 2015 -0500
+Merge pull request #1096 from 9prady9/susan_fixes
+Memory leak fix in SUSAN feature detector
+
+Bug symptoms: memory leak
+Bug root cause: should call memFree after execute susan()
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Fix triangle test failures
+* Tests were failing on compute 53 for int,uint,char,uchar,short,ushort
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: should use long long instead of unsigned to get more bits to represent index
+Bug type0: Normal::type mismatch
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   specilizations for abs math function for int & char
+abs(int) and abs(char) were always returning zeros on CUDA
+backend, probably a bug in CUDA sdk. This change fixes this
+behaviour on CUDA backend which effects the following functions:
+* af_assign_gen
+* af_index_gen
+
+Bug symptoms: template abs function failed on int & char always returning zero (BE ADVISED)
+Bug root cause: unknown, maybe there is a bug in CUDA sdk
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixed __syncthreads() calls in homography
+
+Bug symptoms: unexpected side effect in JacobiSVD() kernel function
+Bug root cause: forget to add __syncthread()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fix cuda shared memory instantiation for s64 and u64
+
+Bug symptoms: can not support intl * uintl run time sized shared memory type before
+Bug root cause: forget to add SPECIALIZE(intl) && SPECIALIZE(uintl)
+Bug type0: Memory::shared memory::type support
+Bug type: kernel function execution::program crash::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Nov 2 11:41:13 2015 -0500
+Merge pull request #1076 from 9prady9/cuda_memcpy_stream_fixes
+Replaced deviceSychronize calls with async versions
+
+Bug symptoms: lower performance while tryting copy data to device
+Bug root cause: should copy data as async way to get a better performance
+Bug type0: Performance::running time::insufficient synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fixed out-of-bounds memory access in CUDA/OpenCL SIFT
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: should check if request is out of bounds
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Fixed min/max values of sigma in SIFT scale levels
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixed several memory leaks in CUDA and OpenCL SIFT
+
+Bug symptoms: memory leak
+Bug root cause: forget to call memFree
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 21 22:47:19 2015 -0400
+Merge pull request #1012 from 9prady9/histogram_fixes
+Reduction and Histogram Fixes
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: should use long long instead of long to get more bits to represent index
+Bug type0: Normal::type mismatch
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   Removed unncessary memory overhead in histogram cuda/opencl kernels
+
+Bug symptoms: high device resource consume
+Bug root cause: use unnecessary shared memory in kernel function
+Bug type0: Memory::shared memory::waste
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fixed histogram cuda/opencl kernels for indexed arrays
+Added a unit test for indexed arrays
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Reduction fixes for smaller arrays (<4096 elements)
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to add another condition judgement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUFIX: Converting non-linear indices to linear indices in ireduce
+- Fixes in both CUDA and OpenCL backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: forget to add another condition judgement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Sep 2 17:41:37 2015 -0400
+Merge pull request #983 from pavanky/indexed_reduce_fixes
+Indexed reduce fixes
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: For calculating number of elements for a buffer in CUDA backend
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing various typos and bug fixes for SVD in CUDA and OpenCL
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixed a bug for unwrap in all backends
+- The output dimensions were being calculated incorrectly
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixed CUDA SIFT on unused memory buffer
+* Removed unused memory buffers and copies
+* Changed calcOrientation kernel to match OpenCL implementation
+
+Bug symptoms: memory unused
+Bug root cause: allocate global memory && copy data to it but not use
+Bug type0: Memory::waste
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Using cudaMemsetAsync for SIFT
+
+Bug symptoms: lower performance while tryting copy data to device
+Bug root cause: should copy data as async way to get a better performance
+Bug type0: Performance::running time::insufficient synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Passing shared size memory dynamically to CUDA SIFT
+
+Bug symptoms: cannot handle some input when specify static-sized shared memory
+Bug root cause: should use dynamically-sized shared memory to handle more situation
+Bug type0: Memory::shared memory::dynamical
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   SIFT fix for CUDA on Windows, made it more readable
+* Changed static consts to defines, build fails on Windows
+when static consts are used in device functions
+* Made image indexing more readable
+
+Bug symptoms: cannot build on Windows
+Bug root cause: it is not allow on windows that static consts are sud in device functions
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash(C)::portability
+===============================================================
+
+===============================================================
+commit comment:   FEAT/TEST: Adding R2C and C2R FFT transforms for all backends
+- These transforms use lower memory foot prints, exploiting symmetry
+- Added relevant tests
+
+Bug symptoms: return wrong value some times
+Bug root cause: host doesn't wait kernel function to finish
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Replaced cuda Memcopy/Memset with async versions
+
+Bug symptoms: lower performance while tryting copy data to device
+Bug root cause: should copy data as async way to get a better performance
+Bug type0: Performance::running time::insufficient synchronization
+Bug type: kernel function execution::lower time performance::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Changed default cuda stream to be non-zero
+* Added additional following api functions specific to cuda backend
+* afcu_get_stream
+* afcu_get_native_id
+* Removed duplicate class in fast kernel that helps declare
+dynamic shared memory based on template type
+
+Bug symptoms: cannot handle some input when specify static-sized shared memory
+Bug root cause: should use dynamically-sized shared memory to handle more situation
+Bug type0: Memory::shared memory::dynamical
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Replaced static shared memory with dynamic in SUSAN CUDA kernel
+
+Bug symptoms: cannot handle some input when specify static-sized shared memory
+Bug root cause: should use dynamically-sized shared memory to handle more situation
+Bug type0: Memory::shared memory::dynamical
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   SUSAN CUDA/OpenCL: Added bound checks to load shared/local Memory
+
+Bug symptoms: kernel function may not start due to shared memory over the limit
+Bug root cause: forget to check if shared memory over the limit
+Bug type0: Memory::shared memory::limit check
+Bug type: kernel function execution::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   typo fix in cuda SUSAN kernel
+
+Bug symptoms: compile failed
+Bug root cause: typo, RADIUS should be radius
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Ensure CUDA and OpenCL return proper errors when out of memory
+
+Bug symptoms: report inaccuracy exception
+Bug root cause: should treat cudaErrorMemoryAllocation independently
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Jul 2 17:56:02 2015 -0400
+Merge pull request #875 from pavanky/reduce-nan
+Fixes in reduction functions when inputs contain NaN
+
+Bug symptoms: failed on given test case that contains 'NaN' value
+Bug root cause: forget to test if input is an NaN value
+Bug type0: Normal::corner case
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Bug fixes for nearest neighbour and hamming
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: should use template type TO instead of unsigned for max_dicts
+Bug type0: Normal::type mismatch
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   Fixing bug in linear interpolation functions
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: should use int instead of WT for grid_x
+Bug type0: Normal::type mismatch
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX for gradient when single element is in new block
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: cond || idy + ymax >= in.dims[1] - 1 should be cond || idy + ymax >= in.dims[1]
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Function return type fix for blas
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX/TEST: fftConvolve now does multi dimensional batching properly
+- Added another fftConvolve test
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixed fftconvolve() bug, resulting in wrong output
+The bug caused FFTs to be computed for smaller sizes, thus, losing data. This
+would only be noticed for particular combinations of dimension 0 sizes of
+signal and filter arrays.
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: anytrue / alltrue now return b8 instead of u8
+
+Bug symptoms: in some condition will return wrong value
+Bug root cause: unchar should be char
+Bug type0: Normal::type mismatch
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   Fixing the cuda error check in cuda/platform.cpp
+
+Bug symptoms: couldn't get cuda error detail
+Bug root cause: forget to add CUDA_CHECK to cuda function
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Prevent CUDA hamming_matcher from allocating additional device memory
+
+Bug symptoms: global memory waste
+Bug root cause: queryTDims and trainTDims will be used only and if only dist_dim == 0, no need to execute it every time.
+Bug type0: Memory::waste
+Bug type: host prepare resource for kernel function::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fixed race condition in CUDA hamming_matcher()
+
+Bug symptoms: may hang or has unexpected behave when execute to such line
+Bug root cause: barrier divergence caused by insert __syncthreads() into branch
+Bug type0: Sync::barrier divergence
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fixed linear interpolation for transform/rotate
+* Added integer and complex types to transform and rotate
+* Added tests
+
+Bug symptoms: can not support intl, uintl, char
+Bug root cause: forget to add INSTANTIATE(intl) && INSTANTIATE(uintl) && INSTANTIATE(char)
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX in iir for all backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIXES: fixing batch mode in IIR filter for all backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   ArrayFire Graphics API changes
+Fixes #172
+* API can now handle multiple windows
+* Objects can be draw to different windows
+* Added new examples edge.cpp & morphing.cpp that has
+edge detector exampels and morphological operations
+Examples:
+To show a simple image in loop you can do the following.
+```
+af::array a = loadimage(...);
+af::Window w;
+while(!w.close()) {
+w.image(a);
+}
+```
+To show a set of images, plots, histograms use the following functions to
+setup grid and render portions of windows with different objects.
+```
+Window::grid(rows, cols) // setup grid layout in window
+Window::draw() // swap render buffers and poll for events
+Window(row, col)->image(a); // overloaded operator() stores current
+// row, col indices and returns this to cascade the draw calls.
+```
+
+Bug symptoms: 2D FFT failing on Radeon HD 7970
+Bug root cause: The sizes which are emitting the clFFT error message are 32x32 - 512x512. It is not immediately clear
+                where the OPENCL_V< CLFFT_INVALID_PLAN > (3083): fftRepo.getPlan failed message comes from though.
+Bug type0: Normal::portability
+Bug type: kernel function execution::Test case sometimes failed::portability
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX in random number generation for multiple GPUS in CUDA backend
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing a minor bug in CUDA solve
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixes for CUDA linear algebra on windows
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun May 3 18:37:30 2015 -0400
+Merge pull request #634 from pavanky/bug_fixes
+Bug fixes in reduction
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Removing volatile memory and race conditions by adding ireduce
+- done by adding __syncthreads() for intra warp calculations
+
+Bug symptoms: return wrong value some time
+Bug root cause: data race in kernel function due to lacking of __syncthreads()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Remove the need for volatile memory by always using __syncthreads();
+
+Bug symptoms: return wrong value some time
+Bug root cause: data race in kernel function due to lacking of __syncthreads()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Fix race condition in reduce_first_kernel.
+
+Bug symptoms: return wrong value some time
+Bug root cause: data race in kernel function due to lacking of __syncthreads()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX fixed Windows Debug mode issue
+copyArray function in all backends was giving undefined reference
+errors for specific template specilizations in debug mode. These
+specilizations are not used anywhere in code base and are invalid,
+hence not added initially. Though the original code was working
+fine on non-windows platforms debug mode, on windows it is apparently
+causing linking errors. So, to fix this we added the missing
+specilizations which throws unsupported error.
+
+Bug symptoms: copyArray function in all backends was giving undefined reference errors for specific template specilizations
+              in debug mode.
+Bug root cause: These specilizations are not used anywhere in code base and are invalid, hence not added initially. Though
+              the original code was working fine on non-windows platforms debug mode, on windows it is apparently causing
+              linking errors.
+Bug type0: Normal::portability
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Extracting lower triangle now works as expected in all backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Fixing out of bound acceses in createPivot when M > N
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Apr 23 16:46:00 2015 -0400
+Merge pull request #603 from pavanky/fft_fixes
+Fixes to FFT across all backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUILD: Fixing uncaught merge conflicts
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixed fftconvolve() bug for large input sizes
+
+Bug symptoms: may have performance issue while have large input sizes for packData.
+Bug root cause: should execute filter_packed_elem / 2 instead of filter_packed_elem
+Bug type0: Performance::running time::large data
+Bug type: host prepare resource for kernel function::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Apr 17 14:05:19 2015 -0400
+Merge pull request #583 from pentschev/err_cufft_fix
+Added CUDA version check to err_cufft.hpp
+
+Bug symptoms: function _cufftGetResultString may failed on some version of CUDA
+Bug root cause: forget to check CUDA version and report the error
+Bug type0: Normal::portability
+Bug type: host retrieve resource of kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: fixed vbo index in plot, cuda & opencl backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: QR decomposition for CUDA backend when M >= N
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing memory leaks for linear algebra in cuda backend
+
+Bug symptoms: memory leak on cholesky()
+Bug root cause: forget to execute memFree(workspace) and memFree(d_info)
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Apr 9 13:20:54 2015 -0400
+Merge pull request #571 from pavanky/gfor_fix
+GFOR fixes and tests
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Added CUFFT_CHECK() to check for cuFFT errors
+
+Bug symptoms: can't report accurate cuda error while face one in cuFFT
+Bug root cause: forget to add CUFFT_CHECK()
+Bug type0: Normal::exception catching
+Bug type: host retrieve resource of kernel function::program crash::wrong implement logic(E)
+===============================================================
+
+===============================================================
+commit comment:   Fixed cholesky upper-lower issue
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixed dimensions in QR CUDA
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   HOTFIX:Corrected kernel window lengths meanshift
+Fixes #565
+
+Bug symptoms: the af_meanshift function fails intermittently with very large values as the output
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Apr 6 09:58:36 2015 -0400
+Merge pull request #568 from pavanky/fft_mem_fix
+Fixes for memory issues in cuFFT and CLFFT
+
+Bug symptoms: memory leak when plan creation failed
+Bug root cause: forget to free the memory when plan creation failed
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   Call garbageCollect() when cufft plan creation fails and try again
+Plan creation requires a lot of scratch space.
+Memory locked by arrayfire needs to be freed if plan creation fails.
+
+Bug symptoms: memory leak when plan creation failed
+Bug root cause: forget to free the memory when plan creation failed
+Bug type0: Memory::leak
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: The 3rd and 4th dimensions offsets were flipped for identity
+- Fixes #562
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Apr 2 14:47:17 2015 -0400
+Merge pull request #559 from 9prady9/fft_fixes
+Fixes to copy_kernel
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: corrected padding kernel offset
+The earlier fix used an offset was numerically accurate but is
+inefficient due to the overlaps it resulted in while reading/writing
+the inputs/outputs respectively. The new offset in this commit
+will be non-overlapping and coalesced.
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: used a wrong offset for 0th dim in kernels
+Both CUDA & OpenCL padding kernels used wrong loop offset earlier
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: for accum along non-first dimension
+
+Bug symptoms: return wrong value
+Bug root cause: data race in kernel function due to lacking of __syncthreads()
+Bug type0: Sync::data race
+Bug type: kernel function execution::Test case sometimes failed::synchronization
+===============================================================
+
+===============================================================
+commit comment:   Changes based on cppcheck static analysis
+* Pass variables by reference when not basic types
+* Prefix iterators for non basic types
+* Variable scope reduction
+* Remove exceptions from destructors
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   HOTFIX: fixes normalization factor bug in ifft
+After this fix, ifft(fft(array)) gives the original array.
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Changed the shared memory loading pattern in 3d convolve
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Mar 25 19:44:28 2015 -0400
+Merge pull request #539 from pavanky/memory
+exposes Memory manager functions and fixes element wise operation bugs
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Decrment the used buffer and byte count only once
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Mar 23 14:48:53 2015 -0400
+Merge pull request #531 from pavanky/indexing
+Generalized indexing and bugfixes
+
+Bug symptoms: may cause segment fault
+Bug root cause: should use char instead of uchar
+Bug type0: Normal::type mismatch
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: batch support for indexed arrays in morphological functions
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: index located error on host memory
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Logical operations now return b8 instead of u8
+
+Bug symptoms: may cause segment fault
+Bug root cause: should use char instead of uchar
+Bug type0: Normal::type mismatch
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Mar 18 22:38:52 2015 -0700
+Merge pull request #521 from mcarilli/randufix
+Changed THREADS to 256 and BLOCKS to 64 in random.hpp.
+
+Bug symptoms: lower performance on previous THREADS && BLOCKS
+Bug root cause: wrong coordinator of threads and blocks
+Bug type0: Performance::running time::dimention
+Bug type: host prepare resource for kernel function::lower time performance::dimention
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX Fixed tiling bug in iota
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX Fixed bug in range
+
+Bug symptoms: return wrong value
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX Fix offsets and strides when using moddims
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: corrected conv2 filter length constant
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong size for MAX_CONV2_FILTER_LEN
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Mar 9 16:42:36 2015 -0400
+Merge pull request #478 from pavanky/bug_fixes
+Bug fixes to matmulTN, var, stdev
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: corrected the dimensions passed to gemv for tranpose(A)
+- M, N have different meanings for gemv and gemm. Who knew.
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Removed cudaMemset from FAST
+
+Bug symptoms: memory unused
+Bug root cause: allocate global memory && copy data to it but not use
+Bug type0: Memory::waste
+Bug type: host prepare resource for kernel function::lower space performance::device resource allocation
+===============================================================
+
+===============================================================
+commit comment:   Fixes and code optimization to join
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX for indexing after JIT ops
+
+Bug symptoms: get unexpected effect
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Mar 4 13:36:04 2015 -0500
+Merge pull request #447 from pentschev/improve_orb_perf
+Improved ORB performance and memory usage on CUDA backend
+
+Bug symptoms: lower performance
+Bug root cause: there is a branch divergence there
+Bug type0: Performance::running time::brach divergence
+Bug type: kernel function execution::lower time performance::branch divergence
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: in ArrayIndex aka lookup for CUDA backend
+
+Bug symptoms: access unauthorized memory in some condition
+Bug root cause: should check if request is out of bounds
+Bug type0: Memory::index locate error
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Feb 28 20:12:03 2015 -0500
+Merge pull request #426 from pavanky/bug_fixes
+Bug fixes for cascaded indexing operations
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: 2d separable convolution
+* Corrected cpu implementation to work on expanded layout only
+in appropriate cases
+* Changed temporary buffer dimensions that in turn
+has been effecting performance. This change has been done in
+both cuda and opencl backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing dim checks for separable convolve in CUDA and OpenCL backends
+
+Bug symptoms: return wrong value in some given condition
+Bug root cause: wrong implement
+Bug type0: Normal::wrong logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   Fixing the dimensions of separable convolution
+- Was causing problems when kernels were rows
+===============================================================
+
+===============================================================
+commit comment:   PERFFIX: improved 2d convolve perf in cuda by 33%
+* templating cuda kernel for filter lengths increased
+performance by 30% which is 93% of closed-source ArrayFire
+implementation of 2d convolution
+* templating separable cuda kernel improved performance by 20%
+* separated separable convolution kernel and wrapper into their
+own file to speed up compilation time
+===============================================================
+
+===============================================================
+commit comment:   PERFFIX: convolution perf improved by 2-4%
+removed obselete helper fn & replaced division by 2 with shift
+operators
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Feb 26 13:25:14 2015 -0500
+Merge pull request #407 from arrayfire/memory
+Changes to backend API
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Feb 24 19:09:27 2015 -0500
+Merge pull request #402 from pavanky/cleanup
+Code clean up for FAST, ORB, features and memory
+===============================================================
+
+===============================================================
+commit comment:   Cleaning up memory.cpp in cuda backend
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Feb 24 12:52:30 2015 -0500
+Merge pull request #401 from 9prady9/conv_fixes
+BUGFIX: increased filter/mask length for convolve kernels
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: increased filter/mask length for convolve kernels
+Modified the following cuda/opencl kernels to handle large kernel lenghts
+more appropriately
+* convolve for vector arrays
+* two dimensional convolutions
+* separable convolve
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Feb 23 17:21:56 2015 -0500
+Merge pull request #399 from pavanky/copy_fixes
+Fixes to moddims and copy
+===============================================================
+
+===============================================================
+commit comment:   Fix opencl build errors:
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Feb 21 14:37:43 2015 -0500
+Merge pull request #390 from shehzan10/devel
+Fixed backend API for join
+* Removed output dimensions as parameter
+* Fixed unitialized warnings for fast cpu
+===============================================================
+
+===============================================================
+commit comment:   Fixed backend API for join
+* Removed output dimensions as parameter
+* Fixed unitialized warnings for fast cpu
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: windows fix for division helper function
+Earlier, some variables were using initilization lists for assigning
+values to variables in division helper function for all backends.
+Corrected that to use old c-style assignment.
+===============================================================
+
+===============================================================
+commit comment:   Fixing issues with min and max on boolean arrays
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Feb 17 09:54:57 2015 -0500
+Merge pull request #384 from pavanky/random
+Fixes to random number generation in OpenCL backend
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Feb 16 15:50:42 2015 -0500
+Merge pull request #381 from arrayfire/devel
+Devel - Master merge 20150216
+- Fixes to JIT in CUDA and OpenCL
+- Remove dependency on ptx submodule
+- Bug fixes to Sobel
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Feb 16 13:13:35 2015 -0500
+Merge pull request #379 from shehzan10/devel
+BUGFIX Fixed sobel output types
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX Fixed sobel output types
+* Test was failing for char on tegra
+* All types other than double now return type float (double returns double)
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: added same complex type cast noop
+for cuda/opencl backends
+===============================================================
+
+===============================================================
+commit comment:   Multiple func definition fix for arith operations: mod and rem
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Feb 11 18:18:38 2015 -0500
+Merge pull request #375 from pavanky/jit_fixes
+Fixes to JIT in CUDA and OpenCL backends
+===============================================================
+
+===============================================================
+commit comment:   BUG: Fixed problem with JIT caching in CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Feb 10 16:55:22 2015 -0500
+Merge pull request #371 from pavanky/fixes
+Fixes to af::array and af::info
+===============================================================
+
+===============================================================
+commit comment:   Bugfix: fixed improper caching when casting in CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Fixing dependency issues during ptx generation
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Feb 4 14:04:23 2015 -0500
+Merge pull request #367 from arrayfire/cuda7
+Merge JIT fixes for CUDA 7
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Feb 4 11:59:56 2015 -0500
+Merge pull request #366 from pentschev/fix_fast_zerofeat
+Bugfix: FAST now creates empty arrays when no features are found
+===============================================================
+
+===============================================================
+commit comment:   Fixed FAST CUDA backend case when no features are found
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Adding target triple for when generating NVVM IR
+- Fixes issues with CUDA JIT
+- Fixes #7
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Jan 28 21:05:10 2015 -0500
+Merge pull request #361 from pentschev/orb_fixes
+Fixes several memory leaks on FAST and ORB
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Jan 28 18:33:34 2015 -0500
+Merge branch 'devel' into orb_fixes
+===============================================================
+
+===============================================================
+commit comment:   Fixed ORB memory leaks on CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Fixed FAST memory leaks on CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Update CMakeLists.txt
+Resolve issue with CUDA 7.0 causing link errors with thrust.
+CUDA 7.0 onwards does not support linking against libstdc++
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Jan 22 12:33:30 2015 -0500
+Merge pull request #354 from pentschev/orb_fixes
+Fixes ORB for cases where no features exist
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Jan 16 01:20:03 2015 -0500
+Merge pull request #344 from pentschev/fix_windows_orb
+Added pi definition to fix ORB on Windows
+===============================================================
+
+===============================================================
+commit comment:   Added pi definition to fix ORB on Windows.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Jan 15 09:37:44 2015 -0500
+Merge pull request #337 from pentschev/fix_windows_cuda_math
+Added missing STL algorithm include to CUDA math.hpp
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Jan 14 18:10:08 2015 -0500
+Merge pull request #334 from pentschev/devel
+Changed CUDA convolve to avoid issues with constant memory.
+===============================================================
+
+===============================================================
+commit comment:   Changed CUDA convolve to avoid issues with constant memory.
+===============================================================
+
+===============================================================
+commit comment:   Moved division function into math utilities.  Fixed mean function.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Jan 8 23:05:38 2015 -0500
+Merge pull request #319 from arrayfire/devel
+Devel - Master merge 20150108
+- OSX Fixes
+- Indexing
+- 4th dimension support
+- GFOR support
+- CMake improvements
+- CUDA Device
+- Performance
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Jan 7 20:36:16 2015 -0500
+Merge pull request #312 from 9prady9/perf_fixes
+performance fixes for convolve
+===============================================================
+
+===============================================================
+commit comment:   perffix: 3d separable convolve
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX in set device for cuda
+* Removed warning cased by 348ea73
+===============================================================
+
+===============================================================
+commit comment:   changed shared mem access pattern for conv3d
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Dec 29 12:42:22 2014 -0500
+Merge pull request #279 from umar456/clang_warn
+Fix compiler warnings on OSX
+===============================================================
+
+===============================================================
+commit comment:   Fixed warning due to if/switch
+===============================================================
+
+===============================================================
+commit comment:   Fix linker warning on OSX
+The default visibility for the NVCC files were not hidden
+and that was causing the warning when building CUDA
+with clang.
+===============================================================
+
+===============================================================
+commit comment:   Removing boost chrono required from opencl
+* Whitespace fixes
+* Removed from FindArrayFire.cmake
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Dec 27 01:26:55 2014 -0500
+Merge pull request #271 from umar456/osx_build
+Fix errors and warnings on OSX
+===============================================================
+
+===============================================================
+commit comment:   Fix g++ warnings on OSX
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Dec 23 22:40:30 2014 -0500
+Merge pull request #259 from arrayfire/devel
+Devel - Master merge 20141223
+- Bugfixes in OpenCL
+- Bugfixes in indexing
+- memory manager for pinned memory
+===============================================================
+
+===============================================================
+commit comment:   Fix warnings in CPU backend on clang
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Dec 20 09:47:22 2014 -0500
+Merge pull request #257 from shehzan10/devel
+Pinned memory manager
+===============================================================
+
+===============================================================
+commit comment:   Added memory manager for pinned memory
+* Allocates, resuses and destroys pinned memory
+* Added dummy static class to call garbage collection at the end of the program
+===============================================================
+
+===============================================================
+commit comment:   Fixing problems with isOwner() in all backends
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Dec 18 18:06:42 2014 -0500
+Merge pull request #252 from shehzan10/devel
+Bug fixes in indexing, copy and JIT
+===============================================================
+
+===============================================================
+commit comment:   Fixed references to shared_ptr for cpu and opencl backend
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Dec 18 16:41:42 2014 -0500
+Merge branch 'memory' of github.com:pavanky/arrayfire into devel
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Dec 17 18:24:27 2014 -0500
+Merge pull request #244 from pavanky/jit_fixes
+Jit fixes
+===============================================================
+
+===============================================================
+commit comment:   BUG: Fixed a problem when casting complex numbers
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Dec 16 13:56:49 2014 -0500
+Merge pull request #240 from pavanky/atan2
+BUG: Fixed issues with atan2 in CUDA and OpenCL backends
+===============================================================
+
+===============================================================
+commit comment:   BUG: Fixed issues with atan2 in CUDA and OpenCL backends
+- This should fix issue #236
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Dec 12 23:19:15 2014 -0500
+Merge pull request #229 from shehzan10/devel
+Added pinned memory creation
+===============================================================
+
+===============================================================
+commit comment:   Added pinned memory functionality
+* Moved alloc and pinned out of array class. Now use af::alloc or af::pinned.
+* Fixed warning in cuda JIT for printf
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Dec 12 18:13:01 2014 -0500
+Merge pull request #227 from 9prady9/conv2d_perf_fixes
+2d convolve performance improvements
+===============================================================
+
+===============================================================
+commit comment:   2d convolve performance improvements
+changed the shared memory loading access pattern in 2d convolve
+kernel for cuda and opencl backends
+===============================================================
+
+===============================================================
+commit comment:   Updating math_ptx submodule
+- Fixes problem with erf
+===============================================================
+
+===============================================================
+commit comment:   PERF: using cuda::mem{Alloc,Free} instead of cuda{Malloc,Free}
+===============================================================
+
+===============================================================
+commit comment:   Added conjugate option to transpose
+* Default is not conjugate
+* Added test
+* Fixed places where af_transpose was used
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Dec 8 10:11:44 2014 -0500
+Merge pull request #207 from pavanky/memory
+Memory management for all three backends
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Dec 8 02:21:19 2014 -0500
+Merge branch 'devel' into memory
+Conflicts:
+src/backend/opencl/kernel/rotate.hpp
+src/backend/opencl/kernel/transform.hpp
+===============================================================
+
+===============================================================
+commit comment:   PERF: Added memory manager for OpenCL backend
+===============================================================
+
+===============================================================
+commit comment:   BUG: Fix in memory manager for CUDA backend with multiple devices
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Dec 6 12:07:01 2014 -0500
+Merge pull request #205 from shehzan10/sort_fixes
+Sort fixes
+- sort_by_key split across two files
+- dir changed to isAscending.
+===============================================================
+
+===============================================================
+commit comment:   PERF: Added memory manager for CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Dec 3 15:35:47 2014 -0500
+Merge pull request #188 from arrayfire/ocl_win_fixes
+OpenCL Fixes
+- Double precision support is enabled only if supported by device.
+- Double precision support is enabled only for double and cdouble.
+- Fixed problems in Windows at exit for OpenCL backend.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Dec 3 13:31:15 2014 -0500
+Merge branch 'devel' into ocl_win_fixes
+Conflicts:
+src/backend/opencl/kernel/random.cl
+src/backend/opencl/kernel/random.hpp
+src/backend/opencl/program.cpp
+===============================================================
+
+===============================================================
+commit comment:   Added AF_ERR_GL_ERROR and error checking in graphics
+===============================================================
+
+===============================================================
+commit comment:   Added OpenGL errors, better window closing to CPU
+===============================================================
+
+===============================================================
+commit comment:   Added OpenGL error checks, better window close handling
+* TODO Do same for CPU
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: in JIT for CUDA backend
+- Dimension check for linear index was incorrect
+===============================================================
+
+===============================================================
+commit comment:   PERF: improvements to CUDA JIT when memory is linear
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Dec 2 12:09:12 2014 -0500
+Merge pull request #179 from pentschev/fast_return_fix
+FAST will return (af_)features instead of (af_)features *
+===============================================================
+
+===============================================================
+commit comment:   Fix for no graphics builds
+===============================================================
+
+===============================================================
+commit comment:   Fixed failing abs() call for int/unsigned types on CUDA backend of FAST.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Dec 1 11:07:22 2014 -0500
+Merge pull request #170 from umar456/devel
+Fixes #167: Check if driver is unloaded when freeing array
+===============================================================
+
+===============================================================
+commit comment:   Fixes #167: Check if driver is unloaded when freeing array
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 25 10:09:39 2014 -0500
+Fixed merge conflicts.
+===============================================================
+
+===============================================================
+commit comment:   Fixing complex function support in arrayfire
+- Added real, imag, conjg
+- changed cplx to complex
+- Fixed bugs with complex
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Nov 22 20:12:05 2014 -0500
+Merge pull request #148 from arrayfire/devel
+Devel - Master merge 20141122
+- Bug fixes to reductions in CUDA backend
+- Fixed memory leaks for JIT in CUDA, OpenCL and CPU
+- Removed s8. char now represents b8.
+- af_regions now takes output type as a parameter
+- Build fixes for Windows.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 18 21:51:11 2014 -0500
+Merge pull request #140 from 9prady9/cuda_fix
+bugfix for cuda on windows.
+===============================================================
+
+===============================================================
+commit comment:   bugfix for cuda on windows
+float2 type with volatile qualifier is causing missing copy constructor
+compile errors on windows platform. Until, cuda cuComplex headers add
+volatile versions of copy constructors for floatn types, the change
+made in this commit is the work around.
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: Buffer nodes from subArrays now use the parent ptr and offsets
+===============================================================
+
+===============================================================
+commit comment:   Compilation fix for null pointer in constructor
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Nov 16 06:46:57 2014 -0500
+Merge pull request #131 from pavanky/bugfixes
+Various Bugfixes
+- Fixed reductions in CUDA backend
+- Fixed random number generation in CUDA
+- Fixed memory leaks in all three backends.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Nov 16 06:45:01 2014 -0500
+Merge branch 'pavanky/jit_fixes' into bugfixes
+===============================================================
+
+===============================================================
+commit comment:   Fixing leaks in CUDA JIT backend
+===============================================================
+
+===============================================================
+commit comment:   Bug fix to random number generation in CUDA backend
+- blocks and threads were flipped in launch config
+===============================================================
+
+===============================================================
+commit comment:   Bug fix for reductions in CUDA backend
+- Intra warp reductions now use the volatile keyword
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Nov 13 20:00:06 2014 -0500
+Merge pull request #123 from pavanky/jit_fixes
+Jit fixes for CUDA and OpenCL backends
+===============================================================
+
+===============================================================
+commit comment:   Fixed bugs in ScalarNode for CUDA and OpenCL JIT backends
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Nov 13 17:46:38 2014 -0500
+Merge pull request #121 from 9prady9/ocl_perf_fix
+changed dim_type typedef to int from long long
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Nov 13 15:22:38 2014 -0500
+Merge pull request #106 from arrayfire/devel
+Devel - Master merge 20141113
+- Sanitizing CMake
+- Checking for cuda compute can be optionally turned off
+- FindArrayFire.cmake added
+- Fixes to build of google tests
+===============================================================
+
+===============================================================
+commit comment:   Fixes #107
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Nov 13 11:40:17 2014 -0500
+Merge pull request #112 from shehzan10/cuda_build_fix
+Optionally disable running CUDA code to get compute capability
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Nov 12 18:09:25 2014 -0500
+Merge pull request #104 from firemanphil/master
+fixes issue #103
+===============================================================
+
+===============================================================
+commit comment:   Fix "Could not read from remote repository" issue
+As per http://stackoverflow.com/questions/8197089/fatal-error-when-updating-submodule-using-git
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Nov 12 11:48:06 2014 -0500
+Merge pull request #96 from arrayfire/devel
+Devel - Master merge 20141111
+- BLAS support for windows
+- Bug fixes in JIT for CUDA and OpenCL
+- `abs` function added internally to CPU and CUDA
+- Added support for setting default device for CUDA and OpenCL
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 11 19:47:49 2014 -0500
+Merge pull request #95 from pavanky/bugfixes
+Fixing a bug in CUDA backend to reset flags properly
+===============================================================
+
+===============================================================
+commit comment:   Fixing a bug in CUDA backend to reset flags properly
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 11 19:12:11 2014 -0500
+Merge branch 'devel' into win_cblas_fixes
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 11 19:07:27 2014 -0500
+Merge pull request #93 from pavanky/bugfixes
+Bugfixes in JIT for CUDA and OpenCL
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 11 17:28:02 2014 -0500
+Merge pull request #91 from shehzan10/unary-fix
+Unary fix for CPU and CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Commit for CUDA PTX update fix for abs
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Nov 8 18:57:37 2014 -0500
+Merge pull request #75 from arrayfire/devel
+Devel - Master merge 20141108
+- getErrorMessage() uses Boost.Compute's error messages
+- Reduce Boost.Compute header files
+- Fixes compilation warnings
+- "make install" available via CMake.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Nov 8 18:36:40 2014 -0500
+Merge pull request #79 from pavanky/warnings
+Fixing compilation warnings in CPU and CUDA backends
+===============================================================
+
+===============================================================
+commit comment:   Fixing compilation warnings in CPU and CUDA backends
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sat Nov 8 18:03:05 2014 -0500
+Merge remote-tracking branch 'origin/ocl_win_fixes' into devel
+Conflicts:
+test/CMakeLists.txt
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Nov 7 14:00:04 2014 -0500
+Merge pull request #59 from arrayfire/win_fixes
+Windows platform compatibility changes
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Nov 6 18:51:49 2014 -0500
+Merge branch 'master' into win_fixes
+Conflicts:
+include/af/defines.h
+src/array/array.cpp
+src/backend/cpu/math.hpp
+===============================================================
+
+===============================================================
+commit comment:   windows and *nix OS compatibility fixes
+===============================================================
+
+===============================================================
+commit comment:   windows fixes for opencl backend
+===============================================================
+
+===============================================================
+commit comment:   windows fixes for cuda backend
+driver version code is commented temporarily due to undefined reference
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Nov 5 21:54:40 2014 -0500
+Merge pull request #44 from bkloppenborg/cuda_6_0_compile_fix
+Cuda 6 0 compile fix
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Nov 5 17:54:20 2014 -0500
+Merge branch 'cuda_6_0_compile_fix'
+===============================================================
+
+===============================================================
+commit comment:   Add definition and directive to fix BOOST_INLINE not being defined on nvcc / CUDA < 6.5. Move FIND command for CUDA into backend/cuda/CMakeLists.txt
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Nov 4 20:45:08 2014 -0500
+Merge pull request #41 from arrayfire/osx_fixes
+OSX Compilation Fixes
+===============================================================
+
+===============================================================
+commit comment:   Adding set functions for the CPU backend
+- setunique, setunion, setintersect
+- CUDA and OpenCL backends error out for now
+===============================================================
+
+===============================================================
+commit comment:   OSX Compilation Fixes
+* <numeric> for iota
+* std::pow multiple matches for arguments in convolve
+* regions kernel wrapper is not in namespace so use global
+* template specialization happens using arguments in array.cpp
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Oct 29 17:04:56 2014 -0400
+Merge branch 'cpp' into 'master'
+CPP wrapper for ArrayFire
+-Fixes #139
+===============================================================
+
+===============================================================
+commit comment:   BUG_FIX: bin2cpp now adds NULL character towards the end of string
+- Fixes JIT issues in CUDA backend
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Oct 27 15:04:06 2014 -0400
+Merge branch 'cuda_limit' into 'master'
+Fixed limits of double type on CUDA backend.
+===============================================================
+
+===============================================================
+commit comment:   Fixed limits of double type on CUDA backend.
+===============================================================
+
+===============================================================
+commit comment:   Fixed template on CUDA regions.
+===============================================================
+
+===============================================================
+commit comment:   Adding basic functions to the C++ API
+- af::array creation / destruction
+- Memory copies
+- af::exception
+- constant(), randu(), randn()
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Oct 23 13:33:32 2014 -0400
+Merge branch 'ref'
+- Fixes #32
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Oct 23 09:38:10 2014 -0400
+Merge remote-tracking branch 'origin/TNJ'
+Conflicts:
+src/backend/cpu/Array.cpp
+test/basic.cpp
+- Fixes #3
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Oct 22 19:00:02 2014 -0400
+Merge remote-tracking branch 'origin/jit'
+- Fixes #4
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Oct 22 18:45:08 2014 -0400
+Merge branch 'subref_assign' into 'master'
+Subref assign
+Fixes #136
+Fixes #137
+Fixes #138
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Oct 22 18:43:53 2014 -0400
+Merge branch 'bilateral_fixes' into 'master'
+Bilateral fixes
+Fixed #89
+===============================================================
+
+===============================================================
+commit comment:   Changed output array type for bilateral function
+Fixed #89
+This commit also includes few modified and couple of new unit tests.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Oct 19 16:22:14 2014 -0400
+Merge branch 'conv' into 'master'
+Convolve
+Fixed #128
+Fixed #129
+Fixed #130
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Oct 17 17:02:56 2014 -0400
+Merge branch 'random_fix' into 'master'
+Random fix
+BUGFIX for cuda random number generation on multiple devices
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX for cuda random number generation on multiple devices
+* curand states were not initialized for every device
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Oct 17 13:20:59 2014 -0400
+Merge branch 'warning-fixes' into 'master'
+Warning fixes
+* Fix ostream warnings
+* Fix blas unitialized warnings.
+===============================================================
+
+===============================================================
+commit comment:   Fixing blas uninitialzed warnings
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Oct 16 15:46:57 2014 -0400
+Merge branch 'fft_fix' into 'master'
+fft fix
+copy kernel kernel launch configuration fix
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Oct 16 15:19:59 2014 -0400
+Merge remote-tracking branch 'origin/ocl_fix'
+===============================================================
+
+===============================================================
+commit comment:   BUGFIX: copy kernel
+the copy kernel was launching too many threads. Corrected the
+equation to use correct configuration
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Oct 13 16:22:02 2014 -0400
+JIT kernel generation support for OpenCL backend
+- Fixes #5
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Oct 13 15:46:05 2014 -0400
+Merge branch 'bug_fixes' into 'master'
+Bug fixes
+===============================================================
+
+===============================================================
+commit comment:   Fixed cudaGetDriverVersion for Mac and ARM
+===============================================================
+
+===============================================================
+commit comment:   Added multi-dimensional support for sort on dim 0
+* Improved functions using templates
+* Bug fixes in CPU and OpenCL backends
+* Added additional tests
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Oct 3 10:28:20 2014 -0400
+Merge remote-tracking branch 'origin/where'
+- Fixes #146 (where for CUDA)
+- Fixes #147 (where for OpenCL)
+===============================================================
+
+===============================================================
+commit comment:   BUG: Fixed boundary checks for scan_first in CUDA and OpenCL
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Oct 1 19:30:13 2014 -0400
+Merge remote-tracking branch 'origin/pad'
+-Fixes #165
+===============================================================
+
+===============================================================
+commit comment:   createPaddedArray optimizations for cuda and opencl backend
+Before this commit, createPaddedArray was calling createValueArray
+to fill the padded regions with a default value which launches a
+kernel to do the task at hand. Once that is done, copy kernel was called
+upon.
+After this commit, createPaddedArray just allocates memory followed by
+a kernel copy that takes care of padded regions as well.
+===============================================================
+
+===============================================================
+commit comment:   Added CUDA and OpenCL backends for Sort on dim0
+* Using thrust in CUDA
+* Using Boost.Compute in OpenCL
+* Added cmake support for Boost.Compute
+* Added simple test
+* Fixed int issue in CPU
+* Using unsigned for indices
+* Disabled complex types
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Sep 30 12:34:16 2014 -0400
+Merge remote-tracking branch 'origin/meanshift'
+- Fixes #113
+- Fixes #114
+- Fixes #115
+===============================================================
+
+===============================================================
+commit comment:   Fix header locations to fix compilation in debug mode
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 29 14:10:21 2014 -0400
+Merge remote-tracking branch 'origin/compile'
+- Fixes #166
+===============================================================
+
+===============================================================
+commit comment:   Removing "static" from template specializations
+- Errors out on gcc 4.9
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 29 09:42:36 2014 -0400
+Merge remote-tracking branch 'origin/fft'
+- Fixes #55
+- Fixes #56
+===============================================================
+
+===============================================================
+commit comment:   Where implemented for CUDA backend
+- Fixes #146
+===============================================================
+
+===============================================================
+commit comment:   Fixing corner cases in scan algorithm for CUDA and OpenCL backends
+===============================================================
+
+===============================================================
+commit comment:   Adding support for where for CPU backend
+- Fixes #145
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Sep 23 23:48:31 2014 -0400
+Merge remote-tracking branch 'origin/cpu_fft'
+- Fixes #54
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 22 21:29:52 2014 -0400
+Merge branch 'scan_bugfix'
+Fixes #144
+===============================================================
+
+===============================================================
+commit comment:   Bug fix to gradient in CUDA and OpenCL backends
+- Fixes #143
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 22 16:01:47 2014 -0400
+Merge remote-tracking branch 'origin/cuda_medfilt'
+Fixes #108
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Sep 19 18:23:37 2014 -0400
+Merge remote-tracking branch 'origin/cpu_medfilt'
+- Fixes #107
+Conflicts:
+include/af/image.h
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Sep 19 18:09:02 2014 -0400
+Merge remote-tracking branch 'origin/gradient'
+- Fixes #104
+- Fixes #105
+- Fixes #106
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Sep 17 22:28:12 2014 -0400
+Merge remote-tracking branch 'origin/scan'
+- Fixes #71
+- Fixes #72
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Sep 17 22:00:11 2014 -0400
+Merge remote-tracking branch 'origin/shift'
+- Fixes #119
+- Fixes #120
+- Fixes #121
+===============================================================
+
+===============================================================
+commit comment:   Fixing issues with CUDA reductions
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Sep 16 14:54:51 2014 -0400
+Merge remote-tracking branch 'origin/reorder'
+- Fixes #122 #123 #124
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 15 14:19:25 2014 -0400
+Merge remote-tracking branch 'origin/matmul_fixes'
+Fixes #87
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Sep 15 13:11:39 2014 -0400
+Merge remote-tracking branch 'origin/cuda_device'
+- Fixes #81
+- Fixes #100
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Sep 14 22:22:09 2014 -0400
+Merge branch 'clreduce' into 'master'
+Reduction support for OpenCL backend
+Fixes #11
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Sun Sep 14 19:24:07 2014 -0400
+Merge remote-tracking branch 'origin/error'
+===============================================================
+
+===============================================================
+commit comment:   Added error framework to transform
+===============================================================
+
+===============================================================
+commit comment:   Added error framework to tile
+===============================================================
+
+===============================================================
+commit comment:   Added error framework to resize
+===============================================================
+
+===============================================================
+commit comment:   Added error framework to diff
+===============================================================
+
+===============================================================
+commit comment:   Added error framework to approx
+===============================================================
+
+===============================================================
+commit comment:   added error handling for histogram
+corresponding unit tests have been modified to handle new
+error messages.
+===============================================================
+
+===============================================================
+commit comment:   added error handling for bilateral
+bilateral unit tests have been modified to handle appropriate
+error messages. Few style corrections has also been made.
+===============================================================
+
+===============================================================
+commit comment:   Proper error handling added to erode/dilate
+===============================================================
+
+===============================================================
+commit comment:   Proper error handling added to transpose
+transpose unit tests have been modified to
+catch updated error messages
+===============================================================
+
+===============================================================
+commit comment:   Added macro CUDA_CHECK that checks for cudaError and throws AfError
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Thu Sep 11 18:02:21 2014 -0400
+Merge branch 'origin/blas_fix'
+===============================================================
+
+===============================================================
+commit comment:   Changing beta == 0 instead of memsetting C to 0 in gemm
+Fixes #92
+===============================================================
+
+===============================================================
+commit comment:   Using Params in cuda kernels
+* For: approx, diff, resize, transform
+* Typo fixes
+===============================================================
+
+===============================================================
+commit comment:   Bug Fix in histogram cuda kernel
+===============================================================
+
+===============================================================
+commit comment:   Formatting changes. Fix leak in CPU. Enable dot
+===============================================================
+
+===============================================================
+commit comment:   Bug fix to random number generation in CUDA
+Typo ended up calling the wrong function
+===============================================================
+
+===============================================================
+commit comment:   Changes to compile on Linux. Fix warnings on g++.
+Using the correct headers on OSX and Linux for the cblas libraries
+Removing comparison warnings from test/blas.cpp
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Aug 29 13:33:03 2014 -0400
+Merge branch 'cpuscan' into 'master'
+Scan algorithm implemented for CPU
+- Fixes Issue #71
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Aug 29 13:25:32 2014 -0400
+Merge branch 'cuda_reduce' into 'master'
+Cuda reduce
+- Added reductions for CUDA backend
+- Reorganized ops.hpp and cuda/backend.hpp
+- New bigger tests for reductions
+- Fixes Issue #10
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Aug 27 11:29:56 2014 -0400
+Merge branch 'simple_index' into 'master'
+Simple index
+Basic indexing support for CUDA and OpenCL backends.
+Fixes Issue #7 and Issue #8
+===============================================================
+
+===============================================================
+commit comment:   Enabling transpose tests and fixes to make tranpose pass the tests
+===============================================================
+
+===============================================================
+commit comment:   Added image IO functions to all backends (code is independent of backend)
+* Uses FreeImage. For dev, use libfreeimage-dev. For lib-only use libfreeimage3
+* Links with shared library
+* Uses load and save image
+* Always returns float array
+* TODO: Make fix in saveimage when host return max function is available.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Aug 25 21:46:41 2014 -0400
+Merge branch 'fix_print_uchar' into 'master'
+Fix print uchar
+Fixed using overloaded << operator.
+===============================================================
+
+===============================================================
+commit comment:   Fixing ostream << operator for uchar to print numbers
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Aug 25 16:34:47 2014 -0400
+Merge branch 'master' into clang_fix
+===============================================================
+
+===============================================================
+commit comment:   Fix various things to get clang working on OSX
+* CUDA does not support libc++ which is the standard c++ lib
+* Remove c++11 headers since OSX has older version of libstdc++
+from src/backend
+* Update testHelpers to remove dependencies on copy_n (see previous
+item)
+* Need to explicitly set ccbin if CC is clang on OSX (NVCC can't
+recognize it)
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Aug 22 18:45:09 2014 -0400
+Merge branch 'random' into 'master'
+Random
+Random number generation in CUDA
+Fixes Issue #45
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Aug 22 13:46:09 2014 -0400
+Merge branch 'cuda_trs' into 'master'
+CUDA backend for af_transpose
+Fixed Issue #20
+===============================================================
+
+===============================================================
+commit comment:   Changes to transpose kernel
+* Changed dynamic to static shared mem allocation in transpose kernel
+* Replaced size_t with dim_type
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Aug 22 13:13:08 2014 -0400
+Merge branch 'diff_cuda' into 'master'
+Diff cuda
+Added CUDA backend for diff1 and diff2.
+Fixes #33
+~~Note: Approve Merge Request 14 before approving this.~~
+===============================================================
+
+===============================================================
+commit comment:   BUG Fix: af_print in CUDA backend was directly using device pointer.
+===============================================================
+
+===============================================================
+commit comment:   CMAKE Fix: Explicitly state source extensions
+Done to avoid conflicts with editors' temporary files
+===============================================================
+
+===============================================================
+commit comment:   Fixing constructors for CUDA and OpenCL
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Wed Aug 20 15:11:58 2014 -0400
+Merge branch 'transpose' into 'master'
+Transpose
+Fixed Issue #19
+===============================================================
+
+===============================================================
+commit comment:   Style changes in transpose
+Also, moved a error check from backend's to wrapper code
+===============================================================
+
+===============================================================
+commit comment:   Fixing build errors from diff branch
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Aug 19 17:54:51 2014 -0400
+Merge branch 'moddims'
+Fixes Issue #30
+Conflicts:
+src/backend/cpu/CMakeLists.txt
+src/backend/cuda/CMakeLists.txt
+src/backend/opencl/CMakeLists.txt
+test/CMakeLists.txt
+===============================================================
+
+===============================================================
+commit comment:   af_moddims function
+I had to make some auxilary functions and methods to make the
+function work. They are
+* ArrayInfo::moddims
+* Array::eval
+* Make stridedCopy available for cpu backend as helper
+I have also added unit tests that test the following scenarios.
+* af_moddims on af_array that has no parent
+* af_moddims on af_array that has parent
+* af_moddims called with invalid input arguments
+CUDA and OpenCL backend implementations are also done. However,
+since indexed arrays are not yet supported for these backends
+moddims is implemented for regular Arrays only. This should be
+fixed once indexing support is added to these backends. SubRef
+unit test for these backends will also fail until indexing is added.
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Tue Aug 19 17:05:07 2014 -0400
+Merge branch 'cpu_diff1' into 'master'
+af_diff1 and af_diff2 on CPU backend
+Completed initial implementations and tests.
+Marked todo to improve for-loops in future.
+Fixes #29
+===============================================================
+
+===============================================================
+commit comment:   Fixing typo in cuda/opencl placeholders for diff1
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Fri Aug 15 13:37:48 2014 -0400
+Merge branch 'datatypes' into 'master'
+Fixing issues with Datatypes
+Fixes Issue #27
+===============================================================
+
+===============================================================
+commit comment:   Fixed errors which popped up on Ubuntu related to pthreads
+===============================================================
+
+===============================================================
+commit comment:   Date:
+Mon Aug 4 17:41:34 2014 -0400
+Merge branch 'data' into 'master'
+Modified APIs for handling af_array
+Fixes #12
+- `af_create_array` used to create af_array from host side data pointer
+- `af_get_data_ptr` used to move data from af_array to host data pointer
+- `af_destroy_array` added.
+- `af_get_elements` and `af_get_type` modified to the proper API.
+===============================================================
+

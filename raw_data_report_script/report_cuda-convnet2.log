@@ -1,0 +1,43 @@
+===============================================================
+commit comment:   Revert Tencent modifications to img_acts.cu because they performed invalid memory reads.
+
+Bug symptoms: may crash when try to access out bound memory
+Bug root cause: forget to make sure the memory bound
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Considerable speedup(VGG model:1.5x, AlexNet:1.1x)
+Optimizations focus on the gpu-related features, such as avoiding bank
+conflict, employing wider band width of shared memory, and using
+vectorized data type, etc..
+
+Bug symptoms: lower time performance
+Bug root cause: bank conflict & band width of shared memory
+Bug type: kernel function execution::lower time performance::memory access
+===============================================================
+
+===============================================================
+commit comment:   Fixed bug in _aggregate that caused it to read invalid memory.
+
+Bug symptoms: may crash when try to access out bound memory
+Bug root cause: forget to make sure the memory bound
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   Fix CUDA 6.0 performance issues with help from Nvidia's Paulius Micikevicius, Jerry Chen, and Cliff Woolley.
+
+Bug symptoms: lower time performance
+Bug root cause: bank conflict & band width of shared memory
+Bug type: kernel function execution::lower time performance::dimension
+===============================================================
+
+===============================================================
+commit comment:   Almost certainly fix _hData != 0 bug.
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host retrieve resource of kernel function::Test case always failed::wrong implement logic
+===============================================================
+

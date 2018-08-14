@@ -1,0 +1,208 @@
+===============================================================
+commit comment:   fix bug on default gamma
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix some type errors
+
+Bug symptoms: may return wrong value due to unsuitable data type
+Bug root cause: should use kernel_type instead of float
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   windows get free memory
+
+Bug symptoms: may crash on windows
+Bug root cause: should add special step on windows platform
+Bug type: host prepare resource for kernel function::program crash::portability
+===============================================================
+
+===============================================================
+commit comment:   fix convergence issue when epsilon is small (SVC)
+
+Bug symptoms: may return wrong value due to unsuitable data type
+Bug root cause: should use double instead of float
+Bug type: kernel function execution::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   fix bug in default gamma
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix bug
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix bugs
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fixed #20
+initialize f_val in smaller batch
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fixed #20
+add max_iter in smo_kernel
+
+Bug symptoms: may faced infinite loop
+Bug root cause: should add iterator limit to limit loop
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix nu-svc bugs
+rename dataset.h to config.h
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix bugs in nu-svc
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   nu-svc fix bugs
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix bug in to_host & to_device
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix KernelMatrix bug
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix problem 2 in #16
+
+Bug symptoms: may return wrong value due to unsuitable data type
+Bug root cause: should use float instead of int
+Bug type: host prepare resource for kernel function::Test case always failed::data type
+===============================================================
+
+===============================================================
+commit comment:   fix a bug when pre-compute in host
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   pre-compute kernel matrix in gpu memory
+===============================================================
+
+===============================================================
+commit comment:   fix syntax errors
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix syntax errors
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix a bug with csr matrix
+subProblem #features doesn't match
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   add device context and fix bugs in passing streams
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix a bug in probability training
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: host prepare resource for kernel function::Test case always failed::wrong implement logic
+===============================================================
+
+===============================================================
+commit comment:   fix a memory leak problem
+
+Bug symptoms: memory leak on ComputeHessianAtOnce()
+Bug root cause: forget to execute cudaFree for malloc memory
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   fix memory leak in trainBinarySVM
+
+Bug symptoms: memory leak on trainBinarySVM()
+Bug root cause: forget to execute cudaFree for malloc memory
+Bug type: host retrieve resource of kernel function::lower space performance::memory leak
+===============================================================
+
+===============================================================
+commit comment:   fix memory out of bound in finding min/max indicator
+
+Bug symptoms: may crash when try to access out bound memory
+Bug root cause: forget to make sure the memory bound
+Bug type: kernel function execution::program crash::access unauthorized memory
+===============================================================
+
+===============================================================
+commit comment:   better code organisation; fix some bugs in GPU memory usage
+
+Bug symptoms: may return wrong value
+Bug root cause: wrong implement logic
+Bug type: kernel function execution::Test case always failed::wrong implement logic
+===============================================================
+
