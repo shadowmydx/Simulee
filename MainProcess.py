@@ -147,6 +147,8 @@ def has_stmt_in_different_branch(stmt_set_one, stmt_set_two, program_flow):
     stmt_map = program_flow.get_stmt_map()
     for stmt_one in stmt_set_one:
         for stmt_two in stmt_set_two:
+            if stmt_one not in stmt_map or stmt_two not in stmt_map:  # TODO how to handle code in different function
+                continue
             if stmt_one not in stmt_map[stmt_two] and stmt_two not in stmt_map[stmt_one]:
                 return True
     return False
