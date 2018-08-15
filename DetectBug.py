@@ -175,6 +175,16 @@ def generate_random_data_for_memory(target_memory_container, target_memory, tota
         target_memory_container.add_value_to_memory(memory_shell, current_data)
 
 
+def fill_data_to_memory_by_list(target_memory_container, target_memory, data_list):
+    for index in xrange(len(data_list)):
+        memory_shell = DataType("..")
+        memory_shell.memory_index = index
+        memory_shell.set_value(target_memory)
+        current_data = DataType("i32")
+        current_data.set_value(data_list[index])
+        target_memory_container.add_value_to_memory(memory_shell, current_data)
+
+
 def test_slice():
     test_block = Block((-1, -1, 0), (1, 1, 1))
     test_thread = Thread((-1, -1, 0), (3, 2, 1))
@@ -257,7 +267,8 @@ def test_convnet_kDotProduct_r():
         'shared': "@_ZZ13kDotProduct_rPfS_S_jE5shmem",
     }
     generate_memory_container([], global_current_env)
-
+    target_memory = global_current_env.get_value("memory_container")
+    generate_random_data_for_memory(target_memory, "%off", 100)
     raw_code = global_current_env.get_value("@_Z13kDotProduct_rPfS_S_j")
     construct_memory_execute_mode(test_block, test_thread, 256, 512, raw_code.raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
@@ -288,6 +299,36 @@ def test_thundersvm_c_smo_solve_kernel():
                                   global_current_env, False)
 
 
+def test_arrayfire_convolve2():
+    test_block = Block((-1, -1, 0), (2, 2, 1))  # important
+    test_thread = Thread((-1, -1, 0), (3, 3, 3))
+    global_current_env = parse_function("./arrayfire-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z9convolve2PiS_iS_S_S_S_iiiiiiii"), {
+        "%nBBS0": 8,
+        "%nBBS1": 1,
+        "%o2": 1,
+        "%o3": 2,
+        "%s2": 1,
+        "%expand": 1,
+        "%fLen0": 2,
+        "%fLen1": 1,
+    })
+    arguments["main_memory"] = {
+        'global': None,
+        'shared': "@_ZZ9convolve2PiS_iS_S_S_S_iiiiiiiiE7shrdMem",
+    }
+    generate_memory_container(["%out_strides", "%out_dims", "%signal_strides", "%signal_dims"], global_current_env)
+    target_memory = global_current_env.get_value("memory_container")
+    fill_data_to_memory_by_list(target_memory, "%out_strides", [1, 1, 1])
+    fill_data_to_memory_by_list(target_memory, "%out_dims", [1, 2, 3])
+    fill_data_to_memory_by_list(target_memory, "%signal_strides", [1, 1, 1])
+    fill_data_to_memory_by_list(target_memory, "%signal_dims", [1, 2, 3])
+    raw_code = global_current_env.get_value("@_Z9convolve2PiS_iS_S_S_S_iiiiiiii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 512, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
@@ -298,8 +339,9 @@ if __name__ == "__main__":
     # test_trace_mat_mat_trans()
     # test_slice()
     # test_convnet_kReflectH()
-    # test_convnet_kTile()
+    test_convnet_kTile()
     # test_convnet_kDotProduct_r()
-    test_thundersvm_c_smo_solve_kernel()
+    # test_thundersvm_c_smo_solve_kernel()
+    # test_arrayfire_convolve2()
     print 'over'
 
