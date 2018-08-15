@@ -30,6 +30,8 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
     if global_env is None:
         global_env = Environment()
     global_env.add_value("@warpSize", warp_size)
+    program_flow = ProgramFlow(KernelCodes(raw_kernel_codes))
+    program_flow.generate_all_stmt_path()
     for block_indexes in generator_for_dimension_var(blocks):
 
         global_env.add_value("@blockIdx", Block(block_indexes, (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
@@ -94,8 +96,8 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         shared_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_shared_memory[current_index])
                         current_visited_shared_memory_index.push(current_index)
-        shared_parser(shared_memory)
-    global_parser(global_memory)
+        shared_parser(shared_memory, program_flow)
+    global_parser(global_memory, program_flow)
 
 
 def get_key_from_action(single_action):
@@ -141,7 +143,16 @@ def is_in_same_warp(action_key_one, action_key_two, warp_size):
     return index_action_one / warp_size == index_action_two / warp_size
 
 
-def has_write_write_sync_issue(target_write_dict):
+def has_stmt_in_different_branch(stmt_set_one, stmt_set_two, program_flow):
+    stmt_map = program_flow.get_stmt_map()
+    for stmt_one in stmt_set_one:
+        for stmt_two in stmt_set_two:
+            if stmt_one not in stmt_map[stmt_two] and stmt_two not in stmt_map[stmt_one]:
+                return True
+    return False
+
+
+def has_write_write_sync_issue(target_write_dict, program_flow):
     result_dict = dict()
     if len(target_write_dict) < 2:
         return result_dict
@@ -149,7 +160,7 @@ def has_write_write_sync_issue(target_write_dict):
         for other_key in target_write_dict:
             if each_key == other_key:
                 continue
-            if is_in_same_warp(each_key, other_key, 32):
+            if is_in_same_warp(each_key, other_key, 32) and not has_stmt_in_different_branch(target_write_dict[each_key][1], target_write_dict[other_key][1], program_flow):
                 if has_equal_key(target_write_dict[each_key][1], target_write_dict[other_key][1]):
                     result_dict[each_key] = target_write_dict[each_key]
                     result_dict[other_key] = target_write_dict[other_key]
@@ -159,7 +170,7 @@ def has_write_write_sync_issue(target_write_dict):
     return result_dict
 
 
-def has_read_write_sync_issue(target_read_dict, target_write_dict):
+def has_read_write_sync_issue(target_read_dict, target_write_dict, program_flow):
     result_write_dict = dict()
     result_read_dict = dict()
     if not (len(target_read_dict) >= 1 and len(target_write_dict) >= 1 and
@@ -169,13 +180,13 @@ def has_read_write_sync_issue(target_read_dict, target_write_dict):
         for other_key in target_write_dict:
             if each_key == other_key:
                 continue
-            if not is_in_same_warp(each_key, other_key, 32):
+            if not is_in_same_warp(each_key, other_key, 32) or has_stmt_in_different_branch(target_read_dict[each_key][1], target_write_dict[other_key][1], program_flow):
                 result_read_dict[each_key] = target_read_dict[each_key]
                 result_write_dict[other_key] = target_write_dict[other_key]
     return result_read_dict, result_write_dict
 
 
-def parse_target_memory_and_checking_sync(target_memory):
+def parse_target_memory_and_checking_sync(target_memory, program_flow):
     memory_lst = target_memory.list
     for single_index in xrange(len(memory_lst)):
         single_memory_item = memory_lst[single_index]
@@ -201,14 +212,14 @@ def parse_target_memory_and_checking_sync(target_memory):
                         visit_read_dict[current_key][0].append(single_action.current_stmt)
                         visit_read_dict[current_key][1][single_action.current_stmt] = True
             if has_write:
-                write_write_issue = has_write_write_sync_issue(visit_write_dict)
+                write_write_issue = has_write_write_sync_issue(visit_write_dict, program_flow)
                 if len(write_write_issue) != 0:
                     print '-------------------------------------------------------------------------------'
                     print 'detect w&w synchronisation issue in ' + str(single_index)
                     print 'write:'
                     show_dict(write_write_issue)
                     print '-------------------------------------------------------------------------------'
-                read_write_issue = has_read_write_sync_issue(visit_read_dict, visit_write_dict)
+                read_write_issue = has_read_write_sync_issue(visit_read_dict, visit_write_dict, program_flow)
                 if len(read_write_issue[0]) != 0:
                     print '-------------------------------------------------------------------------------'
                     print 'detect r&w synchronisation issue in ' + str(single_index)

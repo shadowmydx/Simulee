@@ -167,7 +167,7 @@ class KernelCodes(object):
 
     def __init__(self, kernel_codes):
         super(KernelCodes, self).__init__()
-        self.codes = [item for item in kernel_codes.split('\n') if len(item) != 0]
+        self.codes = [item.strip() for item in kernel_codes.split('\n') if len(item.strip()) != 0]
         self.label = dict()
         self.calling_code = None
         self.reserved_env = None
@@ -330,6 +330,64 @@ class Function(object):
             argument_lst = [item[1] for item in argument_lst]
             target_function = Function(body, function_name, argument_lst, type_lst)
             target_env.add_value(function_name, target_function)
+
+
+class ProgramFlow(object):
+
+    def __init__(self, kernel_code):
+        super(ProgramFlow, self).__init__()
+        self.kernel_code = kernel_code
+        self.stmt_map = dict()
+        self.tmp_visit = dict()
+        self.codes = self.kernel_code.codes
+
+    def get_stmt_map(self):
+        return self.stmt_map
+
+    def generate_all_stmt_path(self):
+        start_index = len(self.codes) - 1
+        while start_index >= 0:
+            self.process_given_stmt(start_index)
+            start_index -= 1
+
+    def process_given_stmt(self, start_index):
+        result_dict = dict()
+        current_stmt = self.codes[start_index]
+        if current_stmt.startswith("br"):
+            result_lst = list()
+            self.get_all_stmt(start_index, result_lst, dict())
+            for item in result_lst:
+                if item != current_stmt:
+                    result_dict[item] = True
+        else:
+            if start_index >= len(self.codes) - 1:
+                self.stmt_map[current_stmt] = result_dict
+                return
+            result_dict[self.codes[start_index + 1]] = True
+            for key in self.stmt_map[self.codes[start_index + 1]]:
+                result_dict[key] = True
+        self.stmt_map[current_stmt] = result_dict
+
+    def get_all_stmt(self, start_index, result_lst, visited_dict):
+        if start_index >= len(self.codes):
+            return
+        current_stmt = self.codes[start_index]
+        if current_stmt in visited_dict:
+            return
+        result_lst.append(current_stmt)
+        visited_dict[current_stmt] = True
+        if current_stmt.startswith("br"):
+            arguments = current_stmt.split(" ")
+            arguments = " ".join(arguments[1: ])
+            arguments = arguments.split(",")
+            if len(arguments) >= 3:
+                label_one = arguments[1][arguments[1].find("%") + 1:]
+                label_two = arguments[2][arguments[2].find("%") + 1:]
+                self.get_all_stmt(self.kernel_code.get_label_by_mark(label_one), result_lst, visited_dict)
+                self.get_all_stmt(self.kernel_code.get_label_by_mark(label_two), result_lst, visited_dict)
+        else:
+            self.get_all_stmt(start_index + 1, result_lst, visited_dict)
+
 
 
 class Environment(object):
