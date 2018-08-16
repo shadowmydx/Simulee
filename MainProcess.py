@@ -30,7 +30,8 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
     if global_env is None:
         global_env = Environment()
     global_env.add_value("@warpSize", warp_size)
-    program_flow = ProgramFlow(KernelCodes(raw_kernel_codes))
+    global_env.add_value("main_entrance", raw_kernel_codes)
+    program_flow = ProgramFlow("main_entrance", global_env, "", lambda x: x)
     program_flow.generate_all_stmt_path()
     for block_indexes in generator_for_dimension_var(blocks):
 
@@ -86,8 +87,13 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
                     if current_action is None:
                         continue
-                    saved_action = Action((current_stmt, current_line, current_action, block_indexes, thread_indexes,
-                                           (threads.limit_x, threads.limit_y, threads.limit_z)))
+                    branch_marking_function = kernel_codes.get_token_string()
+                    if branch_marking_function is None:
+                        saved_action = Action((current_stmt, current_line, current_action, block_indexes, thread_indexes,
+                                               (threads.limit_x, threads.limit_y, threads.limit_z)))
+                    else:
+                        saved_action = Action((branch_marking_function + "::" + current_stmt, current_line, current_action, block_indexes, thread_indexes,
+                                               (threads.limit_x, threads.limit_y, threads.limit_z)))
                     if is_global:
                         global_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_global_memory[current_index])
@@ -147,8 +153,8 @@ def has_stmt_in_different_branch(stmt_set_one, stmt_set_two, program_flow):
     stmt_map = program_flow.get_stmt_map()
     for stmt_one in stmt_set_one:
         for stmt_two in stmt_set_two:
-            if stmt_one not in stmt_map or stmt_two not in stmt_map:  # TODO how to handle code in different function
-                continue
+            # if stmt_one not in stmt_map or stmt_two not in stmt_map:  # TODO how to handle code in different function
+            #     continue
             if stmt_one not in stmt_map[stmt_two] and stmt_two not in stmt_map[stmt_one]:
                 return True
     return False

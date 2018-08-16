@@ -178,6 +178,7 @@ class KernelCodes(object):
         self.need_return_token = None
         self.return_value = None
         self.depending_branch = dict()
+        self.token_name = None
         for index in xrange(len(self.codes)):
             current_item = self.codes[index]
             tmp_res = re.findall(r"; <label>:(\d+)", current_item)
@@ -210,6 +211,12 @@ class KernelCodes(object):
             start = start.calling_code
         return start
 
+    def get_current_root(self):
+        start = self
+        while start.father_code is not None:
+            start = start.father_code
+        return start
+
     def set_halt(self, halt_or_not):
         current_execution = self.get_current_execution_code()
         current_execution.is_halt = halt_or_not
@@ -218,7 +225,22 @@ class KernelCodes(object):
         current_execution = self.get_current_execution_code()
         return current_execution.is_halt
 
-    def prepared_launch_function(self, current_env, other_codes, arguments):
+    def set_token_name(self, token_name):
+        self.token_name = token_name
+
+    def get_token_string(self):
+        current_root = self.get_current_root()
+        result_str = list()
+        while current_root is not None:
+            if current_root.token_name is None:
+                current_root = current_root.calling_code
+                continue
+            result_str.append(current_root.token_name)
+            current_root = current_root.calling_code
+        return '::'.join(result_str) if len(result_str) != 0 else None
+
+    def prepared_launch_function(self, current_env, other_codes, arguments, token_name):
+        other_codes.set_token_name(token_name)
         current_execution = self.get_current_execution_code()
         current_execution.calling_code = other_codes
         other_codes.father_code = current_execution
@@ -334,12 +356,15 @@ class Function(object):
 
 class ProgramFlow(object):
 
-    def __init__(self, kernel_code):
+    def __init__(self, kernel_key, global_env, pre_string, raw_code_getter):
         super(ProgramFlow, self).__init__()
-        self.kernel_code = kernel_code
+        self.kernel_code = KernelCodes(raw_code_getter(global_env.get_value(kernel_key)))
+        self.global_env = global_env
         self.stmt_map = dict()
-        self.tmp_visit = dict()
-        self.codes = self.kernel_code.codes
+        self.codes = [stmt for stmt in self.kernel_code.codes]
+        if len(pre_string) != 0:
+            self.codes = [pre_string + "::" + stmt for stmt in self.codes]
+        self.pre_string = pre_string
 
     def get_stmt_map(self):
         return self.stmt_map
@@ -353,13 +378,26 @@ class ProgramFlow(object):
     def process_given_stmt(self, start_index):
         result_dict = dict()
         current_stmt = self.codes[start_index]
-        if current_stmt.startswith("br"):
+        operate_stmt = current_stmt.split("::")[-1]
+        if operate_stmt.startswith("br"):
             result_lst = list()
             self.get_all_stmt(start_index, result_lst, dict())
             for item in result_lst:
                 if item != current_stmt:
                     result_dict[item] = True
         else:
+            if operate_stmt.find("call ") != -1:
+                previous_str = operate_stmt.split("call ")[1].strip()
+                target_function_pattern = r".*?(?P<function_name>[@][^(]+)\((?P<argus>.*)\)"
+                target_function_pattern = re.compile(target_function_pattern, re.DOTALL)
+                matcher = target_function_pattern.search(operate_stmt)
+                if self.global_env.get_value(matcher.group("function_name")) is not None:
+                    current_call = ProgramFlow(matcher.group("function_name"), self.global_env, previous_str, lambda x: x.raw_codes)
+                    current_call.generate_all_stmt_path()
+                    result_tmp_dict = current_call.get_stmt_map()
+                    for item in result_tmp_dict:
+                        result_dict[item] = True
+                        self.stmt_map[item] = result_tmp_dict[item]
             if start_index >= len(self.codes) - 1:
                 self.stmt_map[current_stmt] = result_dict
                 return
@@ -387,7 +425,6 @@ class ProgramFlow(object):
                 self.get_all_stmt(self.kernel_code.get_label_by_mark(label_two), result_lst, visited_dict)
         else:
             self.get_all_stmt(start_index + 1, result_lst, visited_dict)
-
 
 
 class Environment(object):

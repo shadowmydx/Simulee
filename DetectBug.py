@@ -309,6 +309,7 @@ def test_arrayfire_convolve2():
         "%o2": 1,
         "%o3": 2,
         "%s2": 1,
+        "%s3": 2,
         "%expand": 1,
         "%fLen0": 2,
         "%fLen1": 1,
@@ -339,9 +340,9 @@ if __name__ == "__main__":
     # test_trace_mat_mat_trans()
     # test_slice()
     # test_convnet_kReflectH()
-    test_convnet_kTile()
+    # test_convnet_kTile()
     # test_convnet_kDotProduct_r()
-    # test_thundersvm_c_smo_solve_kernel()
+    test_thundersvm_c_smo_solve_kernel()
     # test_arrayfire_convolve2()
     print 'over'
 
