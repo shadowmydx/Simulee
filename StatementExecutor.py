@@ -183,7 +183,6 @@ def parse_arguments(target_args):
 
 def call_function(arguments, kernel_codes, main_memory, global_env, local_env):
     arguments = arguments.strip()
-    token_name = arguments
     split_index = arguments.find(' ')
     target_function_pattern = r".*?(?P<function_name>[@][^(]+)\((?P<argus>.*)\)"
     target_function_pattern = re.compile(target_function_pattern, re.DOTALL)
@@ -201,7 +200,7 @@ def call_function(arguments, kernel_codes, main_memory, global_env, local_env):
     for key in target_function.argument_lst:
         argus_dict[key] = argus_value[value_index]
         value_index += 1
-    kernel_codes.prepared_launch_function(local_env, KernelCodes(target_function.raw_codes), argus_dict, token_name)
+    kernel_codes.prepared_launch_function(local_env, KernelCodes(target_function.raw_codes), argus_dict, local_env.get_value("current_stmt"))
     return None, None, None, None
 
 

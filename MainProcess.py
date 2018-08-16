@@ -72,6 +72,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                                str(block_indexes), should_print)
                     continue
                 current_stmt = kernel_codes.get_current_statement_and_set_next()
+                local_env.add_value("current_stmt", current_stmt)
                 print_stmt('execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
                            should_print)
                 if detect_if_is_syncthreads(current_stmt):
@@ -153,6 +154,25 @@ def has_stmt_in_different_branch(stmt_set_one, stmt_set_two, program_flow):
     stmt_map = program_flow.get_stmt_map()
     for stmt_one in stmt_set_one:
         for stmt_two in stmt_set_two:
+            if stmt_one not in stmt_map or stmt_two not in stmt_map:
+                new_stmt_one = stmt_one.split("::")
+                new_stmt_two = stmt_two.split("::")
+                start_index = 0
+                min_range = min([len(new_stmt_one), len(new_stmt_two)])
+                for index in xrange(min_range):
+                    if new_stmt_two[index] != new_stmt_one[index]:
+                        start_index = index
+                        break
+                if start_index - 1 >= 0:
+                    target_function_pattern = r".*?(?P<function_name>[@][^(]+)\((?P<argus>.*)\)"
+                    target_function_pattern = re.compile(target_function_pattern, re.DOTALL)
+                    matcher = target_function_pattern.search(new_stmt_one[start_index - 1])
+                    if program_flow.global_env.get_value(matcher.group("function_name")) is not None:
+                        current_call = ProgramFlow(matcher.group("function_name"), program_flow.global_env, "", lambda x: x.raw_codes)
+                        current_call.generate_all_stmt_path()
+                        stmt_map = current_call.get_stmt_map()
+                stmt_one = new_stmt_one[start_index]
+                stmt_two = new_stmt_two[start_index]
             # if stmt_one not in stmt_map or stmt_two not in stmt_map:  # TODO how to handle code in different function
             #     continue
             if stmt_one not in stmt_map[stmt_two] and stmt_two not in stmt_map[stmt_one]:

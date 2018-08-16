@@ -6,12 +6,12 @@ from MainProcess import parse_target_memory_and_checking_sync
 # nv-svc fix bugs
 # plus: 168 - 175 has sync bugs. return index[0] while index[0] = -f
 if __name__ == '__main__':
-    test_block = Block((-1, -1, 0), (2, 1, 1))
-    test_thread = Thread((-1, -1, 0), (3, 1, 1))
+    test_block = Block((-1, -1, 0), (1, 1, 1))
+    test_thread = Thread((-1, -1, 0), (34, 1, 1))
     num_elements = DataType('i32')
     num_elements.set_value(2)
     row_len = DataType('i32')
-    row_len.set_value(12)
+    row_len.set_value(2)
     float_elements = DataType('float')
     float_elements.set_value(3.0)
     eps_float = DataType('float')
@@ -55,4 +55,4 @@ if __name__ == '__main__':
     raw_code = global_env_test.get_value("@_Z19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, args,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_env_test)
+                                  global_env_test, False)
