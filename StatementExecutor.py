@@ -220,7 +220,7 @@ def return_statement(arguments, kernel_codes, main_memory, global_env, local_env
 
 
 def calculation_factory(cac_flag):
-    #  cac_flag = 0 -> +, 1 -> -, 2 -> *, 3 -> \, 4 -> %, 5 _> >>
+    #  cac_flag = 0 -> +, 1 -> -, 2 -> *, 3 -> \, 4 -> %, 5 -> >>, 6 -> &
     def __cal(arguments, kernel_codes, main_memory, global_env, local_env):
         arguments = arguments.replace("nsw", "")
         arguments = arguments.strip()
@@ -244,6 +244,8 @@ def calculation_factory(cac_flag):
             tmp_result.set_value(num(number_one.get_value()) % num(number_two.get_value()))
         elif cac_flag == 5:
             tmp_result.set_value(num(number_one.get_value()) >> num(number_two.get_value()))
+        elif cac_flag == 6:
+            tmp_result.set_value(num(number_one.get_value()) & num(number_two.get_value()))
         return tmp_result, None, None, None
     return __cal
 
@@ -364,10 +366,13 @@ _method_dict = {
     'urem': calculation_factory(4),
     'ashr': calculation_factory(5),
     'lshr': calculation_factory(5),
+    'and': calculation_factory(6),
     'sext': single_elem_calculation_factory(0),
     'zext': single_elem_calculation_factory(0),
     'bitcast': single_elem_calculation_factory(0),
     'sitofp': single_elem_calculation_factory(0),
+    'fpext': single_elem_calculation_factory(0),
+    'fptrunc': single_elem_calculation_factory(0),
     'icmp': compare_expression,
     'fcmp': compare_expression,
     'br': jump,

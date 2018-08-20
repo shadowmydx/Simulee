@@ -80,7 +80,7 @@ def test_add_diag_vec_mat():
     arguments = generate_arguments(global_current_env.get_value("@_Z17_add_diag_vec_matfPfiiiPKfS1_iif"), {
         "%rows": 5,
         "%cols": 5,
-        "%stride": 1,
+        "%stride": 4,
         "%alpha": 1.0,
         "%beta": 1.0,
         "%mat2_row_stride": 1,
@@ -330,6 +330,107 @@ def test_arrayfire_convolve2():
                                   global_current_env, False)
 
 
+def test_cuda_sift_MatchSiftPoints():
+    test_block = Block((-1, -1, 0), (2, 2, 1))  # important
+    test_thread = Thread((-1, -1, 0), (16, 16, 1))
+    global_current_env = parse_function("./cudaSift-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z15MatchSiftPointsPfS_S_ii"), {
+        "%numPts1": 1,
+        "%numPts2": 2,
+    })
+    arguments["main_memory"] = {
+        'global': "%corrData",
+        'shared': "@_ZZ15MatchSiftPointsPfS_S_iiE4sums",
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z15MatchSiftPointsPfS_S_ii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_cuda_sift_MatchSiftPoints2():
+    test_block = Block((-1, -1, 0), (2, 2, 1))  # important
+    test_thread = Thread((-1, -1, 0), (16, 16, 1))
+    global_current_env = parse_function("./cudaSift-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z16MatchSiftPoints2PfS_S_ii"), {
+        "%numPts1": 1,
+        "%numPts2": 2,
+    })
+    arguments["main_memory"] = {
+        'global': "%corrData",
+        'shared': "@_ZZ16MatchSiftPoints2PfS_S_iiE11siftPoints1",
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z16MatchSiftPoints2PfS_S_ii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 2048, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_cuda_sift_MatchSiftPoints3():
+    test_block = Block((-1, -1, 0), (1, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (2, 2, 2))
+    global_current_env = parse_function("./cudaSift-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z16MatchSiftPoints3PfS_S_ii"), {
+        "%numPts1": 1,
+        "%numPts2": 2,
+    })
+    arguments["main_memory"] = {
+        'global': "%corrData",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z16MatchSiftPoints3PfS_S_ii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 2048, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_cuda_sift_MatchSiftPoints4():
+    test_block = Block((-1, -1, 0), (2, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (34, 2, 1))
+    global_current_env = parse_function("./cudaSift-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z16MatchSiftPoints4PfS_S_ii"), {
+        "%numPts1": 1,
+        "%numPts2": 2,
+    })
+    arguments["main_memory"] = {
+        'global': "%corrData",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z16MatchSiftPoints4PfS_S_ii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 2048, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_cuda_sift_FindMaxCorr():
+    test_block = Block((-1, -1, 0), (2, 2, 1))  # important
+    test_thread = Thread((-1, -1, 0), (16, 16, 1))
+    global_current_env = parse_function("./cudaSift-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z13FindMaxCorr_2PfS_S_iii"), {
+        "%numPts1": 1,
+        "%corrWidth": 2,
+        "%siftSize": 3,
+    })
+    arguments["main_memory"] = {
+        'global': "%corrData",
+        'shared': "@_ZZ11FindMaxCorrPfS_S_iiiE8maxIndex",
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z13FindMaxCorr_2PfS_S_iii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
@@ -342,7 +443,9 @@ if __name__ == "__main__":
     # test_convnet_kReflectH()
     # test_convnet_kTile()
     # test_convnet_kDotProduct_r()
-    test_thundersvm_c_smo_solve_kernel()
+    # test_thundersvm_c_smo_solve_kernel()
     # test_arrayfire_convolve2()
+    # test_cuda_sift_MatchSiftPoints4()
+    test_cuda_sift_FindMaxCorr()
     print 'over'
 

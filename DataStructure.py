@@ -386,20 +386,6 @@ class ProgramFlow(object):
                 if item != current_stmt:
                     result_dict[item] = True
         else:
-            # if operate_stmt.find("call ") != -1:
-            #     previous_str = operate_stmt.split("call ")[1].strip()
-            #     target_function_pattern = r".*?(?P<function_name>[@][^(]+)\((?P<argus>.*)\)"
-            #     target_function_pattern = re.compile(target_function_pattern, re.DOTALL)
-            #     matcher = target_function_pattern.search(operate_stmt)
-            #     if self.global_env.get_value(matcher.group("function_name")) is not None:
-            #         current_call = ProgramFlow(matcher.group("function_name"), self.global_env, previous_str, lambda x: x.raw_codes)
-            #         current_call.generate_all_stmt_path()
-            #         result_tmp_dict = current_call.get_stmt_map()
-            #         for item in result_tmp_dict:
-            #             result_dict[item] = True
-            #             for key in self.stmt_map[self.codes[start_index + 1]]:
-            #                 result_tmp_dict[item][key] = True
-            #             self.stmt_map[item] = result_tmp_dict[item]
             if start_index >= len(self.codes) - 1:
                 self.stmt_map[current_stmt] = result_dict
                 return

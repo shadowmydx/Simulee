@@ -7,7 +7,7 @@ from MainProcess import parse_target_memory_and_checking_sync
 # fix syncthreads in cuda nearest neighbour
 def test_barrier_fix_syncthreads():
     test_block = Block((-1, -1, 0), (2, 1, 1))
-    test_thread = Thread((-1, -1, 0), (2, 3, 1))
+    test_thread = Thread((-1, -1, 0), (3, 3, 1))
     global_env_test = Environment()
     shared_memory_test_1 = DataType("[256 x i32]*")
     shared_memory_test_1.set_value("@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist")
@@ -46,7 +46,7 @@ def test_barrier_fix_syncthreads():
     raw_code = global_env_test.get_value("@_Z14select_matchesPjPiPKjPKijji")
     construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, args,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_env_test)
+                                  global_env_test, False)
 
 
 #  Fixed __syncthreads() calls in homography
