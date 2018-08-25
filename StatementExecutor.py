@@ -371,6 +371,7 @@ _method_dict = {
     'zext': single_elem_calculation_factory(0),
     'bitcast': single_elem_calculation_factory(0),
     'sitofp': single_elem_calculation_factory(0),
+    'uitofp': single_elem_calculation_factory(0),
     'fpext': single_elem_calculation_factory(0),
     'fptrunc': single_elem_calculation_factory(0),
     'icmp': compare_expression,

@@ -175,6 +175,16 @@ def generate_random_data_for_memory(target_memory_container, target_memory, tota
         target_memory_container.add_value_to_memory(memory_shell, current_data)
 
 
+def generate_random_float_data_for_memory(target_memory_container, target_memory, total_size):
+    for index in xrange(total_size):
+        memory_shell = DataType("..")
+        memory_shell.memory_index = index
+        memory_shell.set_value(target_memory)
+        current_data = DataType("float")
+        current_data.set_value(random.random())
+        target_memory_container.add_value_to_memory(memory_shell, current_data)
+
+
 def fill_data_to_memory_by_list(target_memory_container, target_memory, data_list):
     for index in xrange(len(data_list)):
         memory_shell = DataType("..")
@@ -431,6 +441,65 @@ def test_cuda_sift_FindMaxCorr():
                                   global_current_env, False)
 
 
+def test_cudamat_random():
+    test_block = Block((-1, -1, 0), (2, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (128, 1, 1))
+    global_current_env = parse_function("./cudamat-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z15kRandomGaussianPjPyPfj"), {
+        "%numElements": 16,
+    })
+    arguments["main_memory"] = {
+        'global': "%rndWords",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z15kRandomGaussianPjPyPfj")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_cudamat_kMinColumnwise():
+    test_block = Block((-1, -1, 0), (9, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (33, 1, 1))
+    global_current_env = parse_function("./cudamat-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z14kMinColumnwisePfS_jj"), {
+        "%width": 9,
+        "%height": 9,
+    })
+    arguments["main_memory"] = {
+        'global': "%target",
+        'shared': "@_ZZ14kMinColumnwisePfS_jjE8min_vals",
+    }
+    generate_memory_container(["%mat"], global_current_env)
+    target_memory = global_current_env.get_value("memory_container")
+    generate_random_float_data_for_memory(target_memory, "%mat", 256)
+    raw_code = global_current_env.get_value("@_Z14kMinColumnwisePfS_jj")
+    construct_memory_execute_mode(test_block, test_thread, 256, 32, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_cuda_cnn_g_getCost_3():
+    test_block = Block((-1, -1, 0), (1, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (32, 1, 1))
+    global_current_env = parse_function("./cuda-cnn-new-bug/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z11g_getCost_3PfS_fi"), {
+        "%lambda": 1.0,
+        "%wlen": 5,
+    })
+    arguments["main_memory"] = {
+        'global': None,
+        'shared': "@_ZZ11g_getCost_3PfS_fiE4_sum",
+    }
+    generate_memory_container([], global_current_env)
+    raw_code = global_current_env.get_value("@_Z11g_getCost_3PfS_fi")
+    construct_memory_execute_mode(test_block, test_thread, 256, 32, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
@@ -446,6 +515,9 @@ if __name__ == "__main__":
     # test_thundersvm_c_smo_solve_kernel()
     # test_arrayfire_convolve2()
     # test_cuda_sift_MatchSiftPoints4()
-    test_cuda_sift_FindMaxCorr()
+    # test_cuda_sift_FindMaxCorr()
+    # test_cudamat_random()
+    # test_cudamat_kMinColumnwise()
+    test_cuda_cnn_g_getCost_3()
     print 'over'
 
