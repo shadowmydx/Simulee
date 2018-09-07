@@ -500,6 +500,64 @@ def test_cuda_cnn_g_getCost_3():
                                   global_current_env, False)
 
 
+def performance_sync_FindMaxCorr():
+    test_block = Block((-1, -1, 0), (2, 2, 1))  # important
+    test_thread = Thread((-1, -1, 0), (16, 16, 1))
+    global_current_env = parse_function("./cudaSift-new-bug/new-func-performance.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z13FindMaxCorr_2PfS_S_iii"), {
+        "%numPts1": 1,
+        "%corrWidth": 2,
+        "%siftSize": 3,
+    })
+    arguments["main_memory"] = {
+        'global': "%corrData",
+        'shared': "@_ZZ11FindMaxCorrPfS_S_iiiE8maxIndex",
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z13FindMaxCorr_2PfS_S_iii")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def performance_sync_cuda_cnn_g_getCost_3():
+    test_block = Block((-1, -1, 0), (1, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (32, 1, 1))
+    global_current_env = parse_function("./cuda-cnn-new-bug/new-func-performance.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z11g_getCost_3PfS_fi"), {
+        "%lambda": 1.0,
+        "%wlen": 5,
+    })
+    arguments["main_memory"] = {
+        'global': None,
+        'shared': "@_ZZ11g_getCost_3PfS_fiE4_sum",
+    }
+    generate_memory_container([], global_current_env)
+    raw_code = global_current_env.get_value("@_Z11g_getCost_3PfS_fi")
+    construct_memory_execute_mode(test_block, test_thread, 256, 32, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def performance_sync_cudpp_sparseMatrixVectorSetFlags():
+    test_block = Block((-1, -1, 0), (1, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (32, 1, 1))
+    global_current_env = parse_function("./cudpp-new-bug/new-func-performance.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z26sparseMatrixVectorSetFlagsPjPKjj"), {
+        "%numRows": 5,
+    })
+    arguments["main_memory"] = {
+        'global': "%d_rowindx",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+    raw_code = global_current_env.get_value("@_Z26sparseMatrixVectorSetFlagsPjPKjj")
+    construct_memory_execute_mode(test_block, test_thread, 100, 100, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
@@ -513,11 +571,14 @@ if __name__ == "__main__":
     # test_convnet_kTile()
     # test_convnet_kDotProduct_r()
     # test_thundersvm_c_smo_solve_kernel()
-    # test_arrayfire_convolve2()
+    # test_arrayfire_convolve2()p
     # test_cuda_sift_MatchSiftPoints4()
     # test_cuda_sift_FindMaxCorr()
     # test_cudamat_random()
     # test_cudamat_kMinColumnwise()
-    test_cuda_cnn_g_getCost_3()
+    # test_cuda_cnn_g_getCost_3()
+    # performance_sync_FindMaxCorr()
+    performance_sync_cuda_cnn_g_getCost_3()
+    # performance_sync_cudpp_sparseMatrixVectorSetFlags()
     print 'over'
 
