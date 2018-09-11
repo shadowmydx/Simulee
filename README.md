@@ -38,3 +38,13 @@ Positive feedback from authors:
 https://github.com/cudpp/cudpp/issues/180
 https://github.com/Celebrandil/CudaSift/issues/38
 ```
+
+Raw bug log located in
+```
+./raw_data_report_script
+```
+
+Git log parser script located in another repo:
+```
+https://github.com/shadowmydx/empirical_script
+```
