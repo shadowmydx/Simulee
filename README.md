@@ -1,6 +1,6 @@
 In DetectBug.py, all functions start with "test_" are detecting data race & barrier divergence bugs, and all functions start with "performance_sync" are used to detect unnecessary barrier functions.
 
-Total Detected Real Bug with Positive Feedback:
+**Total Detected Real Bug with Positive Feedback**:
 ```
 cudpp: 3 Bugs
 CudaSift: 4 Bugs
