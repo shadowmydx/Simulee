@@ -5,6 +5,11 @@ CudaSift: 4 Bugs
 Total： 7 Bugs
 ```
 
+| Project       | Bugs with Positive Feedback | reference                                       |
+| ------------- | --------------------------- | ----------------------------------------------- |
+| cudpp         | 3                           |https://github.com/cudpp/cudpp/issues/180        |
+| CudaSift      | 4                           |https://github.com/Celebrandil/CudaSift/issues/38|
+
 # Introduction
 In DetectBug.py, all functions start with "test_" are detecting data race & barrier divergence bugs, and all functions start with "performance_sync" are used to detect unnecessary barrier functions.
 
