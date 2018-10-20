@@ -1,0 +1,19 @@
+function GENERATE_ALL_STMT_DICTIONARY:
+    start_index =  len(target_codes) - 1
+    result_dict = dict()
+    while start_index >= 0 do
+        current_dict = dict()
+        current_stmt = target_codes[start_index]
+        if current_stmt is br stmt then
+            walk_all_possible_path(current_stmt, branch_lst)
+            for item in branch_lst do
+                current_dict[item] = True
+        else
+            current_dict[target_codes[start_index + 1]] = True
+            next_stmt = result_dict[target_codes[start_index + 1]]
+            for key in next_stmt do
+                current_dict[key] = True
+
+        result_dict[current_stmt] = current_dict
+        start_index -= 1
+    return result_dict
