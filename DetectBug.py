@@ -483,7 +483,7 @@ def test_cudamat_kMinColumnwise():
 
 def test_cuda_cnn_g_getCost_3():
     test_block = Block((-1, -1, 0), (1, 1, 1))  # important
-    test_thread = Thread((-1, -1, 0), (32, 1, 1))
+    test_thread = Thread((-1, -1, 0), (34, 1, 1))
     global_current_env = parse_function("./cuda-cnn-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z11g_getCost_3PfS_fi"), {
         "%lambda": 1.0,
@@ -495,9 +495,9 @@ def test_cuda_cnn_g_getCost_3():
     }
     generate_memory_container([], global_current_env)
     raw_code = global_current_env.get_value("@_Z11g_getCost_3PfS_fi")
-    construct_memory_execute_mode(test_block, test_thread, 256, 32, raw_code.raw_codes, arguments,
+    construct_memory_execute_mode(test_block, test_thread, 256, 512, raw_code.raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
-                                  global_current_env, False)
+                                  global_current_env, True)
 
 
 def performance_sync_FindMaxCorr():
@@ -576,9 +576,9 @@ if __name__ == "__main__":
     # test_cuda_sift_FindMaxCorr()
     # test_cudamat_random()
     # test_cudamat_kMinColumnwise()
-    # test_cuda_cnn_g_getCost_3()
+    test_cuda_cnn_g_getCost_3()
     # performance_sync_FindMaxCorr()
-    performance_sync_cuda_cnn_g_getCost_3()
+    # performance_sync_cuda_cnn_g_getCost_3()
     # performance_sync_cudpp_sparseMatrixVectorSetFlags()
     print 'over'
 

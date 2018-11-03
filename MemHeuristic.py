@@ -33,7 +33,7 @@ def get_updated_and_depended_vars(target_line):
 
 
 def list_item_in_dict(target_lst, target_dict):
-    for item  in target_lst:
+    for item in target_lst:
         if item in target_dict:
             return True
     return False
@@ -54,7 +54,7 @@ def trace_target_memory(global_env, function_name, target_memory):
                     variable_set[updated_var] = True  # load address to other variable
                 else:
                     if each_line.find('store') != -1:
-                        result_lst.append(each_line)  # only record store
+                        result_lst.append((each_line, line_index))  # only record store
             elif each_line.find('getelementptr') != -1:
                 variable_set[updated_var] = True
     return result_lst
@@ -100,7 +100,8 @@ def generate_variable_depend_path(global_env, function_name):
 
 def parse_stmt_get_involved_variable(involved_lst):
     result_lst = list()
-    for each_item in involved_lst:
+    current_parse_lst = [item[0] for item in involved_lst]
+    for each_item in current_parse_lst:
         updated_var, depended_vars = get_updated_and_depended_vars(each_item)
         if each_item.find('load') != -1:
             result_lst.append(depended_vars[0])
@@ -117,8 +118,9 @@ def generate_depended_code_lst(target_codes, involved_lst, depended_dict):
         if each_var not in result_dict:
             result_dict[each_var] = list()
         for each_line in depended_dict[each_var]:
-            result_dict[each_var].append(target_codes[each_line])
-        if involved_lst[start_index].find('load') != -1: # load can not change depended variable
+            # result_dict[each_var].append(each_line)
+            result_dict[each_var].append((target_codes[each_line], each_line))
+        if involved_lst[start_index][0].find('load') != -1:  # load can not change depended variable
             result_dict[each_var].append(involved_lst[start_index])
         start_index += 1
     return result_dict
@@ -130,6 +132,8 @@ def execute_heuristic(blocks, threads, raw_codes, arguments,
     access_dict = dict()
     shared_access_dict = dict()
     current_access_dict = None
+    global_access_count = 0
+    shared_access_count = 0
     if global_env is None:
         global_env = Environment()
     for block_indexes in generator_for_dimension_var(blocks):
@@ -157,38 +161,76 @@ def execute_heuristic(blocks, threads, raw_codes, arguments,
                     if is_global:
                         current_access_dict = access_dict
                         current_access_index = global_access_index
+                        global_access_count += 1
                     else:
                         current_access_dict = shared_access_dict
                         current_access_index = shared_access_index
+                        shared_access_count += 1
                     if current_index not in current_access_index:
                         if current_index not in access_dict:
                             current_access_dict[current_index] = list()
                         current_access_dict[current_index].append(str(block_indexes) + "+" + str(thread_indexes))
                         current_access_index[current_index] = True
-    return access_dict, shared_access_dict
+    return (access_dict, global_access_count), (shared_access_dict, shared_access_count)
+
+
+def parse_initial_var_type(global_env, target_function_name):
+    result_dict = dict()
+    target_function = global_env.get_value(target_function_name)
+    for i in xrange(len(target_function.argument_lst)):
+        result_dict[target_function.argument_lst[i]] = target_function.type_lst[i]
+    return result_dict
+
+
+def generate_heuristic_code(target_file, target_function_name, main_memory):
+    global_env = parse_function(target_file)
+    depended_vars, codes, depended_initial_var = generate_variable_depend_path(global_env, target_function_name)
+    initial_var_type = parse_initial_var_type(global_env, target_function_name)
+    line_lst = list()
+    used_line = dict()
+    should_evolution = list()
+    for mem_type in main_memory:
+        current_mem = main_memory[mem_type]
+        involved_mem_store_load = trace_target_memory(global_env, target_function_name, current_mem)
+        var_code_dict = generate_depended_code_lst(codes, involved_mem_store_load, depended_vars)
+        for single_var in var_code_dict:
+            if single_var in depended_initial_var:
+                should_evolution.append(depended_initial_var[single_var])
+            for each_line in var_code_dict[single_var]:
+                if each_line[1] not in used_line:
+                    used_line[each_line[1]] = True
+                    line_lst.append(each_line)
+    line_lst.sort(key=lambda x: x[1])
+    should_evolution = [(item, initial_var_type[item]) for sub_list in should_evolution
+                        for item in sub_list if initial_var_type[item].find("*") == -1]
+    return line_lst, should_evolution
 
 
 if __name__ == "__main__":
-    global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
-    test_dict, codes, depended_initial_var = generate_variable_depend_path(global_current_env, "@_Z13_copy_low_uppPfii")
-    involved_store_load = trace_target_memory(global_current_env, "@_Z13_copy_low_uppPfii", "%A")
-
-    t_result = generate_depended_code_lst(codes, involved_store_load, test_dict)
-    for t_var in t_result:
-        print depended_initial_var[t_var]
-    for t_var in t_result:
-        raw_code = '\n'.join(t_result[t_var])
-        print raw_code
-        test_block = Block((-1, -1, 0), (1, 1, 1))
-        test_thread = Thread((-1, -1, 0), (3, 1, 1))
-        t_arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 10, "%stride": 0})
-        t_arguments["main_memory"] = {
-            'global': "%A",
-            'shared': None,
-        }
-        generate_memory_container([], global_current_env)
-        target_dict = execute_heuristic(test_block, test_thread, raw_code, t_arguments, global_current_env, False)
-        print target_dict
-        print '===================='
+    test_lst = generate_heuristic_code("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+        "global": "%A"
+    })
+    print test_lst
+    # global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
+    # test_dict, t_codes, t_depended_initial_var = generate_variable_depend_path(global_current_env, "@_Z13_copy_low_uppPfii")
+    # involved_store_load = trace_target_memory(global_current_env, "@_Z13_copy_low_uppPfii", "%A")
+    #
+    # t_result = generate_depended_code_lst(t_codes, involved_store_load, test_dict)
+    # for t_var in t_result:
+    #     print t_depended_initial_var[t_var]
+    # for t_var in t_result:
+    #     raw_code = '\n'.join([_item[0] for _item in t_result[t_var]])
+    #     print raw_code
+    #     test_block = Block((-1, -1, 0), (1, 1, 1))
+    #     test_thread = Thread((-1, -1, 0), (3, 1, 1))
+    #     t_arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 10, "%stride": 0})
+    #     t_arguments["main_memory"] = {
+    #         'global': "%A",
+    #         'shared': None,
+    #     }
+    #     generate_memory_container([], global_current_env)
+    #     target_dict = execute_heuristic(test_block, test_thread, raw_code, t_arguments, global_current_env, False)
+    #     print target_dict
+    #     print '===================='
 
 
