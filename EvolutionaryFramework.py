@@ -1,4 +1,5 @@
 from multiprocessing import Queue, Pool
+import collections
 
 
 class FitnessProcess:
@@ -46,7 +47,11 @@ def evolutionary_framework(generation, population, generator, sorter,
         for single_item in population_lst:
             if selector(single_item, population_lst):
                 if mutation is not None:
-                    child_lst.append(mutation(single_item))
+                    result_item = mutation(single_item)
+                    if isinstance(result_item, collections.Iterable):
+                        child_lst += result_item
+                    else:
+                        child_lst.append(result_item)
                 if crossover is not None:
                     child_lst.append(crossover(single_item, population_lst))
         for single_item in child_lst:
@@ -65,20 +70,26 @@ def evolutionary_framework(generation, population, generator, sorter,
 def evolutionary_framework_local(generation, population, generator, sorter, fitness,
                                  acceptable, selector, mutation, crossover):
     population_lst = generator(population)
-    population_lst = [(item, fitness(item) for item in population_lst)]
+    population_lst = [(item, fitness(item)) for item in population_lst]
     population_lst = sorter(population_lst)
     for i in range(generation):
         child_lst = list()
         for single_item in population_lst:
             if selector(single_item, population_lst):
                 if mutation is not None:
-                    child_lst.append(mutation(single_item))
+                    result_item = mutation(single_item)
+                    if isinstance(result_item, collections.Iterable):
+                        child_lst += result_item
+                    else:
+                        child_lst.append(result_item)
                 if crossover is not None:
                     child_lst.append(crossover(single_item, population_lst))
         child_lst = [(item, fitness(item)) for item in child_lst]
         population_lst += child_lst
         population_lst = sorter(population_lst)
         population_lst = population_lst[: population]
+        print "In " + str(i) + " generation: "
+        print population_lst
         if acceptable is not None and acceptable(population_lst[0]):
             return population_lst
     return population_lst

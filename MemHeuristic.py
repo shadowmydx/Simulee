@@ -203,7 +203,9 @@ def generate_heuristic_code(target_file, target_function_name, main_memory):
     line_lst.sort(key=lambda x: x[1])
     should_evolution = [(item, initial_var_type[item]) for sub_list in should_evolution
                         for item in sub_list if initial_var_type[item].find("*") == -1]
-    return line_lst, should_evolution
+    all_variable_lst = [(item, initial_var_type[item]) for item in initial_var_type
+                        if initial_var_type[item].find("*") == -1]
+    return line_lst, global_env, should_evolution, all_variable_lst
 
 
 if __name__ == "__main__":
