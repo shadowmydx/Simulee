@@ -1,6 +1,7 @@
 from MemHeuristic import *
 from EvolutionaryFramework import *
 import numpy as np
+import time
 
 
 class ArgumentsItem:
@@ -121,15 +122,17 @@ def generator_for_evolutionary_factory(target_generator):
     return _generator
 
 if __name__ == "__main__":
+    start_time = time.time()
     t_generator = evolutionary_item_factory("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
         "global": "%A",
         "shared": None
-    }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)))
+    }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (34, 1, 1)))
     t_item = t_generator()
     t_item.fitness()
     t_generator = generator_for_evolutionary_factory(t_generator)
 
-    # _population_lst = evolutionary_framework(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
-    _population_lst = evolutionary_framework_local(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
+    _population_lst = evolutionary_framework(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
+    # _population_lst = evolutionary_framework_local(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
     for _item in _population_lst:
         print _item[0].construct_running_arguments(), _item[0].father_generate
+    print "cost is " + str(time.time() - start_time)
