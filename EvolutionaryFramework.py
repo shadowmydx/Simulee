@@ -1,25 +1,35 @@
-from multiprocessing import Queue, Pool
+from multiprocessing import Process, Manager, Queue
 import collections
+
+
+def _new_fitness(input_queue, output_queue, fitness):
+    while True:
+        new_item = input_queue.get()
+        output_queue.put((new_item, fitness(new_item)))
 
 
 class FitnessProcess:
 
     def __init__(self, process_limited):
-        self.pool = Pool(process_limited)
+        self.pool = list()
+        self.process_limited = process_limited
         self.input_queue = Queue()
         self.output_queue = Queue()
         self.current_task = 0
 
     def setup_fitness(self, fitness):
-
-        def _new_fitness():
-            new_item = self.input_queue.get()
-            self.output_queue.put((new_item, fitness(new_item)))
-        self.pool.apply(_new_fitness)
+        for i in xrange(self.process_limited):
+            self.pool.append(Process(target=_new_fitness, args=(self.input_queue, self.output_queue, fitness)))
+        for single_process in self.pool:
+            single_process.start()
 
     def send_item(self, target_item):
         self.current_task += 1
         self.input_queue.put(target_item)
+
+    def close(self):
+        for i in xrange(self.process_limited):
+            self.pool[i].terminate()
 
     def __iter__(self):
         return self
@@ -42,7 +52,9 @@ def evolutionary_framework(generation, population, generator, sorter,
     for single_item in process_pool:
         population_lst.append(single_item)
     population_lst = sorter(population_lst)
+    print "finished."
     for i in range(generation):
+        print "In " + str(i) + " generation:"
         child_lst = list()
         for single_item in population_lst:
             if selector(single_item, population_lst):
@@ -63,8 +75,10 @@ def evolutionary_framework(generation, population, generator, sorter,
         population_lst = sorter(population_lst)
         population_lst = population_lst[: population]
         if acceptable is not None and acceptable(population_lst[0]):
-            return population_lst[0]
-    return population_lst[0]
+            process_pool.close()
+            return population_lst
+    process_pool.close()
+    return population_lst
 
 
 def evolutionary_framework_local(generation, population, generator, sorter, fitness,

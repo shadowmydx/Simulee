@@ -129,6 +129,7 @@ if __name__ == "__main__":
     t_item.fitness()
     t_generator = generator_for_evolutionary_factory(t_generator)
 
-    population_lst = evolutionary_framework_local(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
-    for _item in population_lst:
+    # _population_lst = evolutionary_framework(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
+    _population_lst = evolutionary_framework_local(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
+    for _item in _population_lst:
         print _item[0].construct_running_arguments(), _item[0].father_generate
