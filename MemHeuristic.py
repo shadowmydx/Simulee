@@ -182,6 +182,22 @@ def parse_initial_var_type(global_env, target_function_name):
     return result_dict
 
 
+def parse_dimension(global_env, target_function_name):
+    thread_dict = dict()
+    block_dict = dict()
+    thread_pattern = re.compile(r"threadIdx, i32 0, i32 (?P<sequence>\d+)")
+    block_pattern = re.compile(r"blockIdx, i32 0, i32 (?P<sequence>\d+)")
+    target_function = global_env.get_value(target_function_name)
+    for each_line in target_function.raw_codes.split("\n"):
+        if each_line.find("blockIdx") != -1:
+            matcher = block_pattern.search(each_line)
+            block_dict[matcher.group("sequence")] = True
+        elif each_line.find("threadIdx") != -1:
+            matcher = thread_pattern.search(each_line)
+            thread_dict[matcher.group("sequence")] = True
+    return [len(block_dict), len(thread_dict)]
+
+
 def generate_heuristic_code(target_file, target_function_name, main_memory):
     global_env = parse_function(target_file)
     depended_vars, codes, depended_initial_var = generate_variable_depend_path(global_env, target_function_name)
@@ -205,7 +221,7 @@ def generate_heuristic_code(target_file, target_function_name, main_memory):
                         for item in sub_list if initial_var_type[item].find("*") == -1]
     all_variable_lst = [(item, initial_var_type[item]) for item in initial_var_type
                         if initial_var_type[item].find("*") == -1]
-    return line_lst, global_env, should_evolution, all_variable_lst
+    return line_lst, global_env, should_evolution, all_variable_lst, parse_dimension(global_env, target_function_name)
 
 
 if __name__ == "__main__":
