@@ -7,7 +7,7 @@ import time
 class ArgumentsItem:
 
     def __init__(self, target_file, target_function_name, main_memory, blocks, threads):
-        self.codes, self.global_env, self.should_evolution, all_variables = \
+        self.codes, self.global_env, self.should_evolution, all_variables, self.dimension = \
             generate_heuristic_code(target_file, target_function_name, main_memory)
         self.target_file = target_file
         self.target_function_name = target_function_name
@@ -107,8 +107,9 @@ def selector(item, population_lst):
     return True
 
 
-def acceptable(item):
-    return item[1] <= 0.5
+def acceptable(item_lst):
+    score_lst = [item[1] for item in item_lst if item[1] < .7]
+    return len(score_lst) >= len(item_lst) / 5
 
 
 def generator_for_evolutionary_factory(target_generator):
@@ -121,18 +122,27 @@ def generator_for_evolutionary_factory(target_generator):
 
     return _generator
 
+
+def show_evolution_path(target_item):
+    result_lst = list()
+    while target_item is not None:
+        result_lst.append(target_item.father_generate)
+        target_item = target_item.father_item
+    result_lst.reverse()
+    return result_lst
+
 if __name__ == "__main__":
     start_time = time.time()
     t_generator = evolutionary_item_factory("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
         "global": "%A",
         "shared": None
-    }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (34, 1, 1)))
+    }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)))
     t_item = t_generator()
     t_item.fitness()
     t_generator = generator_for_evolutionary_factory(t_generator)
 
-    _population_lst = evolutionary_framework(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
-    # _population_lst = evolutionary_framework_local(8, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
+    # _population_lst = evolutionary_framework(10, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
+    _population_lst = evolutionary_framework_local(20, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
     for _item in _population_lst:
-        print _item[0].construct_running_arguments(), _item[0].father_generate
+        print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
     print "cost is " + str(time.time() - start_time)

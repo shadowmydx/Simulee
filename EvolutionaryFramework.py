@@ -1,5 +1,6 @@
 from multiprocessing import Process, Manager, Queue
 import collections
+import numpy as np
 
 
 def _new_fitness(input_queue, output_queue, fitness):
@@ -73,8 +74,10 @@ def evolutionary_framework(generation, population, generator, sorter,
             child_lst.append(single_item)
         population_lst += child_lst
         population_lst = sorter(population_lst)
+        if population_lst[0][1] == population_lst[-1][1]:
+            np.random.shuffle(population_lst)
         population_lst = population_lst[: population]
-        if acceptable is not None and acceptable(population_lst[0]):
+        if acceptable is not None and acceptable(population_lst):
             process_pool.close()
             return population_lst
     process_pool.close()
@@ -101,10 +104,12 @@ def evolutionary_framework_local(generation, population, generator, sorter, fitn
         child_lst = [(item, fitness(item)) for item in child_lst]
         population_lst += child_lst
         population_lst = sorter(population_lst)
+        if population_lst[0][1] == population_lst[-1][1]:
+            np.random.shuffle(population_lst)
         population_lst = population_lst[: population]
         print "In " + str(i) + " generation: "
         print population_lst
-        if acceptable is not None and acceptable(population_lst[0]):
+        if acceptable is not None and acceptable(population_lst):
             return population_lst
     return population_lst
 
