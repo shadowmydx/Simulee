@@ -4,108 +4,124 @@ import numpy as np
 import time
 
 
-class ArgumentsItem:
+def dimension_mutation_factory(block_limited, thread_limited, block_dimension, thread_dimension):
 
-    def __init__(self, target_file, target_function_name, main_memory, blocks, threads):
-        self.codes, self.global_env, self.should_evolution, all_variables, self.dimension = \
-            generate_heuristic_code(target_file, target_function_name, main_memory)
-        self.target_file = target_file
-        self.target_function_name = target_function_name
-        self.codes = '\n'.join([item[0] for item in self.codes])
-        self.initial_argus = self.construct_argus_dict(all_variables)
-        self.type_dict = self.construct_dict_from_tuple(all_variables)
-        self.father_item = None
-        self.father_generate = None
-        self.step_size = 0
-        self.score = None
-        self.main_memory = main_memory
-        self.function_name = target_function_name
-        self.blocks = blocks
-        self.threads = threads
-        self.global_access = None
-        self.shared_access = None
-        self.second_score = 0
+    def _mutation(current_tuple, is_block):
+        current_limited = block_limited if is_block else thread_limited
+        current_dimension = block_dimension if is_block else thread_dimension
 
-    @staticmethod
-    def construct_argus_dict(variable_lst):
-        result_dict = dict()
-        for item in variable_lst:
-            result_dict[item[0]] = 100 * abs(np.random.standard_cauchy())
-        return result_dict
+    return _mutation
 
-    def copy_initial_argus_to_target(self, target_item):
-        for key in target_item.initial_argus:
-            target_item.initial_argus[key] = self.initial_argus[key]
 
-    def construct_running_arguments(self):
-        number_arguments = dict()
-        for each_var in self.initial_argus:
-            if self.type_dict[each_var].find("i") != -1:
-                number_arguments[each_var] = int(self.initial_argus[each_var])
-            else:
-                number_arguments[each_var] = self.initial_argus[each_var]
-        return number_arguments
+def class_generator(target_file, target_function_name, main_memory):
+    heuristic_content = generate_heuristic_code(target_file, target_function_name, main_memory)
 
-    def mutation(self):
-        normal_item = ArgumentsItem(self.target_file, self.target_function_name, self.main_memory, self.blocks, self.threads)
-        cauchy_item = ArgumentsItem(self.target_file, self.target_function_name, self.main_memory, self.blocks, self.threads)
-        normal_item.father_item = self
-        self.copy_initial_argus_to_target(normal_item)
-        normal_item.father_generate = "normal"
-        cauchy_item.father_item = self
-        self.copy_initial_argus_to_target(cauchy_item)
-        cauchy_item.father_generate = "cauchy"
-        for item in self.should_evolution:
-            normal_random_gap = np.random.normal()
-            normal_item.initial_argus[item[0]] += normal_random_gap
-            normal_item.step_size += normal_random_gap ** 2
-            cauchy_random_gap = np.random.standard_cauchy()
-            cauchy_item.initial_argus[item[0]] += cauchy_random_gap
-            cauchy_item.step_size += cauchy_random_gap ** 2
-        cauchy_item.step_size = np.sqrt(cauchy_item.step_size)
-        normal_item.step_size = np.sqrt(normal_item.step_size)
-        return normal_item, cauchy_item
+    class ArgumentsItem:
 
-    def fitness(self):
-        generate_memory_container([], self.global_env)
-        number_arguments = self.construct_running_arguments()
-        arguments = generate_arguments(self.global_env.get_value(self.function_name), number_arguments)
-        arguments["main_memory"] = self.main_memory
-        self.global_access, self.shared_access = execute_heuristic(self.blocks, self.threads, self.codes, arguments, self.global_env, False)
-        global_count = self.count_total_access(self.global_access[0])
-        shared_count = self.count_total_access(self.shared_access[0])
-        self.score = (len(self.global_access[0]) + len(self.shared_access[0])) / float(global_count + shared_count)
-        return self.score
+        def __init__(self, blocks, threads):
+            self.codes, self.global_env, self.should_evolution, all_variables, self.dimension = \
+                heuristic_content
+            self.target_file = target_file
+            self.target_function_name = target_function_name
+            self.codes = '\n'.join([item[0] for item in self.codes])
+            self.initial_argus = self.construct_argus_dict(all_variables)
+            self.type_dict = self.construct_dict_from_tuple(all_variables)
+            self.father_item = None
+            self.father_generate = None
+            self.step_size = 0
+            self.score = None
+            self.main_memory = main_memory
+            self.function_name = target_function_name
+            self.blocks = blocks
+            self.threads = threads
+            self.global_access = None
+            self.shared_access = None
+            self.second_score = 0
 
-    def second_fitness(self):
-        global_index = self.global_access[0].keys()
-        shared_index = self.shared_access[0].keys()
-        global_index.sort()
-        shared_index.sort()
-        global_second_score = [global_index[index] - global_index[index - 1] for index in xrange(1, len(global_index))]
-        shared_second_score = [shared_index[index] - shared_index[index - 1] for index in xrange(1, len(shared_index))]
-        self.second_score = sum(global_second_score) + sum(shared_second_score)
-        return self.second_score
+        @staticmethod
+        def construct_argus_dict(variable_lst):
+            result_dict = dict()
+            for item in variable_lst:
+                result_dict[item[0]] = 100 * abs(np.random.standard_cauchy())
+            return result_dict
 
-    @staticmethod
-    def count_total_access(param_dict):
-        access_count = 0
-        for key in param_dict:
-            access_count += len(param_dict[key])
-        return access_count
+        def copy_initial_argus_to_target(self, target_item):
+            for key in target_item.initial_argus:
+                target_item.initial_argus[key] = self.initial_argus[key]
 
-    @staticmethod
-    def construct_dict_from_tuple(all_variables):
-        result_dict = dict()
-        for item in all_variables:
-            result_dict[item[0]] = item[1]
-        return result_dict
+        def construct_running_arguments(self):
+            number_arguments = dict()
+            for each_var in self.initial_argus:
+                if self.type_dict[each_var].find("i") != -1:
+                    number_arguments[each_var] = int(self.initial_argus[each_var])
+                else:
+                    number_arguments[each_var] = self.initial_argus[each_var]
+            return number_arguments
+
+        def mutation(self):
+            normal_item = ArgumentsItem(self.blocks, self.threads)
+            cauchy_item = ArgumentsItem(self.blocks, self.threads)
+            normal_item.father_item = self
+            self.copy_initial_argus_to_target(normal_item)
+            normal_item.father_generate = "normal"
+            cauchy_item.father_item = self
+            self.copy_initial_argus_to_target(cauchy_item)
+            cauchy_item.father_generate = "cauchy"
+            for item in self.should_evolution:
+                normal_random_gap = np.random.normal()
+                normal_item.initial_argus[item[0]] += normal_random_gap
+                normal_item.step_size += normal_random_gap ** 2
+                cauchy_random_gap = np.random.standard_cauchy()
+                cauchy_item.initial_argus[item[0]] += cauchy_random_gap
+                cauchy_item.step_size += cauchy_random_gap ** 2
+            cauchy_item.step_size = np.sqrt(cauchy_item.step_size)
+            normal_item.step_size = np.sqrt(normal_item.step_size)
+            return normal_item, cauchy_item
+
+        def fitness(self):
+            generate_memory_container([], self.global_env)
+            number_arguments = self.construct_running_arguments()
+            arguments = generate_arguments(self.global_env.get_value(self.function_name), number_arguments)
+            arguments["main_memory"] = self.main_memory
+            self.global_access, self.shared_access = execute_heuristic(self.blocks, self.threads, self.codes, arguments, self.global_env, False)
+            global_count = self.count_total_access(self.global_access[0])
+            shared_count = self.count_total_access(self.shared_access[0])
+            self.score = (len(self.global_access[0]) + len(self.shared_access[0])) / float(global_count + shared_count)
+            return self.score
+
+        def second_fitness(self):
+            global_index = self.global_access[0].keys()
+            shared_index = self.shared_access[0].keys()
+            global_index.sort()
+            shared_index.sort()
+            global_second_score = [global_index[index] - global_index[index - 1] for index in xrange(1, len(global_index))]
+            shared_second_score = [shared_index[index] - shared_index[index - 1] for index in xrange(1, len(shared_index))]
+            self.second_score = sum(global_second_score) + sum(shared_second_score)
+            return self.second_score
+
+        @staticmethod
+        def count_total_access(param_dict):
+            access_count = 0
+            for key in param_dict:
+                access_count += len(param_dict[key])
+            return access_count
+
+        @staticmethod
+        def construct_dict_from_tuple(all_variables):
+            result_dict = dict()
+            for item in all_variables:
+                result_dict[item[0]] = item[1]
+            return result_dict
+
+    return ArgumentsItem
 
 
 def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads):
 
+    target_class = class_generator(target_file, target_function_name, main_memory)
+
     def _generator():
-        return ArgumentsItem(target_file, target_function_name, main_memory, blocks, threads)
+        return target_class(blocks, threads)
 
     return _generator
 
@@ -179,7 +195,7 @@ if __name__ == "__main__":
         if _population_lst[0][1][0] >= 1:
             print _population_lst[0][1][0]
             t_failed += 1
-        total_generation += _current_generation
+        total_generation += _current_generation + 1
         # for _item in _population_lst:
         #     print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
         # print "cost is " + str(time.time() - start_time)
