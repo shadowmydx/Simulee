@@ -16,17 +16,21 @@ class ArgumentsItem:
         self.type_dict = self.construct_dict_from_tuple(all_variables)
         self.father_item = None
         self.father_generate = None
+        self.step_size = 0
         self.score = None
         self.main_memory = main_memory
         self.function_name = target_function_name
         self.blocks = blocks
         self.threads = threads
+        self.global_access = None
+        self.shared_access = None
+        self.second_score = 0
 
     @staticmethod
     def construct_argus_dict(variable_lst):
         result_dict = dict()
         for item in variable_lst:
-            result_dict[item[0]] = 10 * abs(np.random.standard_cauchy())
+            result_dict[item[0]] = 100 * abs(np.random.standard_cauchy())
         return result_dict
 
     def copy_initial_argus_to_target(self, target_item):
@@ -52,8 +56,14 @@ class ArgumentsItem:
         self.copy_initial_argus_to_target(cauchy_item)
         cauchy_item.father_generate = "cauchy"
         for item in self.should_evolution:
-            normal_item.initial_argus[item[0]] += np.random.normal()
-            cauchy_item.initial_argus[item[0]] += np.random.standard_cauchy()
+            normal_random_gap = np.random.normal()
+            normal_item.initial_argus[item[0]] += normal_random_gap
+            normal_item.step_size += normal_random_gap ** 2
+            cauchy_random_gap = np.random.standard_cauchy()
+            cauchy_item.initial_argus[item[0]] += cauchy_random_gap
+            cauchy_item.step_size += cauchy_random_gap ** 2
+        cauchy_item.step_size = np.sqrt(cauchy_item.step_size)
+        normal_item.step_size = np.sqrt(normal_item.step_size)
         return normal_item, cauchy_item
 
     def fitness(self):
@@ -61,11 +71,21 @@ class ArgumentsItem:
         number_arguments = self.construct_running_arguments()
         arguments = generate_arguments(self.global_env.get_value(self.function_name), number_arguments)
         arguments["main_memory"] = self.main_memory
-        global_access, shared_access = execute_heuristic(self.blocks, self.threads, self.codes, arguments, self.global_env, False)
-        global_count = self.count_total_access(global_access[0])
-        shared_count = self.count_total_access(shared_access[0])
-        self.score = (len(global_access[0]) + len(shared_access[0])) / float(global_count + shared_count)
+        self.global_access, self.shared_access = execute_heuristic(self.blocks, self.threads, self.codes, arguments, self.global_env, False)
+        global_count = self.count_total_access(self.global_access[0])
+        shared_count = self.count_total_access(self.shared_access[0])
+        self.score = (len(self.global_access[0]) + len(self.shared_access[0])) / float(global_count + shared_count)
         return self.score
+
+    def second_fitness(self):
+        global_index = self.global_access[0].keys()
+        shared_index = self.shared_access[0].keys()
+        global_index.sort()
+        shared_index.sort()
+        global_second_score = [global_index[index] - global_index[index - 1] for index in xrange(1, len(global_index))]
+        shared_second_score = [shared_index[index] - shared_index[index - 1] for index in xrange(1, len(shared_index))]
+        self.second_score = sum(global_second_score) + sum(shared_second_score)
+        return self.second_score
 
     @staticmethod
     def count_total_access(param_dict):
@@ -91,7 +111,9 @@ def evolutionary_item_factory(target_file, target_function_name, main_memory, bl
 
 
 def fitness(item):
-    return item.fitness()
+    real_score = item.fitness()
+    second_score = item.second_fitness()
+    return real_score, second_score
 
 
 def mutation(item):
@@ -99,7 +121,12 @@ def mutation(item):
 
 
 def sorter(population_lst):
-    population_lst.sort(key=lambda x: x[1])
+    population_lst.sort(key=lambda x: x[1][0])
+    if population_lst[0][1][0] == population_lst[-1][1][0]:
+        population_lst.sort(key=lambda x: x[1][1])
+        if population_lst[0][1][1] == population_lst[-1][1][1]:
+            population_lst.sort(key=lambda x: x[0].step_size)
+            population_lst.reverse()
     return population_lst
 
 
@@ -108,8 +135,9 @@ def selector(item, population_lst):
 
 
 def acceptable(item_lst):
-    score_lst = [item[1] for item in item_lst if item[1] < .7]
-    return len(score_lst) >= len(item_lst) / 5
+    return item_lst[0][1][0] < 1
+    # score_lst = [item[1] for item in item_lst if item[1] < .7]
+    # return len(score_lst) >= len(item_lst) / 5
 
 
 def generator_for_evolutionary_factory(target_generator):
@@ -132,17 +160,31 @@ def show_evolution_path(target_item):
     return result_lst
 
 if __name__ == "__main__":
-    start_time = time.time()
-    t_generator = evolutionary_item_factory("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
-        "global": "%A",
-        "shared": None
-    }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)))
-    t_item = t_generator()
-    t_item.fitness()
-    t_generator = generator_for_evolutionary_factory(t_generator)
+    t_failed = 0
+    total_generation = 0
+    t_test_round = 100
+    for i in xrange(t_test_round):
+        start_time = time.time()
+        t_generator = evolutionary_item_factory("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+            "global": "%A",
+            "shared": None
+        }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)))
+        t_item = t_generator()
+        t_item.fitness()
+        t_item.second_fitness()
+        t_generator = generator_for_evolutionary_factory(t_generator)
 
-    # _population_lst = evolutionary_framework(10, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
-    _population_lst = evolutionary_framework_local(20, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
-    for _item in _population_lst:
-        print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
-    print "cost is " + str(time.time() - start_time)
+        # _population_lst, _current_generation = evolutionary_framework(10, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
+        _population_lst, _current_generation = evolutionary_framework_local(50, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
+        if _population_lst[0][1][0] >= 1:
+            print _population_lst[0][1][0]
+            t_failed += 1
+        total_generation += _current_generation
+        # for _item in _population_lst:
+        #     print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
+        # print "cost is " + str(time.time() - start_time)
+        print "current failed is " + str(t_failed)
+        print "current test round is " + str(i)
+        print "========================================================="
+    print "average generation: " + str(total_generation / t_test_round)
+    print "total failed in 50 generation: " + str(t_failed)
