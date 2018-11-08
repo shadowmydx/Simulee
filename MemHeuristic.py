@@ -195,7 +195,7 @@ def parse_dimension(global_env, target_function_name):
         elif each_line.find("threadIdx") != -1:
             matcher = thread_pattern.search(each_line)
             thread_dict[matcher.group("sequence")] = True
-    return [len(block_dict), len(thread_dict)]
+    return [len(block_dict) if len(block_dict) != 0 else 1, len(thread_dict)]
 
 
 def generate_heuristic_code(target_file, target_function_name, main_memory):

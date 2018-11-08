@@ -53,6 +53,7 @@ class Thread(DataType):
             type_lst.append(tmp_data)
         self.set_value(type_lst)
         self.limit_x, self.limit_y, self.limit_z = block_dim
+        self.block_dim = block_dim
 
 
 class Block(DataType):
@@ -66,6 +67,7 @@ class Block(DataType):
             type_lst.append(tmp_data)
         self.set_value(type_lst)
         self.limit_x, self.limit_y, self.limit_z = grid_dim
+        self.grid_dim = grid_dim
 
 
 class Action(object):

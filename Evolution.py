@@ -9,12 +9,35 @@ def dimension_mutation_factory(block_limited, thread_limited, block_dimension, t
     def _mutation(current_tuple, is_block):
         current_limited = block_limited if is_block else thread_limited
         current_dimension = block_dimension if is_block else thread_dimension
+        current_class = Block if is_block else Thread
+        direction_vector = np.random.randint(low=-1, high=2, size=current_dimension)
+        direction_vector = list(direction_vector)
+        current_lst = [item for item in current_tuple]
+        for i in xrange(len(direction_vector)):
+            current_lst[i] += direction_vector[i]
+        for i in xrange(len(current_lst)):
+            if current_lst[i] < 1:
+                current_lst[i] = 1
+            elif current_lst[i] > current_limited:
+                current_lst[i] = current_limited
+        return current_class((-1, -1, 0), tuple(current_lst))
 
-    return _mutation
+    def _random_dimension(is_block):
+        current_limited = block_limited if is_block else thread_limited
+        current_dimension = block_dimension if is_block else thread_dimension
+        current_class = Block if is_block else Thread
+        dimension_vector = np.random.randint(low=1, high=current_limited + 1, size=current_dimension)
+        dimension_vector = list(dimension_vector)
+        for i in xrange(len(dimension_vector), 3):
+            dimension_vector.append(1)
+        return current_class((-1, -1, 0), tuple(dimension_vector))
+
+    return _mutation, _random_dimension
 
 
-def class_generator(target_file, target_function_name, main_memory):
+def class_generator(target_file, target_function_name, main_memory, evolve_dimension=False):
     heuristic_content = generate_heuristic_code(target_file, target_function_name, main_memory)
+    dimension_mutation, dimension_generator = dimension_mutation_factory(3, 5, heuristic_content[4][0], heuristic_content[4][1])
 
     class ArgumentsItem:
 
@@ -32,8 +55,12 @@ def class_generator(target_file, target_function_name, main_memory):
             self.score = None
             self.main_memory = main_memory
             self.function_name = target_function_name
-            self.blocks = blocks
-            self.threads = threads
+            if evolve_dimension:
+                self.blocks = dimension_generator(True)
+                self.threads = dimension_generator(False)
+            else:
+                self.blocks = blocks
+                self.threads = threads
             self.global_access = None
             self.shared_access = None
             self.second_score = 0
@@ -59,8 +86,12 @@ def class_generator(target_file, target_function_name, main_memory):
             return number_arguments
 
         def mutation(self):
-            normal_item = ArgumentsItem(self.blocks, self.threads)
-            cauchy_item = ArgumentsItem(self.blocks, self.threads)
+            if evolve_dimension:
+                normal_item = ArgumentsItem(dimension_mutation(self.blocks.grid_dim, True), dimension_mutation(self.threads.block_dim, False))
+                cauchy_item = ArgumentsItem(dimension_mutation(self.blocks.grid_dim, True), dimension_mutation(self.threads.block_dim, False))
+            else:
+                normal_item = ArgumentsItem(self.blocks, self.threads)
+                cauchy_item = ArgumentsItem(self.blocks, self.threads)
             normal_item.father_item = self
             self.copy_initial_argus_to_target(normal_item)
             normal_item.father_generate = "normal"
@@ -116,9 +147,9 @@ def class_generator(target_file, target_function_name, main_memory):
     return ArgumentsItem
 
 
-def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads):
+def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads, dimension=False):
 
-    target_class = class_generator(target_file, target_function_name, main_memory)
+    target_class = class_generator(target_file, target_function_name, main_memory, dimension)
 
     def _generator():
         return target_class(blocks, threads)
@@ -178,24 +209,25 @@ def show_evolution_path(target_item):
 if __name__ == "__main__":
     t_failed = 0
     total_generation = 0
-    t_test_round = 100
+    t_test_round = 1
     for i in xrange(t_test_round):
         start_time = time.time()
         t_generator = evolutionary_item_factory("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
             "global": "%A",
             "shared": None
-        }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)))
+        }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)), True)
         t_item = t_generator()
         t_item.fitness()
         t_item.second_fitness()
         t_generator = generator_for_evolutionary_factory(t_generator)
 
-        # _population_lst, _current_generation = evolutionary_framework(10, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
+        # _population_lst, _current_generation = evolutionary_framework(50, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
         _population_lst, _current_generation = evolutionary_framework_local(50, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
         if _population_lst[0][1][0] >= 1:
             print _population_lst[0][1][0]
             t_failed += 1
         total_generation += _current_generation + 1
+        print _population_lst[0][0].blocks.grid_dim, _population_lst[0][0].threads.block_dim, _population_lst[0][0].construct_running_arguments()
         # for _item in _population_lst:
         #     print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
         # print "cost is " + str(time.time() - start_time)

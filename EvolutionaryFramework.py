@@ -56,6 +56,7 @@ def evolutionary_framework(generation, population, generator, sorter,
     print "finished."
     for i in range(generation):
         print "In " + str(i) + " generation:"
+        print population_lst
         child_lst = list()
         for single_item in population_lst:
             if selector(single_item, population_lst):
