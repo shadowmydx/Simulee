@@ -198,6 +198,52 @@ def parse_dimension(global_env, target_function_name):
     return [len(block_dict) if len(block_dict) != 0 else 1, len(thread_dict)]
 
 
+def parse_branch_var(target_codes):
+    result_lst = list()
+    total_labels = 0
+    for idx, each_line in enumerate(target_codes):
+        if each_line.find("<label>") != -1:
+            result_lst.append(idx)
+            total_labels += 1
+        elif each_line.find("br ") != -1:
+            result_lst.append(idx)
+    return result_lst, total_labels
+
+
+def trace_branch_variable(branch_codes, codes):
+    result_lst = list()
+    branch_var_pattern = re.compile(r"br i1 (?P<var>[%]\d+), label [^\s]+, label [^\s]+")
+    for index in branch_codes:
+        current_line = codes[index]
+        matcher = branch_var_pattern.search(current_line)
+        if matcher is not None:
+            result_lst.append(matcher.group("var"))
+    return result_lst
+
+
+def generate_branch_heuristic_code(target_file, target_function_name):
+    global_env = parse_function(target_file)
+    depended_vars, codes, depended_initial_var = generate_variable_depend_path(global_env, target_function_name)
+    initial_var_type = parse_initial_var_type(global_env, target_function_name)
+    branch_codes, total_labels = parse_branch_var(codes)
+    line_lst = set()
+    should_evolution = set()
+    involved_branch_variable = trace_branch_variable(branch_codes, codes)
+    for branch_variable in involved_branch_variable:
+        if branch_variable in depended_initial_var:
+            for each_initial_var in depended_initial_var[branch_variable]:
+                if initial_var_type[each_initial_var].find("*") == -1:
+                    should_evolution.add(each_initial_var)
+        for each_line in depended_vars[branch_variable]:
+            line_lst.add(each_line)
+    should_evolution = list(should_evolution)
+    line_lst = [(item, codes[item]) for item in line_lst]
+    for item in branch_codes:
+        line_lst.append((item, codes[item]))
+    line_lst.sort(key=lambda x: x[0])
+    return line_lst, should_evolution, total_labels
+
+
 def generate_heuristic_code(target_file, target_function_name, main_memory):
     global_env = parse_function(target_file)
     depended_vars, codes, depended_initial_var = generate_variable_depend_path(global_env, target_function_name)
@@ -228,10 +274,11 @@ def generate_heuristic_code(target_file, target_function_name, main_memory):
 
 
 if __name__ == "__main__":
-    test_lst = generate_heuristic_code("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
-        "global": "%A"
-    })
-    print test_lst
+    generate_branch_heuristic_code("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii")
+    # test_lst = generate_heuristic_code("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+    #     "global": "%A"
+    # })
+    # print test_lst
     # global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_dict, t_codes, t_depended_initial_var = generate_variable_depend_path(global_current_env, "@_Z13_copy_low_uppPfii")
     # involved_store_load = trace_target_memory(global_current_env, "@_Z13_copy_low_uppPfii", "%A")
