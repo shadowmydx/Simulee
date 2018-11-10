@@ -174,6 +174,34 @@ def execute_heuristic(blocks, threads, raw_codes, arguments,
     return (access_dict, global_access_count), (shared_access_dict, shared_access_count)
 
 
+def execute_branch_heuristic(blocks, threads, raw_codes, arguments, global_env=None, should_print=True):
+    main_memory = arguments['main_memory']
+    access_label_dict = dict()
+    if global_env is None:
+        global_env = Environment()
+    for block_indexes in generator_for_dimension_var(blocks):
+        global_env.add_value("@blockIdx", Block(block_indexes, (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
+        global_env.add_value("@gridDim", Block((blocks.limit_x, blocks.limit_y, blocks.limit_z),
+                                               (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
+        local_env = Environment()
+        local_env.binding_value(arguments)
+        for thread_indexes in generator_for_dimension_var(threads):
+            global_env.add_value("@threadIdx", Thread(thread_indexes,
+                                                      (threads.limit_x, threads.limit_y, threads.limit_z)))
+            global_env.add_value("@blockDim", Thread((threads.limit_x, threads.limit_y, threads.limit_z),
+                                                     (threads.limit_x, threads.limit_y, threads.limit_z)))
+            kernel_codes = KernelCodes(raw_codes)
+            while not kernel_codes.is_over():
+                current_stmt = kernel_codes.get_current_statement_and_set_next()
+                if current_stmt.find("<label>") != -1:
+                    access_label_dict[current_stmt] = True
+                if should_print:
+                    print current_stmt + " in " + str(block_indexes) + " + " + str(thread_indexes)
+                return_value, current_action, current_index, is_global = \
+                    execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
+    return access_label_dict
+
+
 def parse_initial_var_type(global_env, target_function_name):
     result_dict = dict()
     target_function = global_env.get_value(target_function_name)
