@@ -222,33 +222,37 @@ def show_evolution_path(target_item):
     result_lst.reverse()
     return result_lst
 
-if __name__ == "__main__":
-    t_failed = 0
-    total_generation = 0
-    t_test_round = 1
-    for i in xrange(t_test_round):
-        start_time = time.time()
-        t_generator = evolutionary_item_factory("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
-            "global": "%A",
-            "shared": None
-        }, Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (3, 1, 1)), True)
-        t_item = t_generator()
-        t_item.fitness()
-        t_item.second_fitness()
-        t_generator = generator_for_evolutionary_factory(t_generator)
 
-        _population_lst, _current_generation = evolutionary_framework(20, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None, 10)
+def generate_initialize_setting(target_file_path, function_name, main_memory, test_round=1, evolve_dimension=True):
+    failed = 0
+    total_generation = 0
+    for i in xrange(test_round):
+        start_time = time.time()
+        generator = evolutionary_item_factory(target_file_path, function_name, main_memory,
+                                              Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (34, 1, 1)), evolve_dimension)
+        generator = generator_for_evolutionary_factory(generator)
+
+        population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable, selector, mutation, None, 10)
         # _population_lst, _current_generation = evolutionary_framework_local(50, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
-        if _population_lst[0][1][0] >= 1:
-            print _population_lst[0][1][0]
-            t_failed += 1
-        total_generation += _current_generation + 1
-        print _population_lst[0][0].blocks.grid_dim, _population_lst[0][0].threads.block_dim, _population_lst[0][0].construct_running_arguments()
+        if population_lst[0][1][0] >= 1:
+            print population_lst[0][1][0]
+            failed += 1
+        total_generation += current_generation + 1
+        for item in population_lst:
+            print item[0].blocks.grid_dim, item[0].threads.block_dim, item[0].construct_running_arguments()
         # for _item in _population_lst:
         #     print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
-        # print "cost is " + str(time.time() - start_time)
-        print "current failed is " + str(t_failed)
+        print "cost is " + str(time.time() - start_time)
+        print "current failed is " + str(failed)
         print "current test round is " + str(i)
         print "========================================================="
-    print "average generation: " + str(total_generation / t_test_round)
-    print "total failed in 50 generation: " + str(t_failed)
+    print "average generation: " + str(total_generation / test_round)
+    print "total failed in 50 generation: " + str(failed)
+
+
+if __name__ == "__main__":
+    generate_initialize_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+        "global": "%A",
+        "shared": None
+    })
+
