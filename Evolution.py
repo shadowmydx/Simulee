@@ -39,8 +39,11 @@ class DimensionFactory:
         return current_class((-1, -1, 0), tuple(dimension_vector))
 
 
-def class_generator(target_file, target_function_name, main_memory):
-    heuristic_content = generate_heuristic_code(target_file, target_function_name, main_memory)
+def class_generator(target_file, target_function_name, main_memory, is_branch=False):
+    if not is_branch:
+        heuristic_content = generate_heuristic_code(target_file, target_function_name, main_memory)
+    else:
+        heuristic_content = generate_branch_heuristic_code(target_file, target_function_name)
     dimension_handler = DimensionFactory(3, 5, heuristic_content[4][0], heuristic_content[4][1])
     return heuristic_content, dimension_handler
 
@@ -127,7 +130,10 @@ class ArgumentsItem:
         return normal_item, cauchy_item
 
     def fitness(self):
-        generate_memory_container([], self.global_env)
+        memory_lst = list()
+        if self.main_memory["shared"] is not None:
+            memory_lst.append(self.main_memory["shared"])
+        generate_memory_container(memory_lst, self.global_env)
         number_arguments = self.construct_running_arguments()
         arguments = generate_arguments(self.global_env.get_value(self.function_name), number_arguments)
         arguments["main_memory"] = self.main_memory
@@ -135,10 +141,16 @@ class ArgumentsItem:
                                                                    self.global_env, False)
         global_count = self.count_total_access(self.global_access[0])
         shared_count = self.count_total_access(self.shared_access[0])
+        if global_count + shared_count == 0:
+            self.score = 2  # no memory access here
+            return 2
         self.score = (len(self.global_access[0]) + len(self.shared_access[0])) / float(global_count + shared_count)
         return self.score
 
     def second_fitness(self):
+        if self.score == 2:
+            self.second_score = 2
+            return self.second_score
         global_index = self.global_access[0].keys()
         shared_index = self.shared_access[0].keys()
         global_index.sort()
@@ -163,14 +175,70 @@ class ArgumentsItem:
         return result_dict
 
 
-def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads, dimension=False):
+class BranchItem(ArgumentsItem):
 
-    class_arguments = class_generator(target_file, target_function_name, main_memory)
+    def __init__(self, target_file, target_function_name, main_memory,
+                 heuristic_content, blocks, threads, evolve_dimension=False):
+        ArgumentsItem.__init__(self, target_file, target_function_name, main_memory,
+                               heuristic_content, blocks, threads, evolve_dimension)
+        self.total_label = len([item for item in self.codes.split("\n") if item.find("<label>") != -1])
+
+    def fitness(self):
+        generate_memory_container([], self.global_env)
+        number_arguments = self.construct_running_arguments()
+        arguments = generate_arguments(self.global_env.get_value(self.function_name), number_arguments)
+        arguments["main_memory"] = self.main_memory
+        access_label_dict = execute_branch_heuristic(self.blocks, self.threads, self.codes,
+                                                     arguments, self.global_env, False)
+        return -len(access_label_dict)
+
+    def second_fitness(self):
+        return self.total_label
+
+    def mutation(self):
+        if self.evolve_dimension:
+            normal_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
+                                        self.heuristic_content, self.dimension_handler.mutation(self.blocks.grid_dim, True),
+                                        self.dimension_handler.mutation(self.threads.block_dim, False))
+            cauchy_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
+                                        self.heuristic_content, self.dimension_handler.mutation(self.blocks.grid_dim, True),
+                                        self.dimension_handler.mutation(self.threads.block_dim, False))
+            normal_item.evolve_dimension = True
+            cauchy_item.evolve_dimension = True
+        else:
+            normal_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
+                                        self.heuristic_content, self.blocks, self.threads)
+            cauchy_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
+                                        self.heuristic_content, self.blocks, self.threads)
+        normal_item.father_item = self
+        self.copy_initial_argus_to_target(normal_item)
+        normal_item.father_generate = "normal"
+        cauchy_item.father_item = self
+        self.copy_initial_argus_to_target(cauchy_item)
+        cauchy_item.father_generate = "cauchy"
+        for item in self.should_evolution:
+            normal_random_gap = np.random.normal()
+            normal_item.initial_argus[item[0]] += normal_random_gap
+            normal_item.step_size += normal_random_gap ** 2
+            cauchy_random_gap = np.random.standard_cauchy()
+            cauchy_item.initial_argus[item[0]] += cauchy_random_gap
+            cauchy_item.step_size += cauchy_random_gap ** 2
+        cauchy_item.step_size = np.sqrt(cauchy_item.step_size)
+        normal_item.step_size = np.sqrt(normal_item.step_size)
+        return normal_item, cauchy_item
+
+
+def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads, dimension=False, is_branch=False):
+
+    class_arguments = class_generator(target_file, target_function_name, main_memory, is_branch)
 
     def _generator():
         return ArgumentsItem(target_file, target_function_name, main_memory, class_arguments, blocks, threads, dimension)
 
-    return _generator
+    def _branch_generator():
+        return BranchItem(target_file, target_function_name, main_memory, class_arguments, blocks, threads, dimension)
+
+    return _branch_generator if is_branch else _generator
 
 
 def fitness(item):
@@ -197,10 +265,17 @@ def selector(item, population_lst):
     return True
 
 
-def acceptable(item_lst):
-    return item_lst[0][1][0] < .2
-    # score_lst = [item[1] for item in item_lst if item[1] < .7]
-    # return len(score_lst) >= len(item_lst) / 5
+def acceptable_factory(is_branch):
+
+    def _acceptable(item_lst):
+        return item_lst[0][1][0] < .2
+        # score_lst = [item[1] for item in item_lst if item[1] < .7]
+        # return len(score_lst) >= len(item_lst) / 5
+
+    def _acceptable_branch(item_lst):
+        return item_lst[0][1][0] == -item_lst[0][1][1]
+
+    return _acceptable_branch if is_branch else _acceptable
 
 
 def generator_for_evolutionary_factory(target_generator):
@@ -223,17 +298,19 @@ def show_evolution_path(target_item):
     return result_lst
 
 
-def generate_initialize_setting(target_file_path, function_name, main_memory, test_round=1, evolve_dimension=True):
+def generate_initialized_setting(target_file_path, function_name, main_memory, is_branch=False, test_round=1,
+                                 evolve_dimension=True):
     failed = 0
     total_generation = 0
     for i in xrange(test_round):
         start_time = time.time()
         generator = evolutionary_item_factory(target_file_path, function_name, main_memory,
-                                              Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (34, 1, 1)), evolve_dimension)
+                                              Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (34, 1, 1)),
+                                              evolve_dimension, is_branch)
         generator = generator_for_evolutionary_factory(generator)
 
-        population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable, selector, mutation, None, 10)
-        # _population_lst, _current_generation = evolutionary_framework_local(50, 50, t_generator, sorter, fitness, acceptable, selector, mutation, None)
+        # population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
+        population_lst, current_generation = evolutionary_framework_local(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
         if population_lst[0][1][0] >= 1:
             print population_lst[0][1][0]
             failed += 1
@@ -252,12 +329,16 @@ def generate_initialize_setting(target_file_path, function_name, main_memory, te
 
 
 if __name__ == "__main__":
-    # generate_initialize_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+    # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
     #     "global": "%A",
     #     "shared": None
+    # }, True)
+    # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
+    #     "global": "%mat",
+    #     "shared": None
     # })
-    generate_initialize_setting("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
-        "global": "%mat",
-        "shared": None
+    generate_initialized_setting("./arrayfire/arrayfire-Fix-syncthreads-in-cuda-nearest-neighbour.ll", "@_Z14select_matchesPjPiPKjPKijji", {
+        "global": None,
+        "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"
     })
 

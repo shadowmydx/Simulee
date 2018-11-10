@@ -265,11 +265,14 @@ def generate_branch_heuristic_code(target_file, target_function_name):
         for each_line in depended_vars[branch_variable]:
             line_lst.add(each_line)
     should_evolution = list(should_evolution)
-    line_lst = [(item, codes[item]) for item in line_lst]
+    line_lst = [(codes[item], item) for item in line_lst]
     for item in branch_codes:
-        line_lst.append((item, codes[item]))
-    line_lst.sort(key=lambda x: x[0])
-    return line_lst, should_evolution, total_labels
+        line_lst.append((codes[item], item))
+    line_lst.sort(key=lambda x: x[1])
+    should_evolution = [(item, initial_var_type[item]) for item in should_evolution]
+    all_variable_lst = [(item, initial_var_type[item]) for item in initial_var_type
+                        if initial_var_type[item].find("*") == -1]
+    return line_lst, global_env, should_evolution, all_variable_lst, parse_dimension(global_env, target_function_name)
 
 
 def generate_heuristic_code(target_file, target_function_name, main_memory):
