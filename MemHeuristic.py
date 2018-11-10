@@ -15,6 +15,10 @@ def parse_all_variable_from_string(target_string):
         real_var = target_string[single_var.start(): single_var.end()]
         if real_var.find("%struct") == -1:
             result_lst.append(real_var)
+    for single_var in re.finditer(r"@\w+", target_string):
+        real_var = target_string[single_var.start(): single_var.end()]
+        if real_var.find("thread") == -1 and real_var.find("block") == -1:
+            result_lst.append(real_var)
     return result_lst
 
 
@@ -27,6 +31,8 @@ def get_updated_and_depended_vars(target_line):
         depended_vars = parse_all_variable_from_string(tmp_arr[1])
     elif target_line.find("store") != -1:
         all_vars = parse_all_variable_from_string(target_line)
+        if len(all_vars) < 2:
+            all_vars.append(all_vars[0])  # immediate value
         updated_var = all_vars[1]
         depended_vars = [all_vars[0]]
     return updated_var, depended_vars
@@ -81,7 +87,8 @@ def generate_variable_depend_path(global_env, function_name):
                 if updated_var not in initial_var_dict:
                     initial_var_dict[updated_var] = list()
                 initial_var_dict[updated_var] += initial_var_dict[each_vars]
-
+            if each_vars not in result_dict:
+                continue  # shared memory has no dependency statement
             if isinstance(result_dict[each_vars], str):
                 if updated_var not in initial_var_dict:
                     initial_var_dict[updated_var] = list()
@@ -129,6 +136,9 @@ def generate_depended_code_lst(target_codes, involved_lst, depended_dict):
 def execute_heuristic(blocks, threads, raw_codes, arguments,
                       global_env=None, should_print=True):
     main_memory = arguments['main_memory']
+    warp_size = DataType("i32")
+    warp_size.set_value(32)
+    global_env.add_value("@warpSize", warp_size)
     access_dict = dict()
     shared_access_dict = dict()
     current_access_dict = None
@@ -167,7 +177,7 @@ def execute_heuristic(blocks, threads, raw_codes, arguments,
                         current_access_index = shared_access_index
                         shared_access_count += 1
                     if current_index not in current_access_index:
-                        if current_index not in access_dict:
+                        if current_index not in current_access_dict:
                             current_access_dict[current_index] = list()
                         current_access_dict[current_index].append(str(block_indexes) + "+" + str(thread_indexes))
                         current_access_index[current_index] = True

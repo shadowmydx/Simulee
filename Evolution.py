@@ -305,12 +305,12 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
     for i in xrange(test_round):
         start_time = time.time()
         generator = evolutionary_item_factory(target_file_path, function_name, main_memory,
-                                              Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (34, 1, 1)),
+                                              Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (40, 1, 1)),
                                               evolve_dimension, is_branch)
         generator = generator_for_evolutionary_factory(generator)
 
-        # population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
-        population_lst, current_generation = evolutionary_framework_local(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
+        population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
+        # population_lst, current_generation = evolutionary_framework_local(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
         if population_lst[0][1][0] >= 1:
             print population_lst[0][1][0]
             failed += 1
@@ -337,8 +337,12 @@ if __name__ == "__main__":
     #     "global": "%mat",
     #     "shared": None
     # })
-    generate_initialized_setting("./arrayfire/arrayfire-Fix-syncthreads-in-cuda-nearest-neighbour.ll", "@_Z14select_matchesPjPiPKjPKijji", {
+    generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
         "global": None,
-        "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"
+        "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
     })
+    # generate_initialized_setting("./arrayfire/arrayfire-Fix-syncthreads-in-cuda-nearest-neighbour.ll", "@_Z14select_matchesPjPiPKjPKijji", {
+    #     "global": None,
+    #     "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"
+    # })
 
