@@ -216,6 +216,9 @@ def generate_heuristic_code(target_file, target_function_name, main_memory):
                 if each_line[1] not in used_line:
                     used_line[each_line[1]] = True
                     line_lst.append(each_line)
+    for idx, each_line in enumerate(codes):
+        if each_line.find("<label>") != -1:
+            line_lst.append((each_line, idx))
     line_lst.sort(key=lambda x: x[1])
     should_evolution = [(item, initial_var_type[item]) for sub_list in should_evolution
                         for item in sub_list if initial_var_type[item].find("*") == -1]

@@ -13,7 +13,10 @@ void _copy_low_upp(float* A, int rows, int stride) {
 // rows = 5, stride = 0, block = (2, 1, 1), thread = (3, 2, 2)
 // (0, 0, 0) (1, 0, 1) with (0, 0, 0) (1, 0, 0)
 // i = 1, j = 0, index_1 = 0, index_2 = 1; i = 1, j = 0, index_1 = 0, index_2 = 1
-// (2, 1, 0) read, (1, 0, 1) write. (1 0 1) write to 1, (2 1 0) read from 1 
+// (2, 1, 0) read, (1, 0, 1) write. (1 0 1) write to 1, (2 1 0) read from 1
+
+// i = 2, j = 1, index_1 = 7, index_2 = 5
+// i = 5, j = 0, index_1 = 15, index_2 = 5
 
 
 

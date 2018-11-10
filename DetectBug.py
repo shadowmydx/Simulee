@@ -40,10 +40,10 @@ def parse_function(target_file):
 
 
 def test_copy_low_upp():
-    test_block = Block((-1, -1, 0), (1, 1, 1))
-    test_thread = Thread((-1, -1, 0), (3, 2, 1))
+    test_block = Block((-1, -1, 0), (2, 2, 1))
+    test_thread = Thread((-1, -1, 0), (5, 5, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
-    arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 5, "%stride": 0})
+    arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 121, "%stride": 3})
     arguments["main_memory"] = {
         'global': "%A",
         'shared': None,
@@ -560,7 +560,7 @@ def performance_sync_cudpp_sparseMatrixVectorSetFlags():
 
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
-    # test_copy_low_upp()
+    test_copy_low_upp()
     # test_copy_upp_low()
     # test_add_diag_vec_mat()
     # test_copy_from_tp()
@@ -576,7 +576,7 @@ if __name__ == "__main__":
     # test_cuda_sift_FindMaxCorr()
     # test_cudamat_random()
     # test_cudamat_kMinColumnwise()
-    test_cuda_cnn_g_getCost_3()
+    # test_cuda_cnn_g_getCost_3()
     # performance_sync_FindMaxCorr()
     # performance_sync_cuda_cnn_g_getCost_3()
     # performance_sync_cudpp_sparseMatrixVectorSetFlags()
