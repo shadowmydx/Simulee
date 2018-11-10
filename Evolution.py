@@ -78,7 +78,7 @@ class ArgumentsItem:
     def construct_argus_dict(variable_lst):
         result_dict = dict()
         for item in variable_lst:
-            result_dict[item[0]] = 100 * abs(np.random.standard_cauchy())
+            result_dict[item[0]] = 10 * abs(np.random.standard_cauchy())
         return result_dict
 
     def copy_initial_argus_to_target(self, target_item):
@@ -239,7 +239,8 @@ def generate_initialize_setting(target_file_path, function_name, main_memory, te
             failed += 1
         total_generation += current_generation + 1
         for item in population_lst:
-            print item[0].blocks.grid_dim, item[0].threads.block_dim, item[0].construct_running_arguments()
+            if item[1][0] < 1:
+                print item[0].blocks.grid_dim, item[0].threads.block_dim, item[0].construct_running_arguments()
         # for _item in _population_lst:
         #     print _item[0].construct_running_arguments(), show_evolution_path(_item[0])
         print "cost is " + str(time.time() - start_time)
@@ -251,8 +252,12 @@ def generate_initialize_setting(target_file_path, function_name, main_memory, te
 
 
 if __name__ == "__main__":
-    generate_initialize_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
-        "global": "%A",
+    # generate_initialize_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+    #     "global": "%A",
+    #     "shared": None
+    # })
+    generate_initialize_setting("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
+        "global": "%mat",
         "shared": None
     })
 
