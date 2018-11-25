@@ -96,6 +96,9 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                         saved_action = Action((branch_marking_function + "::" + current_stmt, current_line, current_action, block_indexes, thread_indexes,
                                                (threads.limit_x, threads.limit_y, threads.limit_z)))
                     if is_global:
+                        if current_index > len(global_memory.list):
+                            print "There is outraged here! plz noted."
+                            continue
                         global_memory.list[current_index].set_by_order(saved_action,
                                                                        visit_order_for_global_memory[current_index])
                         current_visited_global_memory_index.push(current_index)

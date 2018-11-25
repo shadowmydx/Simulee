@@ -137,8 +137,12 @@ class ArgumentsItem:
         number_arguments = self.construct_running_arguments()
         arguments = generate_arguments(self.global_env.get_value(self.function_name), number_arguments)
         arguments["main_memory"] = self.main_memory
-        self.global_access, self.shared_access = execute_heuristic(self.blocks, self.threads, self.codes, arguments,
-                                                                   self.global_env, False)
+        try:
+            self.global_access, self.shared_access = execute_heuristic(self.blocks, self.threads, self.codes, arguments,
+                                                                       self.global_env, False)
+        except ZeroDivisionError:
+            self.score = 1
+            return self.score
         global_count = self.count_total_access(self.global_access[0])
         shared_count = self.count_total_access(self.shared_access[0])
         if global_count + shared_count == 0:
@@ -149,7 +153,10 @@ class ArgumentsItem:
 
     def second_fitness(self):
         if self.score == 2:
-            self.second_score = 2
+            self.second_score = 200
+            return self.second_score
+        if self.global_access is None:
+            self.second_score = 1000
             return self.second_score
         global_index = self.global_access[0].keys()
         shared_index = self.shared_access[0].keys()
@@ -194,6 +201,13 @@ class BranchItem(ArgumentsItem):
 
     def second_fitness(self):
         return self.total_label
+
+    @staticmethod
+    def construct_argus_dict(variable_lst):
+        result_dict = dict()
+        for item in variable_lst:
+            result_dict[item[0]] = np.random.uniform(low=0, high=10)
+        return result_dict
 
     def mutation(self):
         if self.evolve_dimension:
@@ -302,6 +316,7 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
                                  evolve_dimension=True):
     failed = 0
     total_generation = 0
+    test_result_lst = list()
     for i in xrange(test_round):
         start_time = time.time()
         generator = evolutionary_item_factory(target_file_path, function_name, main_memory,
@@ -310,7 +325,7 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
         generator = generator_for_evolutionary_factory(generator)
 
         population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
-        # population_lst, current_generation = evolutionary_framework_local(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
+        # population_lst, current_generation = evolutionary_framework_local(20, 1, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
         if population_lst[0][1][0] >= 1:
             print population_lst[0][1][0]
             failed += 1
@@ -324,11 +339,59 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
         print "current failed is " + str(failed)
         print "current test round is " + str(i)
         print "========================================================="
+        test_result_lst.append(population_lst)
     print "average generation: " + str(total_generation / test_round)
     print "total failed in 50 generation: " + str(failed)
+    return test_result_lst[0]
+
+
+def auto_test_target_function(target_file_path, function_name, main_memory):
+    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory)
+    for item in solution_lst:
+        if item[1][0] < 1:
+            global_env = parse_function(target_file_path)
+            generate_memory_container(main_memory.keys(), global_env)
+            raw_code = global_env.get_value(function_name)
+            blocks = item[0].blocks
+            threads = item[0].threads
+            arguments = item[0].construct_running_arguments()
+            for idx, variable in enumerate(raw_code.argument_lst):
+                if variable not in arguments and raw_code.type_lst[idx].find("*") == -1:
+                    arguments[variable] = 2  # temp action, need more focus
+            arguments = generate_arguments(global_env.get_value(function_name), arguments)
+            arguments["main_memory"] = main_memory
+            execute_framework(blocks, threads, raw_code.raw_codes, arguments, global_env)
 
 
 if __name__ == "__main__":
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+    #     "global": "%A",
+    #     "shared": None
+    # })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
+    #     "global": "%mat",
+    #     "shared": None
+    # })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
+    #     "global": None,
+    #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
+    # })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z13_copy_upp_lowPfii", {
+    #     "global": "%A",
+    #     "shared": None
+    # })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z14_copy_from_matPfPKfiiii", {
+    #     "global": "%mat_out",
+    #     "shared": None
+    # })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
+    #     "global": None,
+    #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
+    # })
+    auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z7_splicePfPKfPKiiiiiii", {
+        "global": "%y",
+        "shared": None
+    })
     # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
     #     "global": "%A",
     #     "shared": None
@@ -337,10 +400,10 @@ if __name__ == "__main__":
     #     "global": "%mat",
     #     "shared": None
     # })
-    generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
-        "global": None,
-        "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
-    })
+    # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
+    #     "global": None,
+    #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
+    # })
     # generate_initialized_setting("./arrayfire/arrayfire-Fix-syncthreads-in-cuda-nearest-neighbour.ll", "@_Z14select_matchesPjPiPKjPKijji", {
     #     "global": None,
     #     "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"

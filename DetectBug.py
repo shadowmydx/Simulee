@@ -40,10 +40,10 @@ def parse_function(target_file):
 
 
 def test_copy_low_upp():
-    test_block = Block((-1, -1, 0), (2, 2, 1))
+    test_block = Block((-1, -1, 0), (2, 3, 1))
     test_thread = Thread((-1, -1, 0), (5, 5, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
-    arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 121, "%stride": 3})
+    arguments = generate_arguments(global_current_env.get_value("@_Z13_copy_low_uppPfii"), {"%rows": 23, "%stride": 1})
     arguments["main_memory"] = {
         'global': "%A",
         'shared': None,
@@ -74,17 +74,17 @@ def test_copy_upp_low():
 
 
 def test_add_diag_vec_mat():
-    test_block = Block((-1, -1, 0), (2, 2, 1))
-    test_thread = Thread((-1, -1, 0), (3, 2, 1))
+    test_block = Block((-1, -1, 0), (1, 3, 1))
+    test_thread = Thread((-1, -1, 0), (5, 5, 1))
     global_current_env = parse_function("./kaldi-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z17_add_diag_vec_matfPfiiiPKfS1_iif"), {
-        "%rows": 5,
-        "%cols": 5,
-        "%stride": 4,
+        "%rows": 3,
+        "%cols": 16,
+        "%stride": 1,
         "%alpha": 1.0,
         "%beta": 1.0,
-        "%mat2_row_stride": 1,
-        "%mat2_col_stride": 1,
+        "%mat2_row_stride": 7,
+        "%mat2_col_stride": 9,
     })
     arguments["main_memory"] = {
         'global': "%mat",
@@ -276,7 +276,7 @@ def test_convnet_kDotProduct_r():
         'global': None,
         'shared': "@_ZZ13kDotProduct_rPfS_S_jE5shmem",
     }
-    generate_memory_container([], global_current_env)
+    generate_memory_container(["%off"], global_current_env)
     target_memory = global_current_env.get_value("memory_container")
     generate_random_data_for_memory(target_memory, "%off", 100)
     raw_code = global_current_env.get_value("@_Z13kDotProduct_rPfS_S_j")
@@ -558,15 +558,22 @@ def performance_sync_cudpp_sparseMatrixVectorSetFlags():
                                   global_current_env, False)
 
 
+def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
+                      should_print=False):
+    construct_memory_execute_mode(blocks, threads, main_size, shared_size, raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_env, should_print)
+
+
 if __name__ == "__main__":
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
-    test_copy_low_upp()
+    # test_copy_low_upp()
     # test_copy_upp_low()
     # test_add_diag_vec_mat()
     # test_copy_from_tp()
     # test_copy_from_mat()
     # test_trace_mat_mat_trans()
-    # test_slice()
+    test_slice()
     # test_convnet_kReflectH()
     # test_convnet_kTile()
     # test_convnet_kDotProduct_r()
