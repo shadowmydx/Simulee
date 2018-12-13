@@ -1,4 +1,5 @@
 import re
+import copy
 
 
 # if is a memory pointer, value start with ("%")
@@ -486,6 +487,60 @@ class LabelQueue(object):
 
     def get_top(self):
         return self.list[0]
+
+class MemDict(object):
+
+    def __init__(self):
+        super(MemDict, self).__init__()
+        self.addr = list()
+        self.flag = list()
+
+    def push(self, add, idx):
+        self.addr.append(dict())
+        self.addr[len(self.addr)-1][add] = idx
+
+    def set_flag(self):
+        self.flag.append(len(self.addr)-1)
+
+    def clear(self):
+        self.addr = []
+
+
+class BarrierStackSet(object):
+
+    def __init__(self):
+        super(BarrierStackSet, self).__init__()
+        self.mem = list()
+        self.list = list()
+
+    def push(self, stmt, idx, value):
+        self.mem.append(dict())
+        #  for StackSet is a set, there is no oprate needed to keep the value unic
+        # if str(stmt) not in self.list:
+        self.list.append(stmt)
+        self.mem[len(self.mem)-1][idx] = value
+
+    def clear(self):
+        self.mem = []
+        self.list = []
+
+    def build_memory(self, target_memory, idx, sign, next_idx, target_mem, last):
+        target = copy.deepcopy(target_memory)
+        target.flag = True
+        if last:
+            for address in target_mem.addr[next_idx]:
+                if len(target_memory.list[address].visit_lst) <= (self.mem[next_idx][address]+1):
+                    continue
+                for value in target_memory.list[address].visit_lst[self.mem[next_idx][address]+1]:
+                    target.list[address].visit_lst[self.mem[next_idx][address]].append(value)
+                    target.flag = False
+        else:
+            address = target_mem.addr[next_idx].keys()[0]
+            for index in range(idx, sign):
+                if address == target_mem.addr[index].keys()[0]:
+                    for value in target_memory.list[address].visit_lst[target_mem.addr[next_idx][address]]:
+                        target.list[address].visit_lst[self.mem[index][address]].append(value)
+        return target
 
 
 def main_test():
