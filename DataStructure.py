@@ -543,6 +543,29 @@ class BarrierStackSet(object):
         return target
 
 
+class Statement(object):
+
+    def __init__(self, block, thread, statement):
+        self.block_thread = str(block)+"+"+str(thread)
+        self.state = statement
+
+
+class StatementPath(object):
+
+    def __init__(self):
+        self.path = dict()
+
+    def add(self, state):
+        if state.block_thread in self.path:
+            state_list = self.path[str(state.block_thread)]
+            state_list.append(state.state)
+            self.path[state.block_thread] = state_list
+        else:
+            state_list = list()
+            state_list.append(state.state)
+            self.path[state.block_thread] = state_list
+
+
 def main_test():
     test_block = Block((-1, -1, 0), (2, 1, 1))
     test_thread = Thread((-1, -1, 0), (128, 1, 1))
