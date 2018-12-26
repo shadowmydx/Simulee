@@ -110,6 +110,133 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
     global_parser(global_memory, program_flow)
 
 
+def construct_memory_execute_mode_for_barrier(blocks, threads, global_size, shared_size, raw_kernel_codes, arguments,
+                                  shared_parser, global_parser, global_env=None, should_print=True):
+    main_memory = arguments['main_memory']
+    global_memory = GlobalMemory(global_size)
+    warp_size = DataType("i32")
+    warp_size.set_value(32)
+    if global_env is None:
+        global_env = Environment()
+    global_env.add_value("@warpSize", warp_size)
+    global_env.add_value("main_entrance", raw_kernel_codes)
+    program_flow = ProgramFlow("main_entrance", global_env, "", lambda x: x)
+    program_flow.generate_all_stmt_path()
+    for block_indexes in generator_for_dimension_var(blocks):
+
+        global_env.add_value("@blockIdx", Block(block_indexes, (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
+        global_env.add_value("@gridDim", Block((blocks.limit_x, blocks.limit_y, blocks.limit_z),
+                                               (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
+        shared_memory = SharedMemory(shared_size)
+        visit_order_for_global_memory = [0 for i in xrange(global_size)]
+        visit_order_for_shared_memory = [0 for i in xrange(shared_size)]
+        current_visited_global_memory_index = StackSet()
+        current_visited_shared_memory_index = StackSet()
+        # struct for collecting data for barrier function
+        shared_barr = BarrierStackSet()
+        global_barr = BarrierStackSet()
+        shared_mem = MemDict()
+        global_mem = MemDict()
+        shared_flag = dict()
+        global_flag = dict()
+        local_env_dict = dict()
+        unfinished_total_threads = dict()
+        for thread_indexes in generator_for_dimension_var(threads):
+            unfinished_total_threads[str(thread_indexes)] = True
+        synchronization = SyncThreads(len(unfinished_total_threads), unfinished_total_threads)
+        while not is_all_thread_finished(unfinished_total_threads):
+            for thread_indexes in generator_for_dimension_var(threads):
+                global_env.add_value("@threadIdx", Thread(thread_indexes,
+                                                          (threads.limit_x, threads.limit_y, threads.limit_z)))
+                global_env.add_value("@blockDim", Thread((threads.limit_x, threads.limit_y, threads.limit_z),
+                                                         (threads.limit_x, threads.limit_y, threads.limit_z)))
+                if str(thread_indexes) not in local_env_dict:
+                    local_env_dict[str(thread_indexes)] = Environment()
+                    local_env_dict[str(thread_indexes)].binding_value(arguments)
+                    local_env_dict[str(thread_indexes)].add_value('kernel_code', KernelCodes(raw_kernel_codes))
+                local_env = local_env_dict[str(thread_indexes)]
+                kernel_codes = local_env.get_value('kernel_code')
+                current_line = kernel_codes.get_current_line()
+                if kernel_codes.is_over():
+                    unfinished_total_threads[str(thread_indexes)] = False
+                    if synchronization.has_halt_threads():
+                        print "Has barrier divergence issue in " + str(synchronization.get_a_hold_stmt())
+                        return
+                    continue
+                if kernel_codes.should_halt():
+                    print_stmt("halt here because of __syncthreads() " + " in " + str(thread_indexes) + " in block " +
+                               str(block_indexes), should_print)
+                    continue
+                current_stmt = kernel_codes.get_current_statement_and_set_next()
+                local_env.add_value("current_stmt", current_stmt)
+                print_stmt('execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
+                           should_print)
+                if detect_if_is_syncthreads(current_stmt):
+                    synchronization.reach_one(thread_indexes, kernel_codes)
+                    if synchronization.can_continue():
+                        print 'last thread located here: ' + str(thread_indexes) + ", in block " + str(block_indexes)
+                        if shared_flag.get(current_stmt) is None:
+                            shared_flag[current_stmt] = True
+                        if global_flag.get(current_stmt) is None:
+                            global_flag[current_stmt] = True
+                        while current_visited_global_memory_index.size() != 0:
+                            global_index = current_visited_global_memory_index.pop()
+                            global_mem.push(global_index, visit_order_for_global_memory[global_index])
+                            global_barr.push(current_stmt, global_index, visit_order_for_global_memory[global_index])
+                            visit_order_for_global_memory[global_index] += 1
+                        global_mem.set_flag()
+                        while current_visited_shared_memory_index.size() != 0:
+                            shared_index = current_visited_shared_memory_index.pop()
+                            shared_mem.push(shared_index, visit_order_for_shared_memory[shared_index])
+                            shared_barr.push(current_stmt, shared_index, visit_order_for_shared_memory[shared_index])
+                            visit_order_for_shared_memory[shared_index] += 1
+                        shared_mem.set_flag()
+                else:
+                    return_value, current_action, current_index, is_global = \
+                        execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env, local_env)
+                    if current_action is None:
+                        continue
+                    branch_marking_function = kernel_codes.get_token_string()
+                    if branch_marking_function is None:
+                        saved_action = Action((current_stmt, current_line, current_action, block_indexes, thread_indexes,
+                                               (threads.limit_x, threads.limit_y, threads.limit_z)))
+                    else:
+                        saved_action = Action((branch_marking_function + "::" + current_stmt, current_line, current_action, block_indexes, thread_indexes,
+                                               (threads.limit_x, threads.limit_y, threads.limit_z)))
+                    if is_global:
+                        if current_index > len(global_memory.list):
+                            print "There is outraged here! plz noted."
+                            continue
+                        global_memory.list[current_index].set_by_order(saved_action,
+                                                                       visit_order_for_global_memory[current_index])
+                        current_visited_global_memory_index.push(current_index)
+                    else:
+                        shared_memory.list[current_index].set_by_order(saved_action,
+                                                                       visit_order_for_shared_memory[current_index])
+                        current_visited_shared_memory_index.push(current_index)
+        shared_parser(shared_memory, program_flow)
+        has_no_necessarily(shared_barr, shared_memory, shared_mem, program_flow, shared_flag)
+        shared_barr.clear()
+        shared_mem.clear()
+    global_parser(global_memory, program_flow)
+    has_no_necessarily(global_barr, global_memory, global_mem, program_flow, global_flag)
+    global_barr.clear()
+    global_mem.clear()
+    necessity = True
+    for barr in shared_flag:
+        if barr in global_flag and (shared_flag[barr] and global_flag[barr]):
+            necessity = False
+        elif barr not in global_flag and shared_flag[barr]:
+            necessity = False
+    for barr in global_flag:
+        if barr not in shared_flag and global_flag[barr]:
+            necessity = False
+    if not necessity:
+        print '-------------------------------------------------------------------------------'
+        print 'the barrier ' + barr + ' is not necessary.'
+        print '-------------------------------------------------------------------------------'
+
+
 #add new functions to dynamically collect information for branch divergence
 def construct_memory_execute_mode_dynamically(blocks, threads, global_size, shared_size, raw_kernel_codes, arguments,
                                   shared_parser, global_parser, global_env=None, should_print=True):
@@ -208,6 +335,149 @@ def construct_memory_execute_mode_dynamically(blocks, threads, global_size, shar
                         current_visited_shared_memory_index.push(current_index)
         shared_parser(shared_memory, program_flow, statement_path)
     global_parser(global_memory, program_flow, statement_path)
+
+
+def construct_memory_execute_mode_dynamically_for_barrier(blocks, threads, global_size, shared_size, raw_kernel_codes,
+                                        arguments, shared_parser, global_parser, global_env=None, should_print=True):
+        main_memory = arguments['main_memory']
+        global_memory = GlobalMemory(global_size)
+        warp_size = DataType("i32")
+        warp_size.set_value(32)
+        if global_env is None:
+            global_env = Environment()
+        global_env.add_value("@warpSize", warp_size)
+        global_env.add_value("main_entrance", raw_kernel_codes)
+        program_flow = ProgramFlow("main_entrance", global_env, "", lambda x: x)
+        program_flow.generate_all_stmt_path()
+        statement_path = StatementPath()
+        for block_indexes in generator_for_dimension_var(blocks):
+
+            global_env.add_value("@blockIdx", Block(block_indexes, (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
+            global_env.add_value("@gridDim", Block((blocks.limit_x, blocks.limit_y, blocks.limit_z),
+                                                   (blocks.limit_x, blocks.limit_y, blocks.limit_z)))
+            shared_memory = SharedMemory(shared_size)
+            visit_order_for_global_memory = [0 for i in xrange(global_size)]
+            visit_order_for_shared_memory = [0 for i in xrange(shared_size)]
+            current_visited_global_memory_index = StackSet()
+            current_visited_shared_memory_index = StackSet()
+            #  struct for collecting data for barrier function
+            shared_barr = BarrierStackSet()
+            global_barr = BarrierStackSet()
+            shared_mem = MemDict()
+            global_mem = MemDict()
+            shared_flag = dict()
+            global_flag = dict()
+            local_env_dict = dict()
+            unfinished_total_threads = dict()
+            for thread_indexes in generator_for_dimension_var(threads):
+                unfinished_total_threads[str(thread_indexes)] = True
+            synchronization = SyncThreads(len(unfinished_total_threads), unfinished_total_threads)
+            while not is_all_thread_finished(unfinished_total_threads):
+                for thread_indexes in generator_for_dimension_var(threads):
+                    global_env.add_value("@threadIdx", Thread(thread_indexes,
+                                                              (threads.limit_x, threads.limit_y, threads.limit_z)))
+                    global_env.add_value("@blockDim", Thread((threads.limit_x, threads.limit_y, threads.limit_z),
+                                                             (threads.limit_x, threads.limit_y, threads.limit_z)))
+                    if str(thread_indexes) not in local_env_dict:
+                        local_env_dict[str(thread_indexes)] = Environment()
+                        local_env_dict[str(thread_indexes)].binding_value(arguments)
+                        local_env_dict[str(thread_indexes)].add_value('kernel_code', KernelCodes(raw_kernel_codes))
+                    local_env = local_env_dict[str(thread_indexes)]
+                    kernel_codes = local_env.get_value('kernel_code')
+                    current_line = kernel_codes.get_current_line()
+                    if kernel_codes.is_over():
+                        unfinished_total_threads[str(thread_indexes)] = False
+                        if synchronization.has_halt_threads():
+                            print "Has barrier divergence issue in " + str(synchronization.get_a_hold_stmt())
+                            return
+                        continue
+                    if kernel_codes.should_halt():
+                        print_stmt(
+                            "halt here because of __syncthreads() " + " in " + str(thread_indexes) + " in block " +
+                            str(block_indexes), should_print)
+                        continue
+                    current_stmt = kernel_codes.get_current_statement_and_set_next()
+                    branch_marking_function = kernel_codes.get_token_string()
+                    if branch_marking_function is None:
+                        state = Statement(block_indexes, thread_indexes, current_stmt)
+                        statement_path.add(state)
+                    else:
+                        state = Statement(block_indexes, thread_indexes, branch_marking_function + "::" + current_stmt)
+                        statement_path.add(state)
+
+                    # current_stmt = kernel_codes.get_current_statement_and_set_next()
+                    local_env.add_value("current_stmt", current_stmt)
+                    print_stmt(
+                        'execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
+                        should_print)
+                    if detect_if_is_syncthreads(current_stmt):
+                        synchronization.reach_one(thread_indexes, kernel_codes)
+                        if synchronization.can_continue():
+                            print 'last thread located here: ' + str(thread_indexes) + ", in block " + str(
+                                block_indexes)
+                            if shared_flag.get(current_stmt) is None:
+                                shared_flag[current_stmt] = True
+                            if global_flag.get(current_stmt) is None:
+                                global_flag[current_stmt] = True
+                            while current_visited_global_memory_index.size() != 0:
+                                global_index = current_visited_global_memory_index.pop()
+                                global_mem.push(global_index, visit_order_for_global_memory[global_index])
+                                global_barr.push(current_stmt, global_index,
+                                                 visit_order_for_global_memory[global_index])
+                                visit_order_for_global_memory[global_index] += 1
+                            global_mem.set_flag()
+                            while current_visited_shared_memory_index.size() != 0:
+                                shared_index = current_visited_shared_memory_index.pop()
+                                shared_mem.push(shared_index, visit_order_for_shared_memory[shared_index])
+                                shared_barr.push(current_stmt, shared_index,
+                                                 visit_order_for_shared_memory[shared_index])
+                                visit_order_for_shared_memory[shared_index] += 1
+                            shared_mem.set_flag()
+                    else:
+                        return_value, current_action, current_index, is_global = \
+                            execute_statement_and_get_action(current_stmt, kernel_codes, main_memory, global_env,
+                                                             local_env)
+                        if current_action is None:
+                            continue
+                        branch_marking_function = kernel_codes.get_token_string()
+                        if branch_marking_function is None:
+                            saved_action = Action(
+                                (current_stmt, current_line, current_action, block_indexes, thread_indexes,
+                                 (threads.limit_x, threads.limit_y, threads.limit_z)))
+                        else:
+                            saved_action = Action((branch_marking_function + "::" + current_stmt, current_line,
+                                                   current_action, block_indexes, thread_indexes,
+                                                   (threads.limit_x, threads.limit_y, threads.limit_z)))
+                        if is_global:
+                            global_memory.list[current_index].set_by_order(saved_action,
+                                                                           visit_order_for_global_memory[current_index])
+                            current_visited_global_memory_index.push(current_index)
+                        else:
+                            shared_memory.list[current_index].set_by_order(saved_action,
+                                                                           visit_order_for_shared_memory[current_index])
+                            current_visited_shared_memory_index.push(current_index)
+            shared_parser(shared_memory, program_flow, statement_path)
+            has_no_necessarily_dynamically(shared_barr, shared_memory, shared_mem, program_flow, shared_flag, statement_path)
+            shared_barr.clear()
+            shared_mem.clear()
+        global_parser(global_memory, program_flow, statement_path)
+        has_no_necessarily_dynamically(global_barr, global_memory, global_mem, program_flow, global_flag, statement_path)
+        global_barr.clear()
+        global_mem.clear()
+        necessity = True
+        for barr in shared_flag:
+            if barr in global_flag and (shared_flag[barr] and global_flag[barr]):
+                necessity = False
+            elif barr not in global_flag and shared_flag[barr]:
+                necessity = False
+        for barr in global_flag:
+            if barr not in shared_flag and global_flag[barr]:
+                necessity = False
+        if not necessity:
+            print '-------------------------------------------------------------------------------'
+            print 'the barrier ' + barr + ' is not necessary.'
+            print '-------------------------------------------------------------------------------'
+
 
 def get_key_from_action(single_action):
     return str(single_action.block) + "+" + str(single_action.thread) + "+" + str(single_action.thread_dim)
@@ -468,6 +738,129 @@ def parse_target_memory_and_checking_sync_dynamically(target_memory, program_flo
                     show_dict(read_write_issue[1])
                     print '-------------------------------------------------------------------------------'
 
+
+def has_no_necessarily_dynamically(target_barr, target_memory, target_mem, program_flow, target_flag, statement_path):
+    index = 0
+    while index < len(target_barr.list):
+        print index , len(target_barr.list)
+        if not target_flag[target_barr.list[index]]:
+            index += 1
+            continue
+        next_index = index
+        jmp = index
+        last = False
+        for next in range(0, len(target_mem.flag)):
+            if next_index < target_mem.flag[next] + 1:
+                next_index = target_mem.flag[next] + 1
+                if next < len(target_mem.flag)-1:
+                    jmp = target_mem.flag[next+1] + 1
+                else:
+                    jmp = next_index
+                break
+        if next_index == jmp:
+            last = True
+            next_index = index
+        for next in range(next_index, jmp):
+            print next
+            if not target_flag[target_barr.list[index]]:
+                break
+            new_memory = target_barr.build_memory(target_memory, index, jmp, next, target_mem, last)
+            if last and new_memory.flag:
+                continue
+            memory_lst = new_memory.list
+            for single_index in xrange(len(memory_lst)):
+                single_memory_item = memory_lst[single_index]
+                visit_lst = single_memory_item.visit_lst
+                for single_visit_order in visit_lst:
+                    visit_read_dict = dict()
+                    visit_write_dict = dict()
+                    has_write = False
+                    for single_action in single_visit_order:
+                        if single_action.action == 'write':
+                            has_write = True
+                            current_key = get_key_from_action(single_action)
+                            if current_key not in visit_write_dict:
+                                visit_write_dict[current_key] = list(), dict()
+                            if single_action.current_stmt not in visit_write_dict[current_key][1]:
+                                visit_write_dict[current_key][0].append(single_action.current_stmt)
+                                visit_write_dict[current_key][1][single_action.current_stmt] = True
+                        if single_action.action == 'read':
+                            current_key = get_key_from_action(single_action)
+                            if current_key not in visit_read_dict:
+                                visit_read_dict[current_key] = list(), dict()
+                            if single_action.current_stmt not in visit_read_dict[current_key][1]:
+                                visit_read_dict[current_key][0].append(single_action.current_stmt)
+                                visit_read_dict[current_key][1][single_action.current_stmt] = True
+                    if has_write:
+                        write_write_issue = has_write_write_sync_issue_dynamically(visit_write_dict, program_flow, statement_path)
+                        read_write_issue = has_read_write_sync_issue_dynamically(visit_read_dict, visit_write_dict, program_flow, statement_path)
+                        if len(read_write_issue[0]) != 0 or len(write_write_issue) != 0:
+                            target_flag[target_barr.list[index]] = False
+        index = next_index
+        if last:
+            break
+
+
+def has_no_necessarily(target_barr, target_memory, target_mem, program_flow, target_flag):
+    index = 0
+    while index < len(target_barr.list):
+        print index , len(target_barr.list)
+        if not target_flag[target_barr.list[index]]:
+            index += 1
+            continue
+        next_index = index
+        jmp = index
+        last = False
+        for next in range(0, len(target_mem.flag)):
+            if next_index < target_mem.flag[next] + 1:
+                next_index = target_mem.flag[next] + 1
+                if next < len(target_mem.flag)-1:
+                    jmp = target_mem.flag[next+1] + 1
+                else:
+                    jmp = next_index
+                break
+        if next_index == jmp:
+            last = True
+            next_index = index
+        for next in range(next_index, jmp):
+            print next
+            if not target_flag[target_barr.list[index]]:
+                break
+            new_memory = target_barr.build_memory(target_memory, index, jmp, next, target_mem, last)
+            if last and new_memory.flag:
+                continue
+            memory_lst = new_memory.list
+            for single_index in xrange(len(memory_lst)):
+                single_memory_item = memory_lst[single_index]
+                visit_lst = single_memory_item.visit_lst
+                for single_visit_order in visit_lst:
+                    visit_read_dict = dict()
+                    visit_write_dict = dict()
+                    has_write = False
+                    for single_action in single_visit_order:
+                        if single_action.action == 'write':
+                            has_write = True
+                            current_key = get_key_from_action(single_action)
+                            if current_key not in visit_write_dict:
+                                visit_write_dict[current_key] = list(), dict()
+                            if single_action.current_stmt not in visit_write_dict[current_key][1]:
+                                visit_write_dict[current_key][0].append(single_action.current_stmt)
+                                visit_write_dict[current_key][1][single_action.current_stmt] = True
+                        if single_action.action == 'read':
+                            current_key = get_key_from_action(single_action)
+                            if current_key not in visit_read_dict:
+                                visit_read_dict[current_key] = list(), dict()
+                            if single_action.current_stmt not in visit_read_dict[current_key][1]:
+                                visit_read_dict[current_key][0].append(single_action.current_stmt)
+                                visit_read_dict[current_key][1][single_action.current_stmt] = True
+                    if has_write:
+                        write_write_issue = has_write_write_sync_issue(visit_write_dict, program_flow)
+                        read_write_issue = has_read_write_sync_issue(visit_read_dict, visit_write_dict, program_flow)
+                        if len(read_write_issue[0]) != 0 or len(write_write_issue) != 0:
+                            target_flag[target_barr.list[index]] = False
+        index = next_index
+        if last:
+            break
 
 if __name__ == "__main__":
     # test_block = Block((-1, -1, 0), (2, 2, 1))
