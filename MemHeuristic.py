@@ -19,6 +19,9 @@ def parse_all_variable_from_string(target_string):
         real_var = target_string[single_var.start(): single_var.end()]
         if real_var.find("thread") == -1 and real_var.find("block") == -1:
             result_lst.append(real_var)
+    sort_lst = [(target_string.find(item), item) for item in result_lst]
+    sort_lst.sort(key=lambda x: x[0])
+    result_lst = [item[1] for item in sort_lst]
     return result_lst
 
 
@@ -63,6 +66,8 @@ def trace_target_memory(global_env, function_name, target_memory):
                         result_lst.append((each_line, line_index))  # only record store
             elif each_line.find('getelementptr') != -1:
                 variable_set[updated_var] = True
+            elif each_line.find("call ") != -1:
+                result_lst.append((each_line, line_index))
     return result_lst
 
 

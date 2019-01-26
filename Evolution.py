@@ -129,6 +129,16 @@ class ArgumentsItem:
         normal_item.step_size = np.sqrt(normal_item.step_size)
         return normal_item, cauchy_item
 
+    def get_vector_format_for_all_item(self):
+        result_lst = list()
+        for item in self.blocks.grid_dim:
+            result_lst.append(item)
+        for item in self.threads.block_dim:
+            result_lst.append(item)
+        for item in self.should_evolution:
+            result_lst.append(self.initial_argus[item[0]])
+        return result_lst
+
     def fitness(self):
         memory_lst = list()
         if self.main_memory["shared"] is not None:
@@ -282,7 +292,7 @@ def selector(item, population_lst):
 def acceptable_factory(is_branch):
 
     def _acceptable(item_lst):
-        return item_lst[0][1][0] < .2
+        return item_lst[0][1][0] < .3
         # score_lst = [item[1] for item in item_lst if item[1] < .7]
         # return len(score_lst) >= len(item_lst) / 5
 
@@ -345,8 +355,9 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
     return test_result_lst[0]
 
 
-def auto_test_target_function(target_file_path, function_name, main_memory):
-    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory)
+def auto_test_target_function(target_file_path, function_name, main_memory, used_default_dimension=False):
+    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
+                                                evolve_dimension=not used_default_dimension)
     for item in solution_lst:
         if item[1][0] < 1:
             global_env = parse_function(target_file_path)
@@ -368,6 +379,10 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
+    # auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i", {
+    #     "global": "%alpha",
+    #     "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
+    # }, used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None

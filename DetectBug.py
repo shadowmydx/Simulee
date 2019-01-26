@@ -560,9 +560,13 @@ def performance_sync_cudpp_sparseMatrixVectorSetFlags():
 
 def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
                       should_print=False):
+    print "===================================================================================="
+    print "Test on " + str(arguments)
+    print "Dimension: " + str(blocks.grid_dim) + " " + str(threads.block_dim)
     construct_memory_execute_mode(blocks, threads, main_size, shared_size, raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
                                   global_env, should_print)
+    print "===================================================================================="
 
 
 if __name__ == "__main__":
@@ -573,11 +577,11 @@ if __name__ == "__main__":
     # test_copy_from_tp()
     # test_copy_from_mat()
     # test_trace_mat_mat_trans()
-    test_slice()
+    # test_slice()
     # test_convnet_kReflectH()
     # test_convnet_kTile()
     # test_convnet_kDotProduct_r()
-    # test_thundersvm_c_smo_solve_kernel()
+    test_thundersvm_c_smo_solve_kernel()
     # test_arrayfire_convolve2()p
     # test_cuda_sift_MatchSiftPoints4()
     # test_cuda_sift_FindMaxCorr()
