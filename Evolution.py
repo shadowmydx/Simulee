@@ -374,7 +374,30 @@ def auto_test_target_function(target_file_path, function_name, main_memory, used
             execute_framework(blocks, threads, raw_code.raw_codes, arguments, global_env)
 
 
+def auto_test_target_function_advanced(target_file_path, function_name, main_memory, used_default_dimension=False):
+    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
+                                                evolve_dimension=not used_default_dimension)
+    for item in solution_lst:
+        if item[1][0] < 1:
+            global_env = parse_function(target_file_path)
+            generate_memory_container(main_memory.keys(), global_env)
+            raw_code = global_env.get_value(function_name)
+            blocks = item[0].blocks
+            threads = item[0].threads
+            arguments = item[0].construct_running_arguments()
+            for idx, variable in enumerate(raw_code.argument_lst):
+                if variable not in arguments and raw_code.type_lst[idx].find("*") == -1:
+                    arguments[variable] = 2  # temp action, need more focus
+            arguments = generate_arguments(global_env.get_value(function_name), arguments)
+            arguments["main_memory"] = main_memory
+            execute_framework_advanced(blocks, threads, raw_code.raw_codes, arguments, global_env)
+
+
 if __name__ == "__main__":
+    auto_test_target_function_advanced("./kaldi-new-bug/fse-func.ll", "@_Z11_sum_reducePd", {
+        "global": "%buffer",
+        "shared": None
+    })
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
     #     "global": "%A",
     #     "shared": None
@@ -403,10 +426,10 @@ if __name__ == "__main__":
     #     "global": None,
     #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
     # })
-    auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z7_splicePfPKfPKiiiiiii", {
-        "global": "%y",
-        "shared": None
-    })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z7_splicePfPKfPKiiiiiii", {
+    #     "global": "%y",
+    #     "shared": None
+    # })
     # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
     #     "global": "%A",
     #     "shared": None

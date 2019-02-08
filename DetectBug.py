@@ -1,5 +1,6 @@
 from DataStructure import *
 from MainProcess import construct_memory_execute_mode
+from MainProcess import construct_memory_execute_mode_for_barrier
 from MainProcess import parse_target_memory_and_checking_sync
 import random
 
@@ -566,6 +567,17 @@ def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_si
     construct_memory_execute_mode(blocks, threads, main_size, shared_size, raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
                                   global_env, should_print)
+    print "===================================================================================="
+
+
+def execute_framework_advanced(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
+                      should_print=False):
+    print "===================================================================================="
+    print "Test on " + str(arguments)
+    print "Dimension: " + str(blocks.grid_dim) + " " + str(threads.block_dim)
+    construct_memory_execute_mode_for_barrier(blocks, threads, main_size, shared_size, raw_codes, arguments,
+                                              parse_target_memory_and_checking_sync,
+                                              parse_target_memory_and_checking_sync, global_env, should_print)
     print "===================================================================================="
 
 
