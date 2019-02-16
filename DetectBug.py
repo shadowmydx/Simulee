@@ -246,7 +246,7 @@ def test_convnet_kReflectH():
 
 def test_convnet_kTile():
     test_block = Block((-1, -1, 0), (2, 2, 1))  # important
-    test_thread = Thread((-1, -1, 0), (34, 1, 1))
+    test_thread = Thread((-1, -1, 0), (3, 1, 1))
     global_current_env = parse_function("./cuda-convnet2-new-bug/new-func.ll")
     arguments = generate_arguments(global_current_env.get_value("@_Z5kTilePKfPfjjjj"), {
         "%srcWidth": 5,
@@ -563,6 +563,7 @@ def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_si
                       should_print=False):
     print "===================================================================================="
     print "Test on " + str(arguments)
+    print_arguments(arguments)
     print "Dimension: " + str(blocks.grid_dim) + " " + str(threads.block_dim)
     construct_memory_execute_mode(blocks, threads, main_size, shared_size, raw_codes, arguments,
                                   parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
@@ -574,11 +575,21 @@ def execute_framework_advanced(blocks, threads, raw_codes, arguments, global_env
                       should_print=False):
     print "===================================================================================="
     print "Test on " + str(arguments)
+    print_arguments(arguments)
     print "Dimension: " + str(blocks.grid_dim) + " " + str(threads.block_dim)
     construct_memory_execute_mode_for_barrier(blocks, threads, main_size, shared_size, raw_codes, arguments,
                                               parse_target_memory_and_checking_sync,
                                               parse_target_memory_and_checking_sync, global_env, should_print)
     print "===================================================================================="
+
+
+def print_arguments(arguments):
+    for key in arguments:
+        current_item = arguments[key]
+        show_item = current_item
+        if isinstance(current_item, DataType):
+            show_item = current_item.value
+        print key, show_item
 
 
 if __name__ == "__main__":
@@ -591,10 +602,10 @@ if __name__ == "__main__":
     # test_trace_mat_mat_trans()
     # test_slice()
     # test_convnet_kReflectH()
-    # test_convnet_kTile()
+    test_convnet_kTile()
     # test_convnet_kDotProduct_r()
-    test_thundersvm_c_smo_solve_kernel()
-    # test_arrayfire_convolve2()p
+    # test_thundersvm_c_smo_solve_kernel()
+    # test_arrayfire_convolve2()
     # test_cuda_sift_MatchSiftPoints4()
     # test_cuda_sift_FindMaxCorr()
     # test_cudamat_random()
