@@ -597,7 +597,7 @@ if __name__ == "__main__":
     # test_copy_low_upp()
     # test_copy_upp_low()
     # test_add_diag_vec_mat()
-    # test_copy_from_tp()
+    test_copy_from_tp()
     # test_copy_from_mat()
     # test_trace_mat_mat_trans()
     # test_slice()

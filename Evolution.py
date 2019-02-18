@@ -336,7 +336,7 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
                                               Thread((-1, -1, 0), fixed_dimension[1]), evolve_dimension, is_branch)
         generator = generator_for_evolutionary_factory(generator)
 
-        population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
+        population_lst, current_generation = evolutionary_framework(3, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
         # population_lst, current_generation = evolutionary_framework_local(20, 1, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
         if population_lst[0][1][0] >= 1:
             print population_lst[0][1][0]
@@ -358,6 +358,7 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
 
 
 def auto_test_target_function(target_file_path, function_name, main_memory, used_default_dimension=False, fixed_dimension=None):
+    start_time = time.time()
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
                                                 evolve_dimension=not used_default_dimension, fixed_dimension=fixed_dimension)
     used_solution = dict()
@@ -379,6 +380,8 @@ def auto_test_target_function(target_file_path, function_name, main_memory, used
             arguments = generate_arguments(global_env.get_value(function_name), arguments)
             arguments["main_memory"] = main_memory
             execute_framework(blocks, threads, raw_code.raw_codes, arguments, global_env)
+            current_time = time.time()
+            print "Current solution total cost time is " + str(current_time - start_time)
 
 
 def auto_test_target_function_advanced(target_file_path, function_name, main_memory,
@@ -408,20 +411,20 @@ def auto_test_target_function_advanced(target_file_path, function_name, main_mem
 
 
 if __name__ == "__main__":
-    # auto_test_target_function_advanced("./kaldi-new-bug/fse-func.ll", "@_Z11_sum_reducePd", {
+    # auto_test_target_function("./kaldi-new-bug/fse-func.ll", "@_Z11_sum_reducePd", {
     #     "global": "%buffer",
     #     "shared": None
-    # })
+    # })  # race & unnecessary
     # auto_test_target_function("./cuda-convnet2-new-bug/new-func.ll", "@_Z13kDotProduct_rPfS_S_j", {
     #     "global": None,
     #     "shared": "@_ZZ13kDotProduct_rPfS_S_jE5shmem"
     # }, fixed_dimension=[(2, 1, 1), (3, 3, 1)], used_default_dimension=True)
-    auto_test_target_function("./cuda-convnet2-new-bug/new-func.ll", "@_Z5kTilePKfPfjjjj", {
-        "global": "%tgt",
-        "shared": None
-    }, fixed_dimension=[(2, 2, 1), (3, 1, 1)], used_default_dimension=True)
-    # auto_test_target_function("./gunrock/new-func.ll", "@_Z10Copy_PredsiPKiS0_Pi", {
-    #     "global": "%out_preds",
+    # auto_test_target_function("./cuda-convnet2-new-bug/new-func.ll", "@_Z5kTilePKfPfjjjj", {
+    #     "global": "%tgt",
+    #     "shared": None
+    # }, fixed_dimension=[(2, 2, 1), (3, 1, 1)], used_default_dimension=True)
+    # auto_test_target_function("./read_write_test.ll", "@_Z13device_globalPji", {
+    #     "global": "%input_array",
     #     "shared": None
     # })
     # auto_test_target_function("./cudatree/new-func.ll", "@_Z7predictPjS_PtPfPiS2_S2_ii", {
@@ -460,10 +463,10 @@ if __name__ == "__main__":
     #     "global": "%y",
     #     "shared": None
     # })
-    # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z13_copy_from_tpPfPKfiii", {
     #     "global": "%A",
     #     "shared": None
-    # }, True)
+    # })
     # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None
