@@ -328,7 +328,7 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
     total_generation = 0
     test_result_lst = list()
     if fixed_dimension is None:
-        fixed_dimension = [(2, 1, 1), (34, 1, 1)]
+        fixed_dimension = [(1, 1, 1), (34, 1, 1)]
     for i in xrange(test_round):
         start_time = time.time()
         generator = evolutionary_item_factory(target_file_path, function_name, main_memory,
@@ -439,10 +439,10 @@ if __name__ == "__main__":
     #     "global": "%alpha",
     #     "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
     # }, used_default_dimension=True)
-    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
-    #     "global": "%mat",
-    #     "shared": None
-    # })
+    auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
+        "global": "%mat",
+        "shared": None
+    })
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
     #     "global": None,
     #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
