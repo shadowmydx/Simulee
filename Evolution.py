@@ -427,6 +427,10 @@ if __name__ == "__main__":
     #     "global": "%input_array",
     #     "shared": None
     # })
+    # auto_test_target_function("./arrayfire-new-bug/new-func.ll", "@_Z9convolve2PiS_iS_S_S_S_iiiiiiii", {
+    #     "global": None,
+    #     "shared": "_ZZ9convolve2PiS_iS_S_S_S_iiiiiiiiE7shrdMem"
+    # })
     # auto_test_target_function("./cudatree/new-func.ll", "@_Z7predictPjS_PtPfPiS2_S2_ii", {
     #     "global": "%predict_res",
     #     "shared": None
@@ -439,10 +443,10 @@ if __name__ == "__main__":
     #     "global": "%alpha",
     #     "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
     # }, used_default_dimension=True)
-    auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
-        "global": "%mat",
-        "shared": None
-    })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
+    #     "global": "%mat",
+    #     "shared": None
+    # })
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
     #     "global": None,
     #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
@@ -451,6 +455,10 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
+    auto_test_target_function("./gunrock/fse-func.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
+        "global": "%froms_out",
+        "shared": None
+    }, fixed_dimension=[(2, 1, 1), (33, 1, 1)], used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z14_copy_from_matPfPKfiiii", {
     #     "global": "%mat_out",
     #     "shared": None
