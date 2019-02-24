@@ -390,6 +390,10 @@ def auto_test_target_function_advanced(target_file_path, function_name, main_mem
                                                 evolve_dimension=not used_default_dimension,
                                                 fixed_dimension=fixed_dimension)
     used_solution = dict()
+    if solution_lst[0][0] >= 1:
+        print("=========================================================")
+        print("In case that no conflicts, so all barrier functions located in original code are redundant.")
+        print("=========================================================")
     for item in solution_lst:
         if item[1][0] < 1:
             solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
@@ -439,10 +443,10 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
-    # auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i", {
-    #     "global": "%alpha",
-    #     "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
-    # }, used_default_dimension=True)
+    auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i", {
+        "global": "%alpha",
+        "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
+    }, used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None
@@ -455,10 +459,10 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
-    auto_test_target_function("./gunrock/fse-func.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
-        "global": "%froms_out",
-        "shared": None
-    }, fixed_dimension=[(2, 1, 1), (33, 1, 1)], used_default_dimension=True)
+    # auto_test_target_function("./gunrock/fse-func.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
+    #     "global": "%froms_out",
+    #     "shared": None
+    # }, fixed_dimension=[(2, 1, 1), (33, 1, 1)], used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z14_copy_from_matPfPKfiiii", {
     #     "global": "%mat_out",
     #     "shared": None
