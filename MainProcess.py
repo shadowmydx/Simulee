@@ -117,6 +117,7 @@ def construct_memory_execute_mode_for_barrier(blocks, threads, global_size, shar
                                   shared_parser, global_parser, global_env=None, should_print=True):
     main_memory = arguments['main_memory']
     global_memory = GlobalMemory(global_size)
+    redundant_barrier = list()
     warp_size = DataType("i32")
     warp_size.set_value(32)
     if global_env is None:
@@ -231,13 +232,13 @@ def construct_memory_execute_mode_for_barrier(blocks, threads, global_size, shar
     necessity = True
     for barr in shared_flag:
         if barr in global_flag and (shared_flag[barr] and global_flag[barr]):
-            necessity = False
+            redundant_barrier.append(barr)
         elif barr not in global_flag and shared_flag[barr]:
-            necessity = False
+            redundant_barrier.append(barr)
     for barr in global_flag:
         if barr not in shared_flag and global_flag[barr]:
-            necessity = False
-    if not necessity:
+            redundant_barrier.append(barr)
+    for barr in redundant_barrier:
         print '-------------------------------------------------------------------------------'
         print 'the barrier ' + barr + ' is not necessary.'
         print '-------------------------------------------------------------------------------'
