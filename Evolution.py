@@ -129,6 +129,16 @@ class ArgumentsItem:
         normal_item.step_size = np.sqrt(normal_item.step_size)
         return normal_item, cauchy_item
 
+    def get_vector_format_for_all_item(self):
+        result_lst = list()
+        for item in self.blocks.grid_dim:
+            result_lst.append(item)
+        for item in self.threads.block_dim:
+            result_lst.append(item)
+        for item in self.should_evolution:
+            result_lst.append(self.initial_argus[item[0]])
+        return result_lst
+
     def fitness(self):
         memory_lst = list()
         if self.main_memory["shared"] is not None:
@@ -282,7 +292,7 @@ def selector(item, population_lst):
 def acceptable_factory(is_branch):
 
     def _acceptable(item_lst):
-        return item_lst[0][1][0] < .2
+        return item_lst[0][1][0] < .3
         # score_lst = [item[1] for item in item_lst if item[1] < .7]
         # return len(score_lst) >= len(item_lst) / 5
 
@@ -313,18 +323,20 @@ def show_evolution_path(target_item):
 
 
 def generate_initialized_setting(target_file_path, function_name, main_memory, is_branch=False, test_round=1,
-                                 evolve_dimension=True):
+                                 evolve_dimension=True, fixed_dimension=None):
     failed = 0
     total_generation = 0
     test_result_lst = list()
+    if fixed_dimension is None:
+        fixed_dimension = [(1, 1, 1), (34, 1, 1)]
     for i in xrange(test_round):
         start_time = time.time()
         generator = evolutionary_item_factory(target_file_path, function_name, main_memory,
-                                              Block((-1, -1, 0), (1, 1, 1)), Thread((-1, -1, 0), (40, 1, 1)),
-                                              evolve_dimension, is_branch)
+                                              Block((-1, -1, 0), fixed_dimension[0]),
+                                              Thread((-1, -1, 0), fixed_dimension[1]), evolve_dimension, is_branch)
         generator = generator_for_evolutionary_factory(generator)
 
-        population_lst, current_generation = evolutionary_framework(20, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
+        population_lst, current_generation = evolutionary_framework(3, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
         # population_lst, current_generation = evolutionary_framework_local(20, 1, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
         if population_lst[0][1][0] >= 1:
             print population_lst[0][1][0]
@@ -345,10 +357,17 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
     return test_result_lst[0]
 
 
-def auto_test_target_function(target_file_path, function_name, main_memory):
-    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory)
+def auto_test_target_function(target_file_path, function_name, main_memory, used_default_dimension=False, fixed_dimension=None):
+    start_time = time.time()
+    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
+                                                evolve_dimension=not used_default_dimension, fixed_dimension=fixed_dimension)
+    used_solution = dict()
     for item in solution_lst:
         if item[1][0] < 1:
+            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
+            if solution_str in used_solution:
+                continue
+            used_solution[solution_str] = True
             global_env = parse_function(target_file_path)
             generate_memory_container(main_memory.keys(), global_env)
             raw_code = global_env.get_value(function_name)
@@ -361,13 +380,73 @@ def auto_test_target_function(target_file_path, function_name, main_memory):
             arguments = generate_arguments(global_env.get_value(function_name), arguments)
             arguments["main_memory"] = main_memory
             execute_framework(blocks, threads, raw_code.raw_codes, arguments, global_env)
+            current_time = time.time()
+            print "Current solution total cost time is " + str(current_time - start_time)
+
+
+def auto_test_target_function_advanced(target_file_path, function_name, main_memory,
+                                       used_default_dimension=False, fixed_dimension=None):
+    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
+                                                evolve_dimension=not used_default_dimension,
+                                                fixed_dimension=fixed_dimension)
+    used_solution = dict()
+    if solution_lst[0][0] >= 1:
+        print("=========================================================")
+        print("In case that no conflicts, so all barrier functions located in original code are redundant.")
+        print("=========================================================")
+    for item in solution_lst:
+        if item[1][0] < 1:
+            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
+            if solution_str in used_solution:
+                continue
+            used_solution[solution_str] = True
+            global_env = parse_function(target_file_path)
+            generate_memory_container(main_memory.keys(), global_env)
+            raw_code = global_env.get_value(function_name)
+            blocks = item[0].blocks
+            threads = item[0].threads
+            arguments = item[0].construct_running_arguments()
+            for idx, variable in enumerate(raw_code.argument_lst):
+                if variable not in arguments and raw_code.type_lst[idx].find("*") == -1:
+                    arguments[variable] = 2  # temp action, need more focus
+            arguments = generate_arguments(global_env.get_value(function_name), arguments)
+            arguments["main_memory"] = main_memory
+            execute_framework_advanced(blocks, threads, raw_code.raw_codes, arguments, global_env)
 
 
 if __name__ == "__main__":
+    # auto_test_target_function("./kaldi-new-bug/fse-func.ll", "@_Z11_sum_reducePd", {
+    #     "global": "%buffer",
+    #     "shared": None
+    # })  # race & unnecessary
+    # auto_test_target_function("./cuda-convnet2-new-bug/new-func.ll", "@_Z13kDotProduct_rPfS_S_j", {
+    #     "global": None,
+    #     "shared": "@_ZZ13kDotProduct_rPfS_S_jE5shmem"
+    # }, fixed_dimension=[(2, 1, 1), (3, 3, 1)], used_default_dimension=True)
+    # auto_test_target_function("./cuda-convnet2-new-bug/new-func.ll", "@_Z5kTilePKfPfjjjj", {
+    #     "global": "%tgt",
+    #     "shared": None
+    # }, fixed_dimension=[(2, 2, 1), (3, 1, 1)], used_default_dimension=True)
+    # auto_test_target_function("./read_write_test.ll", "@_Z13device_globalPji", {
+    #     "global": "%input_array",
+    #     "shared": None
+    # })
+    # auto_test_target_function("./arrayfire-new-bug/new-func.ll", "@_Z9convolve2PiS_iS_S_S_S_iiiiiiii", {
+    #     "global": None,
+    #     "shared": "_ZZ9convolve2PiS_iS_S_S_S_iiiiiiiiE7shrdMem"
+    # })
+    # auto_test_target_function("./cudatree/new-func.ll", "@_Z7predictPjS_PtPfPiS2_S2_ii", {
+    #     "global": "%predict_res",
+    #     "shared": None
+    # })
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
     #     "global": "%A",
     #     "shared": None
     # })
+    auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i", {
+        "global": "%alpha",
+        "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
+    }, used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None
@@ -380,6 +459,10 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
+    # auto_test_target_function("./gunrock/fse-func.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
+    #     "global": "%froms_out",
+    #     "shared": None
+    # }, fixed_dimension=[(2, 1, 1), (33, 1, 1)], used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z14_copy_from_matPfPKfiiii", {
     #     "global": "%mat_out",
     #     "shared": None
@@ -388,14 +471,14 @@ if __name__ == "__main__":
     #     "global": None,
     #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
     # })
-    auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z7_splicePfPKfPKiiiiiii", {
-        "global": "%y",
-        "shared": None
-    })
-    # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z13_copy_low_uppPfii", {
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z7_splicePfPKfPKiiiiiii", {
+    #     "global": "%y",
+    #     "shared": None
+    # })
+    # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z13_copy_from_tpPfPKfiii", {
     #     "global": "%A",
     #     "shared": None
-    # }, True)
+    # })
     # generate_initialized_setting("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None

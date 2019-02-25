@@ -1,0 +1,38 @@
+device_global@Gklee_Test/read_write_race0.cu   0.627186059952
+_add_diag_vec_mat@kaldi/cu-kernels.cu          1.89538502693
+_copy_low_upp@kaldi/cu-kernels.cu              1.59333300591
+_splice@kaldi/cu-kernels.cu                    1.93862199783
+_copy_upp_low@kaldi/cu-kernels.cu              1.47234892845
+Join@gunrock/join.cuh                          6.25341415405
+c_smo_solve_kernel@thundersvm/smo-kernels.cu   7.8977749348
+kTile@cuda-convnet2/nvmatrix_kernels.cu        2.0280020237
+kDotProduct@cuda-convnet2/nvmatrix_kernels.cu  1.58654117584
+_trace_mat_mat_trans@kaldi/cu-kernels.cu       3.75331711769
+convolve2@arrayfire/convolve.hpp               4.3802690506
+
+
+arguments: {
+    population: 50,
+    generation: 3
+}
+
+---------------------------------------------------------------------
+
+device_global@Gklee_Test/read_write_race0.cu   0.336097002029
+_add_diag_vec_mat@kaldi/cu-kernels.cu          2.3871281147
+_copy_low_upp@kaldi/cu-kernels.cu              0.82728099823
+_splice@kaldi/cu-kernels.cu                    1.16035079956
+_copy_upp_low@kaldi/cu-kernels.cu              1.14414095879
+Join@gunrock/join.cuh                          2.89437294006
+c_smo_solve_kernel@thundersvm/smo-kernels.cu   4.28621101379
+kTile@cuda-convnet2/nvmatrix_kernels.cu        0.474329948425
+kDotProduct@cuda-convnet2/nvmatrix_kernels.cu  0.762001037598
+_trace_mat_mat_trans@kaldi/cu-kernels.cu       2.00656104088
+convolve2@arrayfire/convolve.hpp               1.73516201973
+
+
+arguments: {
+    population: 20,
+    generation: 3
+}
+
