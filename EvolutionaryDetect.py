@@ -66,10 +66,17 @@ def test_thundersvm_c_smo_solve_kernel():
 
 
 def test_gunrock_join():
-    auto_test_target_function("./gunrock/fse-func.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
+    auto_test_target_function("./gunrock/new-func2.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
         "global": "%froms_out",
         "shared": None
-    }, fixed_dimension=[(2, 1, 1), (33, 1, 1)], used_default_dimension=True)
+    }, fixed_dimension=[(4, 1, 1), (33, 1, 1)], used_default_dimension=True)
+
+
+def test_gunrock_join2():
+    auto_test_target_function("./gunrock/new-func2.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
+        "global": "%froms_out",
+        "shared": None
+    })
 
 
 def test_convnet2_kTile():
@@ -108,9 +115,10 @@ def test_sync_cudpp_sparseMatrixVectorSetFlags():
 
 
 if __name__ == "__main__":
-    test_gunrock_join()
+    test_gunrock_join2()
+    # test_gunrock_join()
     # test_sum_reduced()
     # test_sync_cudpp_sparseMatrixVectorSetFlags()
     # test_sync_FindMaxCorr()
-    # test_sync_cuda_cnn_g_getCost_3()
+    # test_sync_cuda_cnn_g_geptCost_3()
     # test_splice()
