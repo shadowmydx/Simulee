@@ -559,6 +559,48 @@ def performance_sync_cudpp_sparseMatrixVectorSetFlags():
                                   global_current_env, False)
 
 
+def test_xmrig():
+    test_block = Block((-1, -1, 0), (3, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (5, 1, 1))
+    global_current_env = parse_function("./xmrig/new-func.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z27cryptonight_core_gpu_phase3iiiPKjPjS1_"), {
+        "%threads": 25,
+        "%bfactor": 6,
+        "%partidx": 0,
+    })
+    arguments["main_memory"] = {
+        'global': None,
+        'shared': "@_ZZ27cryptonight_core_gpu_phase3iiiPKjPjS1_E12sharedMemory",
+    }
+    generate_memory_container([], global_current_env)
+    raw_code = global_current_env.get_value("@_Z27cryptonight_core_gpu_phase3iiiPKjPjS1_")
+    construct_memory_execute_mode(test_block, test_thread, 512, 1024, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
+def test_gunrock():
+    test_block = Block((-1, -1, 0), (4, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (33, 1, 1))
+    global_current_env = parse_function("./gunrock/gunrock.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z4JoiniiPKiS0_PiS0_S0_S0_S1_S1_"), {
+        "%edges": 1,
+        "%iter": 0,
+    })
+    arguments["main_memory"] = {
+        'global': "%froms_out",
+        'shared': None,
+    }
+    generate_memory_container(["%pos", "%intersect", ], global_current_env)
+    target_memory = global_current_env.get_value("memory_container")
+    fill_data_to_memory_by_list(target_memory, "%pos", [9, 10, 11])
+    fill_data_to_memory_by_list(target_memory, "%intersect", [5, 11, 3])
+    raw_code = global_current_env.get_value("@_Z4JoiniiPKiS0_PiS0_S0_S0_S1_S1_")
+    construct_memory_execute_mode(test_block, test_thread, 512, 512, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
                       should_print=False):
     print "===================================================================================="
@@ -614,5 +656,7 @@ if __name__ == "__main__":
     # performance_sync_FindMaxCorr()
     # performance_sync_cuda_cnn_g_getCost_3()
     # performance_sync_cudpp_sparseMatrixVectorSetFlags()
+    # test_xmrig()
+    # test_gunrock()
     print 'over'
 

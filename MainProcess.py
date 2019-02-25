@@ -229,7 +229,6 @@ def construct_memory_execute_mode_for_barrier(blocks, threads, global_size, shar
     has_no_necessarily(global_barr, global_memory, global_mem, program_flow, global_flag)
     global_barr.clear()
     global_mem.clear()
-    necessity = True
     for barr in shared_flag:
         if barr in global_flag and (shared_flag[barr] and global_flag[barr]):
             redundant_barrier.append(barr)
