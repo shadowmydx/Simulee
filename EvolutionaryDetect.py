@@ -122,10 +122,10 @@ def test_sync_cudpp_sparseMatrixVectorSetFlags():
 
 
 if __name__ == "__main__":
-    test_gunrock_xmrig()
+    # test_gunrock_xmrig()
     # test_gunrock_join2()
     # test_gunrock_join()
-    # test_sum_reduced()
+    test_sum_reduced()
     # test_sync_cudpp_sparseMatrixVectorSetFlags()
     # test_sync_FindMaxCorr()
     # test_sync_cuda_cnn_g_geptCost_3()
