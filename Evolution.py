@@ -390,7 +390,7 @@ def auto_test_target_function_advanced(target_file_path, function_name, main_mem
                                                 evolve_dimension=not used_default_dimension,
                                                 fixed_dimension=fixed_dimension)
     used_solution = dict()
-    if solution_lst[0][0] >= 1:
+    if solution_lst[0][1][0] >= 1:
         print("=========================================================")
         print("In case that no conflicts, so all barrier functions located in original code are redundant.")
         print("=========================================================")
