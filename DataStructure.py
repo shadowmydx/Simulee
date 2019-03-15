@@ -122,8 +122,8 @@ class SyncThreads(object):
         if self.current_barrier is not None:
             if self.has_halt_threads() and current_barrier != self.current_barrier:
                 print "Has barrier divergence issue in " + current_barrier + " and " + self.current_barrier
-            else:
-                self.current_barrier = current_barrier
+        else:
+            self.current_barrier = current_barrier
         self.current_reach_thread[threads] = kernel_codes
         kernel_codes.set_halt(True)
 
