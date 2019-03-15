@@ -115,9 +115,15 @@ class SyncThreads(object):
         super(SyncThreads, self).__init__()
         self.total_threads, self.over_dict = total_threads, over_dict  # over_dict: if there is a barrier divergence
         self.current_reach_thread = dict()  # key: threads number; value: kernel_codes
+        self.current_barrier = None
 
-    def reach_one(self, threads, kernel_codes):
+    def reach_one(self, threads, kernel_codes, current_barrier=None):
         threads = str(threads)
+        if self.current_barrier is not None:
+            if self.has_halt_threads() and current_barrier != self.current_barrier:
+                print "Has barrier divergence issue in " + current_barrier + " and " + self.current_barrier
+            else:
+                self.current_barrier = current_barrier
         self.current_reach_thread[threads] = kernel_codes
         kernel_codes.set_halt(True)
 
@@ -126,6 +132,7 @@ class SyncThreads(object):
             for key in self.current_reach_thread:
                 self.current_reach_thread[key].set_halt(False)
             self.current_reach_thread.clear()
+            self.current_barrier = None
             return True
         return False
 

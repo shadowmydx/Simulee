@@ -76,7 +76,7 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                 print_stmt('execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
                            should_print)
                 if detect_if_is_syncthreads(current_stmt):
-                    synchronization.reach_one(thread_indexes, kernel_codes)
+                    synchronization.reach_one(thread_indexes, kernel_codes, current_stmt)
                     if synchronization.can_continue():
                         print 'last thread located here: ' + str(thread_indexes) + ", in block " + str(block_indexes)
                         while current_visited_global_memory_index.size() != 0:
@@ -176,7 +176,7 @@ def construct_memory_execute_mode_for_barrier(blocks, threads, global_size, shar
                 print_stmt('execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
                            should_print)
                 if detect_if_is_syncthreads(current_stmt):
-                    synchronization.reach_one(thread_indexes, kernel_codes)
+                    synchronization.reach_one(thread_indexes, kernel_codes, current_stmt)
                     if synchronization.can_continue():
                         print 'last thread located here: ' + str(thread_indexes) + ", in block " + str(block_indexes)
                         if shared_flag.get(current_stmt) is None:
