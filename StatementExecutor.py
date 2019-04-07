@@ -245,7 +245,10 @@ def calculation_factory(cac_flag):
         elif cac_flag == 5:
             tmp_result.set_value(num(number_one.get_value()) >> num(number_two.get_value()))
         elif cac_flag == 6:
-            tmp_result.set_value(num(number_one.get_value()) & num(number_two.get_value()))
+            if tmp_result.data_type == 'i1':
+                tmp_result.set_value(number_one.get_value() and number_two.get_value())
+            else:
+                tmp_result.set_value(num(number_one.get_value()) & num(number_two.get_value()))
         elif cac_flag == 7:
             tmp_result.set_value(num(number_one.get_value()) << num(number_two.get_value()))
         return tmp_result, None, None, None
@@ -266,7 +269,7 @@ def single_elem_calculation_factory(cac_flag):
 
 
 def compare_expression(arguments, kernel_codes, main_memory, global_env, local_env):
-    result_tmp = DataType('bool')
+    result_tmp = DataType('i1')
     oper_dict = {
         'eq': lambda x, y: x == y,
         'ne': lambda x, y: x != y,
