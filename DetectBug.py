@@ -57,6 +57,24 @@ def test_copy_low_upp():
                                   global_current_env, False)
 
 
+def test_device_global():
+    test_block = Block((-1, -1, 0), (1, 1, 1))
+    test_thread = Thread((-1, -1, 0), (5, 1, 1))
+    global_current_env = parse_function("./read_write_test.ll")
+    # global_current_env = parse_function("./read_write_test_repaired.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z13device_globalPji"), {"%num_elements": 5})
+    arguments["main_memory"] = {
+        'global': "%input_array",
+        'shared': None,
+    }
+    generate_memory_container([], global_current_env)
+
+    raw_code = global_current_env.get_value("@_Z13device_globalPji")
+    construct_memory_execute_mode(test_block, test_thread, 100, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 def test_copy_upp_low():
     test_block = Block((-1, -1, 0), (1, 1, 1))
     test_thread = Thread((-1, -1, 0), (2, 3, 1))
@@ -635,9 +653,10 @@ def print_arguments(arguments):
 
 
 if __name__ == "__main__":
+    test_device_global()
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()
-    test_copy_upp_low()
+    # test_copy_upp_low()
     # test_add_diag_vec_mat()
     # test_copy_from_tp()
     # test_copy_from_mat()
