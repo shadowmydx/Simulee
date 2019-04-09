@@ -74,6 +74,15 @@ class BranchInformation(object):
                 self.statement_to_label[each_line] = current_label
                 self.label_to_statement[current_label].append(each_line)
 
+    def construct_normal_repair_patch(self, target_label):
+        statement_lst = self.label_to_statement[target_label]
+        statement_lst.insert(1, "call void @__syncthreads()")
+        for each_label in self.label_to_statement:
+            current_statement = self.label_to_statement[each_label]
+            print '\n'.join(current_statement)
+            print
+            print
+
     def find_nearest_common(self, target_label):
         previous_common = target_label
         while previous_common not in self.main_path_node:
@@ -87,12 +96,14 @@ class BranchInformation(object):
         label_one = self.statement_to_label[statement_one]
         label_two = self.statement_to_label[statement_two]
         if label_one in self.main_path_node or label_two in self.main_path_node:
-            print "add directly."
+            target_label = label_one if label_one in self.main_path_node else label_two
+            self.construct_normal_repair_patch(target_label)
             return
         common_start_one, common_end_one = self.find_nearest_common(label_one)
         common_start_two, common_end_two = self.find_nearest_common(label_two)
         if common_start_one != common_start_two:
-            print "add directly."
+            target_label = common_end_two if int(common_end_two) < int(common_end_one) else common_end_one
+            self.construct_normal_repair_patch(target_label)
             return
         condition_label_dict = self.parse_condition_for_each_label(common_start_one, common_end_one)
         new_structure = self.generate_new_structure(condition_label_dict)
