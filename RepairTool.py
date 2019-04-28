@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 
 class BranchInformation(object):
-
     def __init__(self, raw_codes):
         self.from_true = 'True'
         self.from_false = 'False'
@@ -137,9 +136,10 @@ class BranchInformation(object):
         should_add = False
         already_added = False
         used_label = set()
+        barrier_label = 0
         for each_label in self.label_to_statement:
             if each_label == start_label:
-                break   # assume: order dict
+                break  # assume: order dict
             used_label.add(each_label)
             statement_lst = self.label_to_statement[each_label]
             print '\n'.join(statement_lst)
@@ -149,8 +149,10 @@ class BranchInformation(object):
             used_label.add(each_label)
             statement_lst = self.label_to_statement[each_label]
             if should_add and not already_added:
-                statement_lst.insert(1, "call void @__syncthreads()")
-                already_added = True
+                statement_lst.insert(1, "call void @__syncthreads(), " + str(barrier_label))
+                barrier_label += 1
+                should_add = False
+                # already_added = True
             print '\n'.join(statement_lst)
             print
             print
@@ -184,7 +186,9 @@ class BranchInformation(object):
                         icmp_statement = icmp_statement.replace(operator, not_logic_dict[operator])
                         break
                 boolean_value_statement = self.label_boolean + target_label + " = load i1 " + str(boolean_value)
-                boolean_value_statement_not = self.label_boolean + target_label + "not = " + icmp_statement[icmp_statement.find("=") + 1:].strip()
+                boolean_value_statement_not = self.label_boolean + target_label + "not = " + icmp_statement[
+                                                                                             icmp_statement.find(
+                                                                                                 "=") + 1:].strip()
                 statement_lst.insert(index, boolean_value_statement_not)
                 statement_lst.insert(index, boolean_value_statement)
                 # print statement_lst
@@ -208,13 +212,16 @@ class BranchInformation(object):
                 first_condition = all_conditions[0]
                 variable_name = self.label_boolean + start_label
                 statement_lst = ["; <label>:" + start_label]
-                first_condition = variable_name + " = load i1 " + added_label[first_condition[0]][0 if first_condition[1] == 'True' else 1]
+                first_condition = variable_name + " = load i1 " + added_label[first_condition[0]][
+                    0 if first_condition[1] == 'True' else 1]
                 statement_lst.append(first_condition)
                 for index in xrange(1, len(all_conditions)):
                     current_condition = all_conditions[index]
-                    first_condition = variable_name + " = and i1 " + variable_name + ", " + added_label[current_condition[0]][0 if current_condition[1] == 'True' else 1]
+                    first_condition = variable_name + " = and i1 " + variable_name + ", " + \
+                                      added_label[current_condition[0]][0 if current_condition[1] == 'True' else 1]
                     statement_lst.append(first_condition)
-                statement_lst.append("br i1 " + variable_name + ", label %" + each_label + ", label %" + str(int(start_label) + 1))
+                statement_lst.append(
+                    "br i1 " + variable_name + ", label %" + each_label + ", label %" + str(int(start_label) + 1))
                 self.label_to_statement[start_label] = statement_lst
                 result_lst.append(start_label)
                 start_label = str(int(start_label) + 1)
@@ -231,10 +238,10 @@ class BranchInformation(object):
         statement_lst = self.label_to_statement[each_label]
         for index in xrange(len(statement_lst)):
             current_statement = statement_lst[index]
-            if current_statement.find("br") != -1:  #  should consider loop in the future!
+            if current_statement.find("br") != -1:  # should consider loop in the future!
                 target_label = self.parse_from_br(current_statement)
-                if len(target_label) == 1 and int(target_label[0]) <= int(each_label):
-                    continue   # ignore loop
+                if len(target_label) == 1 and int(target_label[0]) <= int(each_label) <= int(self.last_label):
+                    continue  # ignore loop, adding label should not contain loop
                 statement_lst[index] = "br label %" + new_label
 
     def construct_back_order_map(self):
@@ -272,7 +279,8 @@ class BranchInformation(object):
                     if previous_condition[0] not in result_dict:
                         continue
                     if current_node in result_dict:
-                        result_dict[current_node] |= result_dict[previous_condition[0]]  # only one previous and in label dict
+                        result_dict[current_node] |= result_dict[
+                            previous_condition[0]]  # only one previous and in label dict
                     else:
                         result_dict[current_node] = result_dict[previous_condition[0]]
 
@@ -366,9 +374,11 @@ class BranchInformation(object):
 def test():
     global_env = parse_function("./read_write_test.ll")
     target_function = global_env.get_value("@_Z13device_globalPji")
-    branch = BranchInformation([item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
     # print branch.branch_map
-    branch.repair_pair_statements("%27 = load i32* %26, align 4, !dbg !161", "store i32 %16, i32* %20, align 4, !dbg !158")
+    branch.repair_pair_statements("%27 = load i32* %26, align 4, !dbg !161",
+                                  "store i32 %16, i32* %20, align 4, !dbg !158")
     # target_codes = KernelCodes(target_function)
     # print "test"
 
@@ -376,13 +386,13 @@ def test():
 def test_arrayfire():
     global_env = parse_function("./arrayfire-repair/reduce.ll")
     target_function = global_env.get_value("@_Z11warp_reducePd")
-    branch = BranchInformation([item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
-    branch.repair_pair_statements("%24 = load double* %23, align 8, !dbg !31", "store double %28, double* %30, align 8, !dbg !33")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch.repair_pair_statements("%24 = load double* %23, align 8, !dbg !31",
+                                  "store double %28, double* %30, align 8, !dbg !33")
     print "here"
 
 
 if __name__ == "__main__":
     test_arrayfire()
     # test()
-
-
