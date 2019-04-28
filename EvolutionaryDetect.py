@@ -6,7 +6,15 @@ def test_device_global():
     auto_test_target_function("./read_write_test.ll", "@_Z13device_globalPji", {
         "global": "%input_array",
         "shared": None
-    })
+    }, fixed_dimension=[(1, 1, 1), (5, 1, 1)], used_default_dimension=True)
+
+
+def test_device_global_repaired():
+    auto_test_target_function("./read_write_test_repaired.ll", "@_Z13device_globalPji", {
+        "global": "%input_array",
+        "shared": None
+    }, fixed_dimension=[(1, 1, 1), (5, 1, 1)], used_default_dimension=True)
+    # })
 
 
 def test_sum_reduced():
@@ -121,11 +129,21 @@ def test_sync_cudpp_sparseMatrixVectorSetFlags():
     })
 
 
+def test_arrayfire_reduce():
+    auto_test_target_function("./arrayfire-repair/reduce-repair.ll", "@_Z11warp_reducePd", {
+        "global": "%s_ptr",
+        "shared": None
+    }, fixed_dimension=[(1, 1, 1), (34, 3, 1)], used_default_dimension=True)
+
+
 if __name__ == "__main__":
+    test_arrayfire_reduce()
+    # test_device_global_repaired()
+    # test_device_global()
     # test_gunrock_xmrig()
     # test_gunrock_join2()
     # test_gunrock_join()
-    test_sum_reduced()
+    # test_sum_reduced()
     # test_sync_cudpp_sparseMatrixVectorSetFlags()
     # test_sync_FindMaxCorr()
     # test_sync_cuda_cnn_g_geptCost_3()

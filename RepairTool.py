@@ -17,10 +17,11 @@ class BranchInformation(object):
         self.label_to_statement = OrderedDict()
         self.main_path_node = set()
         self.last_label = None
+        self.new_create_label = None
+        self.construct_statement_and_label()
         self.construct_label_dict()
         self.construct_branch_map()
         self.construct_back_order_map()
-        self.construct_statement_and_label()
         self.find_all_main_path_node()
 
     def generate_path_to_end(self, start_node):
@@ -92,9 +93,32 @@ class BranchInformation(object):
             next_common = list(self.branch_map[next_common])[0]
         return previous_common, next_common
 
+    def split_label(self, target_stmt, target_label):
+        new_label = self.new_create_label
+        self.new_create_label = str(int(self.new_create_label) + 1)
+        statement_lst = self.label_to_statement[target_label]
+        split_index = statement_lst.index(target_stmt)
+        pre_lst = statement_lst[: split_index]
+        new_lst = ["; <label>:(num)".replace("(num)", new_label)]
+        new_lst += statement_lst[split_index:]
+        pre_lst.append("br label %" + new_label)
+        self.label_to_statement[target_label] = pre_lst
+        self.label_to_statement[new_label] = new_lst
+        for statement in new_lst:
+            self.statement_to_label[statement] = new_label
+        self.branch_map[new_label] = self.branch_map[target_label]
+        self.branch_map[target_label] = {new_label}
+        self.back_order_map[new_label] = {target_label}
+        for item in self.branch_map[new_label]:
+            self.back_order_map[item].remove(target_label)
+            self.back_order_map[item].add(new_label)
+        return new_label
+
     def repair_pair_statements(self, statement_one, statement_two):
         label_one = self.statement_to_label[statement_one]
         label_two = self.statement_to_label[statement_two]
+        if label_one == label_two:
+            label_two = self.split_label(statement_two, label_two)
         if label_one in self.main_path_node or label_two in self.main_path_node:
             target_label = label_one if label_one in self.main_path_node else label_two
             self.construct_normal_repair_patch(target_label)
@@ -107,12 +131,22 @@ class BranchInformation(object):
             return
         condition_label_dict = self.parse_condition_for_each_label(common_start_one, common_end_one)
         new_structure = self.generate_new_structure(condition_label_dict)
-        self.construct_repair_patch(label_one, label_two, new_structure)
+        self.construct_repair_patch(label_one, label_two, common_start_one, new_structure)
 
-    def construct_repair_patch(self, label_one, label_two, new_structure):
+    def construct_repair_patch(self, label_one, label_two, start_label, new_structure):
         should_add = False
         already_added = False
+        used_label = set()
+        for each_label in self.label_to_statement:
+            if each_label == start_label:
+                break   # assume: order dict
+            used_label.add(each_label)
+            statement_lst = self.label_to_statement[each_label]
+            print '\n'.join(statement_lst)
+            print
+            print
         for each_label in new_structure:
+            used_label.add(each_label)
             statement_lst = self.label_to_statement[each_label]
             if should_add and not already_added:
                 statement_lst.insert(1, "call void @__syncthreads()")
@@ -122,6 +156,12 @@ class BranchInformation(object):
             print
             if should_add is False and (label_one == each_label or label_two == each_label):
                 should_add = True
+        for each_label in self.label_to_statement:
+            if each_label not in used_label:
+                statement_lst = self.label_to_statement[each_label]
+                print '\n'.join(statement_lst)
+                print
+                print
 
     def add_boolean_value(self, target_label):
         not_logic_dict = {
@@ -154,7 +194,7 @@ class BranchInformation(object):
     def generate_new_structure(self, condition_label_dict):
         result_lst = list()
         added_label = dict()
-        start_label = str(int(self.last_label) + 1)
+        start_label = str(int(self.new_create_label) + 1)
         for each_label in condition_label_dict:
             for boolean_value in condition_label_dict[each_label]:
                 target_label = boolean_value[0]
@@ -192,6 +232,9 @@ class BranchInformation(object):
         for index in xrange(len(statement_lst)):
             current_statement = statement_lst[index]
             if current_statement.find("br") != -1:  #  should consider loop in the future!
+                target_label = self.parse_from_br(current_statement)
+                if len(target_label) == 1 and int(target_label[0]) <= int(each_label):
+                    continue   # ignore loop
                 statement_lst[index] = "br label %" + new_label
 
     def construct_back_order_map(self):
@@ -226,6 +269,8 @@ class BranchInformation(object):
             else:
                 previous_condition = list(self.back_order_map[current_node])
                 if len(previous_condition) != 0:
+                    if previous_condition[0] not in result_dict:
+                        continue
                     if current_node in result_dict:
                         result_dict[current_node] |= result_dict[previous_condition[0]]  # only one previous and in label dict
                     else:
@@ -249,17 +294,27 @@ class BranchInformation(object):
     def construct_branch_map(self):
         raw_codes = self.raw_codes
         current_label = '0'  # start with 0
+        previous_label = None
         for each_line in raw_codes:
             each_line = each_line.strip()
             label = self.parse_label(each_line)
             if label is not None:
                 current_label = label
+                if previous_label is not None:
+                    statement_lst = self.label_to_statement[previous_label]
+                    statement_lst.append("br label %" + str(current_label))
+                    self.branch_map[previous_label].add(current_label)
+                    previous_label = None
             br_labels = self.parse_from_br(each_line)
             if current_label not in self.branch_map:
                 self.branch_map[current_label] = set()
             for single_label in br_labels:
-                self.branch_map[current_label].add(single_label)
+                if int(single_label) > int(current_label):
+                    self.branch_map[current_label].add(single_label)  # ignore loop label.
+                else:
+                    previous_label = current_label
         self.last_label = current_label
+        self.new_create_label = str(int(current_label) + 1)
 
     def construct_label_dict(self):
         raw_codes = self.raw_codes
@@ -318,8 +373,16 @@ def test():
     # print "test"
 
 
-if __name__ == "__main__":
-    test()
+def test_arrayfire():
+    global_env = parse_function("./arrayfire-repair/reduce.ll")
+    target_function = global_env.get_value("@_Z11warp_reducePd")
+    branch = BranchInformation([item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch.repair_pair_statements("%24 = load double* %23, align 8, !dbg !31", "store double %28, double* %30, align 8, !dbg !33")
+    print "here"
 
+
+if __name__ == "__main__":
+    test_arrayfire()
+    # test()
 
 
