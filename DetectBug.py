@@ -1,7 +1,8 @@
 from DataStructure import *
 from MainProcess import construct_memory_execute_mode
 from MainProcess import construct_memory_execute_mode_for_barrier
-from MainProcess import parse_target_memory_and_checking_sync
+from MainProcess import construct_memory_execute_mode_dynamically
+from MainProcess import parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync_dynamically
 import random
 
 
@@ -649,6 +650,18 @@ def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_si
     print "===================================================================================="
 
 
+def execute_framework_dynamical(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
+                      should_print=False):
+    print "===================================================================================="
+    print "Test on " + str(arguments)
+    print_arguments(arguments)
+    print "Dimension: " + str(blocks.grid_dim) + " " + str(threads.block_dim)
+    construct_memory_execute_mode_dynamically(blocks, threads, main_size, shared_size, raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync_dynamically, parse_target_memory_and_checking_sync_dynamically,
+                                  global_env, should_print)
+    print "===================================================================================="
+
+
 def execute_framework_advanced(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
                       should_print=False):
     print "===================================================================================="
@@ -670,8 +683,34 @@ def print_arguments(arguments):
         print key, show_item
 
 
+def test_kaldi_repair_add_mat():
+    test_block = Block((-1, -1, 0), (1, 1, 1))  # important
+    test_thread = Thread((-1, -1, 0), (33, 1, 1))
+    global_current_env = parse_function("./kaldi-repair/_add_diag_mat_repair.ll")
+    arguments = generate_arguments(global_current_env.get_value("@_Z17_add_diag_mat_matdPdiPKdiiiS1_iid"), {
+        "%beta": 137.667712982,
+        "%N_col_stride": 25,
+        "%v_dim": 12,
+        "%alpha": 55.3145449404,
+        "%M_cols": 1,
+        "%M_row_stride": 63,
+        "%N_row_stride":7, # -70,
+        "%M_col_stride": 2
+    })
+    arguments["main_memory"] = {
+        'global': None,
+        'shared': "@_ZZ17_add_diag_mat_matdPdiPKdiiiS1_iidE9temp_data",
+    }
+    generate_memory_container([], global_current_env)
+    raw_code = global_current_env.get_value("@_Z17_add_diag_mat_matdPdiPKdiiiS1_iid")
+    construct_memory_execute_mode(test_block, test_thread, 256, 256, raw_code.raw_codes, arguments,
+                                  parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync,
+                                  global_current_env, False)
+
+
 if __name__ == "__main__":
-    test_arrayfire_reduce()
+    test_kaldi_repair_add_mat()
+    # test_arrayfire_reduce()
     # test_device_global()
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
     # test_copy_low_upp()

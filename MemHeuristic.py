@@ -232,10 +232,10 @@ def parse_dimension(global_env, target_function_name):
     block_pattern = re.compile(r"blockIdx, i32 0, i32 (?P<sequence>\d+)")
     target_function = global_env.get_value(target_function_name)
     for each_line in target_function.raw_codes.split("\n"):
-        if each_line.find("blockIdx") != -1:
+        if each_line.find("blockIdx,") != -1:
             matcher = block_pattern.search(each_line)
             block_dict[matcher.group("sequence")] = True
-        elif each_line.find("threadIdx") != -1:
+        elif each_line.find("threadIdx,") != -1:
             matcher = thread_pattern.search(each_line)
             thread_dict[matcher.group("sequence")] = True
     return [len(block_dict) if len(block_dict) != 0 else 1, len(thread_dict)]

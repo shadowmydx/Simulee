@@ -17,6 +17,8 @@ class BranchInformation(object):
         self.main_path_node = set()
         self.last_label = None
         self.new_create_label = None
+        self.new_initial_variable = set()
+        self.boolean_pattern = "(var) = alloca i1, align 4"
         self.construct_statement_and_label()
         self.construct_label_dict()
         self.construct_branch_map()
@@ -74,9 +76,11 @@ class BranchInformation(object):
                 self.statement_to_label[each_line] = current_label
                 self.label_to_statement[current_label].append(each_line)
 
-    def construct_normal_repair_patch(self, target_label):
-        statement_lst = self.label_to_statement[target_label]
-        statement_lst.insert(1, "call void @__syncthreads()")
+    def construct_normal_repair_patch(self, target_label_lst):
+        for target_label in target_label_lst:
+            statement_lst = self.label_to_statement[target_label]
+            if statement_lst[1].find("void @__syncthreads()") == -1:
+                statement_lst.insert(1, "call void @__syncthreads()")
         for each_label in self.label_to_statement:
             current_statement = self.label_to_statement[each_label]
             print '\n'.join(current_statement)
@@ -120,23 +124,29 @@ class BranchInformation(object):
             label_two = self.split_label(statement_two, label_two)
         if label_one in self.main_path_node or label_two in self.main_path_node:
             target_label = label_one if label_one in self.main_path_node else label_two
-            self.construct_normal_repair_patch(target_label)
+            self.construct_normal_repair_patch([target_label, target_label])
             return
         common_start_one, common_end_one = self.find_nearest_common(label_one)
         common_start_two, common_end_two = self.find_nearest_common(label_two)
         if common_start_one != common_start_two:
-            target_label = common_end_two if int(common_end_two) < int(common_end_one) else common_end_one
-            self.construct_normal_repair_patch(target_label)
+            target_label_lst = [common_end_two, common_end_one] if int(common_end_two) < int(common_end_one) else [common_end_one, common_end_two]
+            self.construct_normal_repair_patch(target_label_lst)
             return
         condition_label_dict = self.parse_condition_for_each_label(common_start_one, common_end_one)
         new_structure = self.generate_new_structure(condition_label_dict)
         self.construct_repair_patch(label_one, label_two, common_start_one, new_structure)
+
+    def add_new_initial_var(self):
+        statement_lst = self.label_to_statement["0"]
+        for variable in self.new_initial_variable:
+            statement_lst.insert(0, self.boolean_pattern.replace("(var)", variable))
 
     def construct_repair_patch(self, label_one, label_two, start_label, new_structure):
         should_add = False
         already_added = False
         used_label = set()
         barrier_label = 0
+        self.add_new_initial_var()
         for each_label in self.label_to_statement:
             if each_label == start_label:
                 break  # assume: order dict
@@ -205,6 +215,9 @@ class BranchInformation(object):
                 if target_label not in added_label:
                     added_label[target_label] = self.add_boolean_value(target_label)
         self.change_target_label_br(next(iter(condition_label_dict)), start_label)
+        for key in added_label:
+            self.new_initial_variable.add(added_label[key][0])
+            self.new_initial_variable.add(added_label[key][1])
         result_lst.append(next(iter(condition_label_dict)))
         for each_label in condition_label_dict:
             if len(condition_label_dict[each_label]) != 0:
@@ -322,7 +335,7 @@ class BranchInformation(object):
                 else:
                     previous_label = current_label
         self.last_label = current_label
-        self.new_create_label = str(int(current_label) + 1)
+        self.new_create_label = str(max([int(label) for label in self.label_to_statement]) + 1)
 
     def construct_label_dict(self):
         raw_codes = self.raw_codes
@@ -393,6 +406,32 @@ def test_arrayfire():
     print "here"
 
 
+def test_thundersvm():
+    global_env = parse_function("./thundersvm-repair/smo_kernel.ll")
+    target_function = global_env.get_value("@_Z19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch.repair_pair_statements("store float %66, float* %70, align 4, !dbg !114", "%79 = call i32 @_Z13get_block_minPKfPi(float* %77, i32* %78), !dbg !118")
+    print "here"
+
+
+def test_kaldi_add_diag():
+    # global_env = parse_function("./kaldi-repair/_add_diag_mat_no.ll")
+    # target_function = global_env.get_value("@_Z17_add_diag_mat_matdPdiPKdiiiS1_iid")
+    # branch = BranchInformation(
+    #     [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    # branch.repair_pair_statements("%93 = load double* %92, align 8, !dbg !69", "store double %66, double* %69, align 8, !dbg !56")
+    # print 100 * "+"
+    global_env = parse_function("./kaldi-repair/_add_diag_mat_repair.ll")
+    target_function = global_env.get_value("@_Z17_add_diag_mat_matdPdiPKdiiiS1_iid")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch.repair_pair_statements("%93 = load double* %92, align 8, !dbg !69", "store double %100, double* %98, align 8, !dbg !72")
+    print "here"
+
+
 if __name__ == "__main__":
-    test_arrayfire()
+    test_kaldi_add_diag()
+    # test_thundersvm()
+    # test_arrayfire()
     # test()

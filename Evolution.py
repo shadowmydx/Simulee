@@ -384,6 +384,33 @@ def auto_test_target_function(target_file_path, function_name, main_memory, used
             print "Current solution total cost time is " + str(current_time - start_time)
 
 
+def auto_test_target_function_dynamical(target_file_path, function_name, main_memory, used_default_dimension=False, fixed_dimension=None):
+    start_time = time.time()
+    solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
+                                                evolve_dimension=not used_default_dimension, fixed_dimension=fixed_dimension)
+    used_solution = dict()
+    for item in solution_lst:
+        if item[1][0] < 1:
+            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
+            if solution_str in used_solution:
+                continue
+            used_solution[solution_str] = True
+            global_env = parse_function(target_file_path)
+            generate_memory_container(main_memory.keys(), global_env)
+            raw_code = global_env.get_value(function_name)
+            blocks = item[0].blocks
+            threads = item[0].threads
+            arguments = item[0].construct_running_arguments()
+            for idx, variable in enumerate(raw_code.argument_lst):
+                if variable not in arguments and raw_code.type_lst[idx].find("*") == -1:
+                    arguments[variable] = 2  # temp action, need more focus
+            arguments = generate_arguments(global_env.get_value(function_name), arguments)
+            arguments["main_memory"] = main_memory
+            execute_framework_dynamical(blocks, threads, raw_code.raw_codes, arguments, global_env)
+            current_time = time.time()
+            print "Current solution total cost time is " + str(current_time - start_time)
+
+
 def auto_test_target_function_advanced(target_file_path, function_name, main_memory,
                                        used_default_dimension=False, fixed_dimension=None):
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,

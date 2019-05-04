@@ -48,8 +48,11 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
         for thread_indexes in generator_for_dimension_var(threads):
             unfinished_total_threads[str(thread_indexes)] = True
         synchronization = SyncThreads(len(unfinished_total_threads), unfinished_total_threads)
+        test_sync = dict()
         while not is_all_thread_finished(unfinished_total_threads):
             for thread_indexes in generator_for_dimension_var(threads):
+                if thread_indexes not in test_sync:
+                    test_sync[thread_indexes] = dict()
                 global_env.add_value("@threadIdx", Thread(thread_indexes,
                                                           (threads.limit_x, threads.limit_y, threads.limit_z)))
                 global_env.add_value("@blockDim", Thread((threads.limit_x, threads.limit_y, threads.limit_z),
@@ -65,6 +68,8 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                     unfinished_total_threads[str(thread_indexes)] = False
                     if synchronization.has_halt_threads():
                         print "Has barrier divergence issue in " + str(synchronization.get_a_hold_stmt())
+                        for key in test_sync:
+                            print key, test_sync[key]
                         return
                     continue
                 if kernel_codes.should_halt():
@@ -76,6 +81,9 @@ def construct_memory_execute_mode(blocks, threads, global_size, shared_size, raw
                 print_stmt('execute ' + current_stmt + " in " + str(thread_indexes) + " in block " + str(block_indexes),
                            should_print)
                 if detect_if_is_syncthreads(current_stmt):
+                    if current_stmt not in test_sync[thread_indexes]:
+                        test_sync[thread_indexes][current_stmt] = 0
+                    test_sync[thread_indexes][current_stmt] += 1
                     synchronization.reach_one(thread_indexes, kernel_codes, current_stmt)
                     if synchronization.can_continue():
                         print 'last thread located here: ' + str(thread_indexes) + ", in block " + str(block_indexes)
@@ -564,7 +572,7 @@ def has_stmt_in_different_branch_dynamically(action_key_one, action_key_two, stm
     action_key_two = action_key_two.split("+")[0] + "+" + action_key_two.split("+")[1]
     stmt_path_one = statement_path.path[str(action_key_one)]
     stmt_path_two = statement_path.path[str(action_key_two)]
-    stmt_length = min(len(stmt_path_one), len(stmt_set_two))
+    stmt_length = min(len(stmt_path_one), len(stmt_path_two))
     for index in range(stmt_length):
         if stmt_path_one[index] == stmt_set_one or stmt_path_two[index] == stmt_set_two:
             if stmt_path_one[index] == stmt_path_two[index]:
@@ -572,7 +580,7 @@ def has_stmt_in_different_branch_dynamically(action_key_one, action_key_two, stm
             else:
                 return True
         if stmt_path_one[index] == stmt_path_two[index]:
-            index += 1
+            continue
         else:
             return True
 
@@ -616,9 +624,9 @@ def has_write_write_sync_issue_dynamically(target_write_dict, program_flow, stat
 def has_read_write_sync_issue(target_read_dict, target_write_dict, program_flow):
     result_write_dict = dict()
     result_read_dict = dict()
-    if not (len(target_read_dict) >= 1 and len(target_write_dict) >= 1 and
-            has_not_equal_key(target_read_dict, target_write_dict)):
-        return result_read_dict, result_write_dict
+    # if not (len(target_read_dict) >= 1 and len(target_write_dict) >= 1 and
+    #         has_not_equal_key(target_read_dict, target_write_dict)):
+    #     return result_read_dict, result_write_dict
     for each_key in target_read_dict:
         for other_key in target_write_dict:
             if each_key == other_key:
@@ -632,9 +640,9 @@ def has_read_write_sync_issue(target_read_dict, target_write_dict, program_flow)
 def has_read_write_sync_issue_dynamically(target_read_dict, target_write_dict, program_flow, statement_path):
     result_write_dict = dict()
     result_read_dict = dict()
-    if not (len(target_read_dict) >= 1 and len(target_write_dict) >= 1 and
-            has_not_equal_key(target_read_dict, target_write_dict)):
-        return result_read_dict, result_write_dict
+    # if not (len(target_read_dict) >= 1 and len(target_write_dict) >= 1 and
+    #         has_not_equal_key(target_read_dict, target_write_dict)):
+    #     return result_read_dict, result_write_dict
     for each_key in target_read_dict:
         for other_key in target_write_dict:
             if each_key == other_key:
