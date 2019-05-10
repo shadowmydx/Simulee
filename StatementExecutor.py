@@ -243,7 +243,7 @@ def calculation_factory(cac_flag):
             tmp_result.set_value(num(number_one.get_value()) * num(number_two.get_value()))
         elif cac_flag == 3:
             if num(number_two.get_value()) == 0:
-                tmp_result.set_value(None)  # divide 0
+                tmp_result.set_value(0)  # divide 0
             else:
                 tmp_result.set_value(num(number_one.get_value()) / num(number_two.get_value()))
         elif cac_flag == 4:

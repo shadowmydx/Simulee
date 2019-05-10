@@ -77,6 +77,7 @@ class BranchInformation(object):
                 self.label_to_statement[current_label].append(each_line)
 
     def construct_normal_repair_patch(self, target_label_lst):
+        content_str = ""
         for target_label in target_label_lst:
             statement_lst = self.label_to_statement[target_label]
             if statement_lst[1].find("void @__syncthreads()") == -1:
@@ -86,6 +87,8 @@ class BranchInformation(object):
             print '\n'.join(current_statement)
             print
             print
+            content_str += '\n'.join(current_statement) + '\n\n'
+        return content_str
 
     def find_nearest_common(self, target_label):
         previous_common = target_label
@@ -124,17 +127,16 @@ class BranchInformation(object):
             label_two = self.split_label(statement_two, label_two)
         if label_one in self.main_path_node or label_two in self.main_path_node:
             target_label = label_one if label_one in self.main_path_node else label_two
-            self.construct_normal_repair_patch([target_label, target_label])
-            return
+            return self.construct_normal_repair_patch([target_label, target_label])
         common_start_one, common_end_one = self.find_nearest_common(label_one)
         common_start_two, common_end_two = self.find_nearest_common(label_two)
         if common_start_one != common_start_two:
-            target_label_lst = [common_end_two, common_end_one] if int(common_end_two) < int(common_end_one) else [common_end_one, common_end_two]
-            self.construct_normal_repair_patch(target_label_lst)
-            return
+            target_label_lst = [common_end_two, common_end_one] if int(common_end_two) < int(common_end_one) else [
+                common_end_one, common_end_two]
+            return self.construct_normal_repair_patch(target_label_lst)
         condition_label_dict = self.parse_condition_for_each_label(common_start_one, common_end_one)
         new_structure = self.generate_new_structure(condition_label_dict)
-        self.construct_repair_patch(label_one, label_two, common_start_one, new_structure)
+        return self.construct_repair_patch(label_one, label_two, common_start_one, new_structure)
 
     def add_new_initial_var(self):
         statement_lst = self.label_to_statement["0"]
@@ -142,6 +144,7 @@ class BranchInformation(object):
             statement_lst.insert(0, self.boolean_pattern.replace("(var)", variable))
 
     def construct_repair_patch(self, label_one, label_two, start_label, new_structure):
+        content_str = ""
         should_add = False
         already_added = False
         used_label = set()
@@ -155,6 +158,7 @@ class BranchInformation(object):
             print '\n'.join(statement_lst)
             print
             print
+            content_str += '\n'.join(statement_lst) + "\n\n"
         for each_label in new_structure:
             used_label.add(each_label)
             statement_lst = self.label_to_statement[each_label]
@@ -166,6 +170,7 @@ class BranchInformation(object):
             print '\n'.join(statement_lst)
             print
             print
+            content_str += '\n'.join(statement_lst) + "\n\n"
             if should_add is False and (label_one == each_label or label_two == each_label):
                 should_add = True
         for each_label in self.label_to_statement:
@@ -174,6 +179,8 @@ class BranchInformation(object):
                 print '\n'.join(statement_lst)
                 print
                 print
+                content_str += '\n'.join(statement_lst) + "\n\n"
+        return content_str
 
     def add_boolean_value(self, target_label):
         not_logic_dict = {
@@ -411,7 +418,8 @@ def test_thundersvm():
     target_function = global_env.get_value("@_Z19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_")
     branch = BranchInformation(
         [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
-    branch.repair_pair_statements("store float %66, float* %70, align 4, !dbg !114", "%79 = call i32 @_Z13get_block_minPKfPi(float* %77, i32* %78), !dbg !118")
+    branch.repair_pair_statements("store float %66, float* %70, align 4, !dbg !114",
+                                  "%79 = call i32 @_Z13get_block_minPKfPi(float* %77, i32* %78), !dbg !118")
     print "here"
 
 
@@ -426,12 +434,73 @@ def test_kaldi_add_diag():
     target_function = global_env.get_value("@_Z17_add_diag_mat_matdPdiPKdiiiS1_iid")
     branch = BranchInformation(
         [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
-    branch.repair_pair_statements("%93 = load double* %92, align 8, !dbg !69", "store double %100, double* %98, align 8, !dbg !72")
+    branch.repair_pair_statements("%93 = load double* %92, align 8, !dbg !69",
+                                  "store double %100, double* %98, align 8, !dbg !72")
     print "here"
 
 
+def test_arrayfire_scan_dim():
+    global_env = parse_function("./arrayfire-repair/scan_dim.ll")
+    target_function = global_env.get_value("@_Z15scan_dim_kerneljjjj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch.repair_pair_statements("%87 = load double* %86, align 8, !dbg !78",
+                                  "store double %47, double* %50, align 8, !dbg !63")
+    print "here"
+
+
+def test_arrayfire_compute_val_homography():
+    global_env = parse_function("./arrayfire-repair/homography.ll")
+    target_function = global_env.get_value("@_Z21computeEvalHomographyjjjf")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    branch.repair_pair_statements("%64 = load i32* %63, align 4, !dbg !52",
+                                  "store i32 %25, i32* %28, align 4, !dbg !41")
+    print "here"
+
+
+def test_gklee_barrier1():
+    global_env = parse_function("./gklee-test-repair/barrier1-delete.ll")
+    target_function = global_env.get_value("@_Z2dlPi")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%34 = load i32* %33, align 4, !dbg !24",
+                                            "store i32 %51, i32* %55, align 4, !dbg !27")
+    content = "define void @_Z2dlPi(i32* %in) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./gklee-test-repair/barrier1-first.ll", content)
+    global_env = parse_function("./gklee-test-repair/barrier1-first.ll")
+    target_function = global_env.get_value("@_Z2dlPi")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%46 = load i32* %45, align 4, !dbg !26",
+                                            "store i32 %51, i32* %55, align 4, !dbg !27")
+    content = "define void @_Z2dlPi(i32* %in) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./gklee-test-repair/barrier1-second.ll", content)
+    global_env = parse_function("./gklee-test-repair/barrier1-second.ll")
+    target_function = global_env.get_value("@_Z2dlPi")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%34 = load i32* %33, align 4, !dbg !24",
+                                            "store i32 %19, i32* %17, align 4, !dbg !19")
+    content = "define void @_Z2dlPi(i32* %in) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./gklee-test-repair/barrier1-repair.ll", content)
+    print "here"
+
+
+def write_patch_to_file(file_path, content):
+    with open(file_path, 'w') as f:
+        f.write(content)
+
+
 if __name__ == "__main__":
-    test_kaldi_add_diag()
+    from time import time
+
+    start_time = time()
+    test_gklee_barrier1()
+    # test_arrayfire_scan_dim()
+    # test_kaldi_add_diag()
     # test_thundersvm()
     # test_arrayfire()
+    # test_arrayfire_compute_val_homography()
     # test()
+    print str(time() - start_time)
