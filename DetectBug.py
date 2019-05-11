@@ -650,7 +650,7 @@ def execute_framework(blocks, threads, raw_codes, arguments, global_env, main_si
     print "===================================================================================="
 
 
-def execute_framework_dynamical(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=512,
+def execute_framework_dynamical(blocks, threads, raw_codes, arguments, global_env, main_size=512, shared_size=1060,
                       should_print=False):
     print "===================================================================================="
     print "Test on " + str(arguments)

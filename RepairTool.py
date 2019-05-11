@@ -9,6 +9,7 @@ class BranchInformation(object):
         self.from_false = 'False'
         self.label_boolean = '%label'
         self.raw_codes = raw_codes
+        self.label_order_lst = list()
         self.branch_map = OrderedDict()  # key: label name value: label that can go to
         self.label_dict = OrderedDict()  # key: label name value: branch name (label: branch1&&branch2, then can be access)
         self.back_order_map = OrderedDict()  # reverse of branch map
@@ -68,10 +69,12 @@ class BranchInformation(object):
             label = self.parse_label(each_line)
             if current_label not in self.label_to_statement:
                 self.label_to_statement[current_label] = list()
+                self.label_order_lst.append(current_label)
             if label is not None:
                 current_label = label
                 if current_label not in self.label_to_statement:
                     self.label_to_statement[current_label] = [each_line]
+                    self.label_order_lst.append(current_label)
             else:
                 self.statement_to_label[each_line] = current_label
                 self.label_to_statement[current_label].append(each_line)
@@ -110,9 +113,12 @@ class BranchInformation(object):
         pre_lst.append("br label %" + new_label)
         self.label_to_statement[target_label] = pre_lst
         self.label_to_statement[new_label] = new_lst
+        new_index = self.label_order_lst.index(target_label) + 1
+        self.label_order_lst.insert(new_index, new_label)
         for statement in new_lst:
             self.statement_to_label[statement] = new_label
         self.branch_map[new_label] = self.branch_map[target_label]
+
         self.branch_map[target_label] = {new_label}
         self.back_order_map[new_label] = {target_label}
         for item in self.branch_map[new_label]:
@@ -150,7 +156,8 @@ class BranchInformation(object):
         used_label = set()
         barrier_label = 0
         self.add_new_initial_var()
-        for each_label in self.label_to_statement:
+        # for each_label in self.label_to_statement:
+        for each_label in self.label_order_lst:
             if each_label == start_label:
                 break  # assume: order dict
             used_label.add(each_label)
@@ -173,7 +180,9 @@ class BranchInformation(object):
             content_str += '\n'.join(statement_lst) + "\n\n"
             if should_add is False and (label_one == each_label or label_two == each_label):
                 should_add = True
-        for each_label in self.label_to_statement:
+
+        # for each_label in self.label_to_statement:
+        for each_label in self.label_order_lst:
             if each_label not in used_label:
                 statement_lst = self.label_to_statement[each_label]
                 print '\n'.join(statement_lst)
@@ -283,6 +292,8 @@ class BranchInformation(object):
                 result_dict[current_node].add(self.label_dict[current_node])
             if len(self.back_order_map[current_node]) > 1:
                 previous_condition = list(self.back_order_map[current_node])
+                if previous_condition[0] not in result_dict:
+                    continue
                 total_condition = set(list(result_dict[previous_condition[0]]))  # deep copy
                 has_condition = False
                 if current_node in result_dict:
@@ -330,7 +341,8 @@ class BranchInformation(object):
                 current_label = label
                 if previous_label is not None:
                     statement_lst = self.label_to_statement[previous_label]
-                    statement_lst.append("br label %" + str(current_label))
+                    if statement_lst[-1] != "br label %" + str(current_label):
+                        statement_lst.append("br label %" + str(current_label))
                     self.branch_map[previous_label].add(current_label)
                     previous_label = None
             br_labels = self.parse_from_br(each_line)
@@ -459,6 +471,166 @@ def test_arrayfire_compute_val_homography():
     print "here"
 
 
+def test_arrayfire_scan_dim_nofinal_kernel():
+    global_env = parse_function("./arrayfire-repair/scan_dim_by_key_impl.ll")
+    target_function = global_env.get_value("@_Z24scan_dim_nonfinal_kerneljjj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%62 = load i8* %61, align 1, !dbg !80",
+                                            "store i8 %113, i8* %116, align 1, !dbg !94")
+    content = "define void @_Z24scan_dim_nonfinal_kerneljjj(i32 %blocks_x, i32 %blocks_y, i32 %lim) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/scan_dim_by_key_impl-repair.ll", content)
+
+
+def test_arrayfire_scan_nofinal_kernel():
+    global_env = parse_function("./arrayfire-repair/scan_first_by_key_impl.ll")
+    target_function = global_env.get_value("@_Z20scan_nonfinal_kerneljjj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%80 = load i8* %79, align 1, !dbg !91",
+                                            "store i8 %128, i8* %131, align 1, !dbg !105")
+    content = "define void @_Z20scan_nonfinal_kerneljjj(i32 %blocks_x, i32 %blocks_y, i32 %lim) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/scan_first_by_key_impl-repair.ll", content)
+
+
+def test_arrayfire_hamming_matcher_unroll_1():
+    global_env = parse_function("./arrayfire-repair/hamming1.ll")
+    target_function = global_env.get_value("@_Z22hamming_matcher_unrollPjS_j")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%148 = load i32* getelementptr inbounds ([256 x i32]* @_ZZ22hamming_matcher_unrollPjS_jE6s_dist, i32 0, i64 0), align 4, !dbg !78",
+        "store i32 %26, i32* %29, align 4, !dbg !43")
+    content = "define void @_Z22hamming_matcher_unrollPjS_j(i32* %out_idx, i32* %out_dist, i32 %max_dist) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming1-repair.ll", content)
+
+
+def test_arrayfire_hamming_matcher_1():
+    global_env = parse_function("./arrayfire-repair/hamming2.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%149 = load i32* getelementptr inbounds ([256 x i32]* @_ZZ15hamming_matcherPjS_jjE6s_dist, i32 0, i64 0), align 4, !dbg !81",
+        "store i32 %27, i32* %30, align 4, !dbg !44")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming2-repair.ll", content)
+
+
+def test_arrayfire_hamming_matcher_2():
+    global_env = parse_function("./arrayfire-repair/hamming3.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%204 = load i32* %203, align 4, !dbg !88",
+        "store i32 %159, i32* %162, align 4, !dbg !79")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-first.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/hamming3-first.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%204 = load i32* %203, align 4, !dbg !88",
+        "store i32 %187, i32* %190, align 4, !dbg !84")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-second.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/hamming3-second.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%148 = load i32* %147, align 4, !dbg !78",
+        "store i32 %131, i32* %134, align 4, !dbg !74")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-third.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/hamming3-third.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%176 = load i32* %175, align 4, !dbg !83",
+        "store i32 %187, i32* %190, align 4, !dbg !84")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-4th.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/hamming3-4th.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%215 = load i32* %214, align 4, !dbg !89",
+        "store i32 %215, i32* %218, align 4, !dbg !89")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-5th.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/hamming3-5th.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%187 = load i32* %186, align 4, !dbg !84",
+        "store i32 %187, i32* %190, align 4, !dbg !84")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-6th.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/hamming3-6th.ll")
+    target_function = global_env.get_value("@_Z15hamming_matcherPjS_jj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements(
+        "%159 = load i32* %158, align 4, !dbg !79",
+        "store i32 %159, i32* %162, align 4, !dbg !79")
+    content = "define void @_Z15hamming_matcherPjS_jj(i32* %out_idx, i32* %out_dist, i32 %max_dist, i32 %feat_len) uwtable noinline {\n" + content + "\n}"
+    write_patch_to_file("./arrayfire-repair/hamming3-7th.ll", content)
+
+
+def test_arrayfire_JacobiSVD():
+    global_env = parse_function("./arrayfire-repair/JacobiSVD.ll")
+    target_function = global_env.get_value("@_Z9JacobiSVDPiS_ii")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%53 = load i32* %52, align 4, !dbg !65",
+                                            "store i32 %140, i32* %144, align 4, !dbg !89")
+    content = "define void @_Z9JacobiSVDPiS_ii(i32* %S, i32* %V, i32 %m, i32 %n) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./arrayfire-repair/JacobiSVD-first.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/JacobiSVD-first.ll")
+    target_function = global_env.get_value("@_Z9JacobiSVDPiS_ii")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%58 = load i32* %57, align 4, !dbg !65",
+                                            "store i32 %145, i32* %149, align 4, !dbg !90")
+    content = "define void @_Z9JacobiSVDPiS_ii(i32* %S, i32* %V, i32 %m, i32 %n) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./arrayfire-repair/JacobiSVD-second.ll", content)
+    print "here"
+
+
+def test_arrayfire_descriptor():
+    global_env = parse_function("./arrayfire-repair/Descriptor-delete.ll")
+    target_function = global_env.get_value("@_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("store float %78, float* %76, align 4, !dbg !87",
+                                            "store float %102, float* %100, align 4, !dbg !92")
+    content = "define void @_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi(float* %desc_out, i32 %desc_len, i32 %histsz, float* %x_in, float* %y_in, i32* %layer_in, float* %response_in, float* %size_in, float* %ori_in, i32 %total_feat, i32 %d, i32 %n, float %scale, float %sigma, i32 %n_layers) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./arrayfire-repair/Descriptor-first.ll", content)
+
+    global_env = parse_function("./arrayfire-repair/Descriptor-first.ll")
+    target_function = global_env.get_value("@_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("store float %78, float* %76, align 4, !dbg !87",
+                                            "store float 0.000000e+00, float* %52, align 4, !dbg !82")
+    content = "define void @_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi(float* %desc_out, i32 %desc_len, i32 %histsz, float* %x_in, float* %y_in, i32* %layer_in, float* %response_in, float* %size_in, float* %ori_in, i32 %total_feat, i32 %d, i32 %n, float %scale, float %sigma, i32 %n_layers) uwtable noinline {\n" + content + "}"
+    write_patch_to_file("./arrayfire-repair/Descriptor-second.ll", content)
+    print "here"
+
+
 def test_gklee_barrier1():
     global_env = parse_function("./gklee-test-repair/barrier1-delete.ll")
     target_function = global_env.get_value("@_Z2dlPi")
@@ -487,6 +659,17 @@ def test_gklee_barrier1():
     print "here"
 
 
+def test_arrayfire_warp_reduce1():
+    global_env = parse_function("./arrayfire-repair/reduce1.ll")
+    target_function = global_env.get_value("@_Z11warp_reducePiPj")
+    branch = BranchInformation(
+        [item.strip() for item in target_function.raw_codes.split("\n") if len(item.strip()) != 0])
+    content = branch.repair_pair_statements("%23 = load i32* %22, align 4, !dbg !30",
+                                            "store i32 %36, i32* %40, align 4, !dbg !36")
+    content = 'define void @_Z11warp_reducePiPj(i32* %s_ptr, i32* %s_idx) nounwind uwtable section "__device__" {' + content + "}\n"
+    write_patch_to_file("./arrayfire-repair/reduce1-repair.ll", content)
+
+
 def write_patch_to_file(file_path, content):
     with open(file_path, 'w') as f:
         f.write(content)
@@ -496,7 +679,15 @@ if __name__ == "__main__":
     from time import time
 
     start_time = time()
-    test_gklee_barrier1()
+    test_arrayfire_hamming_matcher_2()
+    # test_arrayfire_descriptor()
+    # test_arrayfire_warp_reduce1()
+    # test_arrayfire_JacobiSVD()
+    # test_arrayfire_hamming_matcher_1()
+    # test_arrayfire_hamming_matcher_unroll_1()
+    # test_arrayfire_scan_nofinal_kernel()
+    # test_arrayfire_scan_dim_nofinal_kernel()
+    # test_gklee_barrier1()
     # test_arrayfire_scan_dim()
     # test_kaldi_add_diag()
     # test_thundersvm()

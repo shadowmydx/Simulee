@@ -5,7 +5,6 @@ import time
 
 
 class DimensionFactory:
-
     def __init__(self, block_limited, thread_limited, block_dimension, thread_dimension):
         self.block_limited = block_limited
         self.thread_limited = thread_limited
@@ -100,10 +99,12 @@ class ArgumentsItem:
     def mutation(self):
         if self.evolve_dimension:
             normal_item = ArgumentsItem(self.target_file, self.target_function_name, self.main_memory,
-                                        self.heuristic_content, self.dimension_handler.mutation(self.blocks.grid_dim, True),
+                                        self.heuristic_content,
+                                        self.dimension_handler.mutation(self.blocks.grid_dim, True),
                                         self.dimension_handler.mutation(self.threads.block_dim, False))
             cauchy_item = ArgumentsItem(self.target_file, self.target_function_name, self.main_memory,
-                                        self.heuristic_content, self.dimension_handler.mutation(self.blocks.grid_dim, True),
+                                        self.heuristic_content,
+                                        self.dimension_handler.mutation(self.blocks.grid_dim, True),
                                         self.dimension_handler.mutation(self.threads.block_dim, False))
             normal_item.evolve_dimension = True
             cauchy_item.evolve_dimension = True
@@ -193,7 +194,6 @@ class ArgumentsItem:
 
 
 class BranchItem(ArgumentsItem):
-
     def __init__(self, target_file, target_function_name, main_memory,
                  heuristic_content, blocks, threads, evolve_dimension=False):
         ArgumentsItem.__init__(self, target_file, target_function_name, main_memory,
@@ -222,18 +222,20 @@ class BranchItem(ArgumentsItem):
     def mutation(self):
         if self.evolve_dimension:
             normal_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
-                                        self.heuristic_content, self.dimension_handler.mutation(self.blocks.grid_dim, True),
-                                        self.dimension_handler.mutation(self.threads.block_dim, False))
+                                     self.heuristic_content,
+                                     self.dimension_handler.mutation(self.blocks.grid_dim, True),
+                                     self.dimension_handler.mutation(self.threads.block_dim, False))
             cauchy_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
-                                        self.heuristic_content, self.dimension_handler.mutation(self.blocks.grid_dim, True),
-                                        self.dimension_handler.mutation(self.threads.block_dim, False))
+                                     self.heuristic_content,
+                                     self.dimension_handler.mutation(self.blocks.grid_dim, True),
+                                     self.dimension_handler.mutation(self.threads.block_dim, False))
             normal_item.evolve_dimension = True
             cauchy_item.evolve_dimension = True
         else:
             normal_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
-                                        self.heuristic_content, self.blocks, self.threads)
+                                     self.heuristic_content, self.blocks, self.threads)
             cauchy_item = BranchItem(self.target_file, self.target_function_name, self.main_memory,
-                                        self.heuristic_content, self.blocks, self.threads)
+                                     self.heuristic_content, self.blocks, self.threads)
         normal_item.father_item = self
         self.copy_initial_argus_to_target(normal_item)
         normal_item.father_generate = "normal"
@@ -252,12 +254,13 @@ class BranchItem(ArgumentsItem):
         return normal_item, cauchy_item
 
 
-def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads, dimension=False, is_branch=False):
-
+def evolutionary_item_factory(target_file, target_function_name, main_memory, blocks, threads, dimension=False,
+                              is_branch=False):
     class_arguments = class_generator(target_file, target_function_name, main_memory, is_branch)
 
     def _generator():
-        return ArgumentsItem(target_file, target_function_name, main_memory, class_arguments, blocks, threads, dimension)
+        return ArgumentsItem(target_file, target_function_name, main_memory, class_arguments, blocks, threads,
+                             dimension)
 
     def _branch_generator():
         return BranchItem(target_file, target_function_name, main_memory, class_arguments, blocks, threads, dimension)
@@ -290,7 +293,6 @@ def selector(item, population_lst):
 
 
 def acceptable_factory(is_branch):
-
     def _acceptable(item_lst):
         return item_lst[0][1][0] < .3
         # score_lst = [item[1] for item in item_lst if item[1] < .7]
@@ -303,7 +305,6 @@ def acceptable_factory(is_branch):
 
 
 def generator_for_evolutionary_factory(target_generator):
-
     def _generator(population):
         result_lst = list()
         for i in xrange(population):
@@ -336,7 +337,9 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
                                               Thread((-1, -1, 0), fixed_dimension[1]), evolve_dimension, is_branch)
         generator = generator_for_evolutionary_factory(generator)
 
-        population_lst, current_generation = evolutionary_framework(3, 50, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None, 10)
+        population_lst, current_generation = evolutionary_framework(3, 50, generator, sorter, fitness,
+                                                                    acceptable_factory(is_branch), selector, mutation,
+                                                                    None, 10)
         # population_lst, current_generation = evolutionary_framework_local(20, 1, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
         if population_lst[0][1][0] >= 1:
             print population_lst[0][1][0]
@@ -357,14 +360,17 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
     return test_result_lst[0]
 
 
-def auto_test_target_function(target_file_path, function_name, main_memory, used_default_dimension=False, fixed_dimension=None):
+def auto_test_target_function(target_file_path, function_name, main_memory, used_default_dimension=False,
+                              fixed_dimension=None):
     start_time = time.time()
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
-                                                evolve_dimension=not used_default_dimension, fixed_dimension=fixed_dimension)
+                                                evolve_dimension=not used_default_dimension,
+                                                fixed_dimension=fixed_dimension)
     used_solution = dict()
     for item in solution_lst:
         if item[1][0] < 1:
-            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
+            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(
+                item[0].construct_running_arguments())
             if solution_str in used_solution:
                 continue
             used_solution[solution_str] = True
@@ -384,19 +390,26 @@ def auto_test_target_function(target_file_path, function_name, main_memory, used
             print "Current solution total cost time is " + str(current_time - start_time)
 
 
-def auto_test_target_function_dynamical(target_file_path, function_name, main_memory, used_default_dimension=False, fixed_dimension=None):
+def auto_test_target_function_dynamical(target_file_path, function_name, main_memory, used_default_dimension=False,
+                                        fixed_dimension=None, initial_function=None):
     start_time = time.time()
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
-                                                evolve_dimension=not used_default_dimension, fixed_dimension=fixed_dimension)
+                                                evolve_dimension=not used_default_dimension,
+                                                fixed_dimension=fixed_dimension)
     used_solution = dict()
+    executed = False
     for item in solution_lst:
         if item[1][0] < 1:
-            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
+            executed = True
+            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(
+                item[0].construct_running_arguments())
             if solution_str in used_solution:
                 continue
             used_solution[solution_str] = True
             global_env = parse_function(target_file_path)
             generate_memory_container(main_memory.keys(), global_env)
+            if initial_function is not None:
+                global_env = initial_function(global_env)
             raw_code = global_env.get_value(function_name)
             blocks = item[0].blocks
             threads = item[0].threads
@@ -409,6 +422,24 @@ def auto_test_target_function_dynamical(target_file_path, function_name, main_me
             execute_framework_dynamical(blocks, threads, raw_code.raw_codes, arguments, global_env)
             current_time = time.time()
             print "Current solution total cost time is " + str(current_time - start_time)
+    if not executed:
+        item = solution_lst[0]
+        global_env = parse_function(target_file_path)
+        generate_memory_container(main_memory.keys(), global_env)
+        if initial_function is not None:
+            global_env = initial_function(global_env)
+        raw_code = global_env.get_value(function_name)
+        blocks = item[0].blocks
+        threads = item[0].threads
+        arguments = item[0].construct_running_arguments()
+        for idx, variable in enumerate(raw_code.argument_lst):
+            if variable not in arguments and raw_code.type_lst[idx].find("*") == -1:
+                arguments[variable] = 2  # temp action, need more focus
+        arguments = generate_arguments(global_env.get_value(function_name), arguments)
+        arguments["main_memory"] = main_memory
+        execute_framework_dynamical(blocks, threads, raw_code.raw_codes, arguments, global_env)
+        current_time = time.time()
+        print "Current solution total cost time is " + str(current_time - start_time)
 
 
 def auto_test_target_function_advanced(target_file_path, function_name, main_memory,
@@ -423,7 +454,8 @@ def auto_test_target_function_advanced(target_file_path, function_name, main_mem
         print("=========================================================")
     for item in solution_lst:
         if item[1][0] < 1:
-            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(item[0].construct_running_arguments())
+            solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(
+                item[0].construct_running_arguments())
             if solution_str in used_solution:
                 continue
             used_solution[solution_str] = True
@@ -470,10 +502,11 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
-    auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i", {
-        "global": "%alpha",
-        "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
-    }, used_default_dimension=True)
+    auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i",
+                              {
+                                  "global": "%alpha",
+                                  "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
+                              }, used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None
@@ -518,4 +551,3 @@ if __name__ == "__main__":
     #     "global": None,
     #     "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"
     # })
-
