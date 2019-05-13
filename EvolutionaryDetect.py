@@ -104,6 +104,20 @@ def test_gunrock_xmrig():
     })
 
 
+def test_arrayfire_compute_median():
+    auto_test_target_function_advanced("./arrayfire-repair/computeMedian-repair.ll", "@_Z13computeMedianj", {
+        'global': None,
+        'shared': "@_ZZ13computeMedianjE5s_idx",
+    })
+
+
+def test_arrayfire_harris_response():
+    auto_test_target_function_advanced("./arrayfire-repair/harris_response.ll", "@_Z15harris_responsePfS_PKfS1_S1_jS_jfj", {
+        'global': "%image_ptr",
+        'shared': None,
+    })
+
+
 def test_convnet2_kTile():
     auto_test_target_function("./cuda-convnet2-new-bug/new-func.ll", "@_Z5kTilePKfPfjjjj", {
         "global": "%tgt",
@@ -245,8 +259,10 @@ def dummy_data_for_shared_memory_hamming3(global_env):
 
 
 if __name__ == "__main__":
-    test_arrayfire_hamming_matcher_2()
-    # test_arrayfire_descriptor()  # need future work!
+    test_arrayfire_harris_response()
+    # test_arrayfire_compute_median()
+    # test_arrayfire_hamming_matcher_2()
+    # test_arrayfire_descriptor()  #
     # test_arrayfire_reduce1()
     # test_arrayfire_JacobiSVD()
     # test_arrayfire_hamming_matcher_1()
