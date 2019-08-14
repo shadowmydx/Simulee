@@ -1,0 +1,11 @@
+kaldi:
+_sum_reduce: 1 race, 1 unnecessary  (1 unnecessary confirm, 1 race under discussion)
+_copy_low_upp: 2 races (2 races under discussion)
+_copy_upp_low: 2 races (2 races under discussion)
+_add_diag_vec_mat: 1 race (1 race under discussion)
+_copy_from_mat: 1 race (no issue, same situation)
+_splice: 1 race (no issue, same situation)
+_copy_from_tp: 2 races (no issue, same situation)
+
+thundersvm:
+c_smo_solve_kernel: 4 races (4 races under discussion)

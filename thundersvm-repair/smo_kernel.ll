@@ -186,228 +186,245 @@ define zeroext i1 @_Z8is_I_lowfff(float %a, float %y, float %C) nounwind uwtable
 }
 
 define void @_Z19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_(i32* %label, float* %f_values, float* %alpha, float* %alpha_diff, i32* %working_set, i32 %ws_size, float %C, float* %k_mat_rows, float* %k_mat_diag, i32 %row_len, float %eps, float* %diff_and_bias) uwtable noinline {
-    %1 = alloca i32*, align 8
-    %2 = alloca float*, align 8
-    %3 = alloca float*, align 8
-    %4 = alloca float*, align 8
-    %5 = alloca i32*, align 8
-    %6 = alloca i32, align 4
-    %7 = alloca float, align 4
-    %8 = alloca float*, align 8
-    %9 = alloca float*, align 8
-    %10 = alloca i32, align 4
-    %11 = alloca float, align 4
-    %12 = alloca float*, align 8
-    %f_idx2reduce = alloca i32*, align 8
-    %f_val2reduce = alloca float*, align 8
-    %alpha_i_diff = alloca float*, align 8
-    %alpha_j_diff = alloca float*, align 8
-    %kd = alloca float*, align 8
-    %tid = alloca i32, align 4
-    %wsi = alloca i32, align 4
-    %y = alloca float, align 4
-    %f = alloca float, align 4
-    %a = alloca float, align 4
-    %aold = alloca float, align 4
-    %local_eps = alloca float, align 4
-    %numOfIter = alloca i32, align 4
-    %ip = alloca i32, align 4
-    %up_value_p = alloca float, align 4
-    %kIpwsI = alloca float, align 4
-    %local_diff = alloca float, align 4
-    store i32* %label, i32** %1, align 8
-    store float* %f_values, float** %2, align 8
-    store float* %alpha, float** %3, align 8
-    store float* %alpha_diff, float** %4, align 8
-    store i32* %working_set, i32** %5, align 8
-    store i32 %ws_size, i32* %6, align 4
-    store float %C, float* %7, align 4
-    store float* %k_mat_rows, float** %8, align 8
-    store float* %k_mat_diag, float** %9, align 8
-    store i32 %row_len, i32* %10, align 4
-    store float %eps, float* %11, align 4
-    store float* %diff_and_bias, float** %12, align 8
-    store i32* getelementptr inbounds ([256 x i32]* @_ZZ19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_E10shared_mem, i32 0, i32 0), i32** %f_idx2reduce, align 8, !dbg !84
-    %13 = load i32* %6, align 4, !dbg !86
-    %14 = sext i32 %13 to i64, !dbg !86
-    %15 = load i32** %f_idx2reduce, align 8, !dbg !86
-    %16 = getelementptr inbounds i32* %15, i64 %14, !dbg !86
-    %17 = bitcast i32* %16 to float*, !dbg !86
-    store float* %17, float** %f_val2reduce, align 8, !dbg !86
-    %18 = load i32* %6, align 4, !dbg !88
-    %19 = sext i32 %18 to i64, !dbg !88
-    %20 = load float** %f_val2reduce, align 8, !dbg !88
-    %21 = getelementptr inbounds float* %20, i64 %19, !dbg !88
-    store float* %21, float** %alpha_i_diff, align 8, !dbg !88
-    %22 = load float** %alpha_i_diff, align 8, !dbg !90
-    %23 = getelementptr inbounds float* %22, i64 1, !dbg !90
-    store float* %23, float** %alpha_j_diff, align 8, !dbg !90
-    %24 = load float** %alpha_j_diff, align 8, !dbg !92
-    %25 = getelementptr inbounds float* %24, i64 1, !dbg !92
-    store float* %25, float** %kd, align 8, !dbg !92
-    %26 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !94
-    store i32 %26, i32* %tid, align 4, !dbg !94
-    %27 = load i32* %tid, align 4, !dbg !96
-    %28 = sext i32 %27 to i64, !dbg !96
-    %29 = load i32** %5, align 8, !dbg !96
-    %30 = getelementptr inbounds i32* %29, i64 %28, !dbg !96
-    %31 = load i32* %30, align 4, !dbg !96
-    store i32 %31, i32* %wsi, align 4, !dbg !96
-    %32 = load i32* %wsi, align 4, !dbg !97
-    %33 = sext i32 %32 to i64, !dbg !97
-    %34 = load float** %9, align 8, !dbg !97
-    %35 = getelementptr inbounds float* %34, i64 %33, !dbg !97
-    %36 = load float* %35, align 4, !dbg !97
-    %37 = load i32* %tid, align 4, !dbg !97
-    %38 = sext i32 %37 to i64, !dbg !97
-    %39 = load float** %kd, align 8, !dbg !97
-    %40 = getelementptr inbounds float* %39, i64 %38, !dbg !97
-    store float %36, float* %40, align 4, !dbg !97
-    %41 = load i32* %wsi, align 4, !dbg !99
-    %42 = sext i32 %41 to i64, !dbg !99
-    %43 = load i32** %1, align 8, !dbg !99
-    %44 = getelementptr inbounds i32* %43, i64 %42, !dbg !99
-    %45 = load i32* %44, align 4, !dbg !99
-    %46 = sitofp i32 %45 to float, !dbg !99
-    store float %46, float* %y, align 4, !dbg !99
-    %47 = load i32* %wsi, align 4, !dbg !101
-    %48 = sext i32 %47 to i64, !dbg !101
-    %49 = load float** %2, align 8, !dbg !101
-    %50 = getelementptr inbounds float* %49, i64 %48, !dbg !101
-    %51 = load float* %50, align 4, !dbg !101
-    store float %51, float* %f, align 4, !dbg !101
-    %52 = load i32* %wsi, align 4, !dbg !103
-    %53 = sext i32 %52 to i64, !dbg !103
-    %54 = load float** %3, align 8, !dbg !103
-    %55 = getelementptr inbounds float* %54, i64 %53, !dbg !103
-    %56 = load float* %55, align 4, !dbg !103
-    store float %56, float* %a, align 4, !dbg !103
-    %57 = load float* %a, align 4, !dbg !105
-    store float %57, float* %aold, align 4, !dbg !105
-    call void @__syncthreads(), !dbg !106
-    store float 0.000000e+00, float* %local_eps, align 4, !dbg !108
-    store i32 0, i32* %numOfIter, align 4, !dbg !110
-    br label %58, !dbg !111
+  %1 = alloca i32*, align 8
+  %2 = alloca float*, align 8
+  %3 = alloca float*, align 8
+  %4 = alloca float*, align 8
+  %5 = alloca i32*, align 8
+  %6 = alloca i32, align 4
+  %7 = alloca float, align 4
+  %8 = alloca float*, align 8
+  %9 = alloca float*, align 8
+  %10 = alloca i32, align 4
+  %11 = alloca float, align 4
+  %12 = alloca float*, align 8
+  %f_idx2reduce = alloca i32*, align 8
+  %f_val2reduce = alloca float*, align 8
+  %alpha_i_diff = alloca float*, align 8
+  %alpha_j_diff = alloca float*, align 8
+  %kd = alloca float*, align 8
+  %tid = alloca i32, align 4
+  %wsi = alloca i32, align 4
+  %y = alloca float, align 4
+  %f = alloca float, align 4
+  %a = alloca float, align 4
+  %aold = alloca float, align 4
+  %local_eps = alloca float, align 4
+  %numOfIter = alloca i32, align 4
+  %ip = alloca i32, align 4
+  %up_value_p = alloca float, align 4
+  %kIpwsI = alloca float, align 4
+  %local_diff = alloca float, align 4
+  store i32* %label, i32** %1, align 8
+  call void @llvm.dbg.declare(metadata !{i32** %1}, metadata !67), !dbg !68
+  store float* %f_values, float** %2, align 8
+  call void @llvm.dbg.declare(metadata !{float** %2}, metadata !69), !dbg !68
+  store float* %alpha, float** %3, align 8
+  call void @llvm.dbg.declare(metadata !{float** %3}, metadata !70), !dbg !68
+  store float* %alpha_diff, float** %4, align 8
+  call void @llvm.dbg.declare(metadata !{float** %4}, metadata !71), !dbg !68
+  store i32* %working_set, i32** %5, align 8
+  call void @llvm.dbg.declare(metadata !{i32** %5}, metadata !72), !dbg !68
+  store i32 %ws_size, i32* %6, align 4
+  call void @llvm.dbg.declare(metadata !{i32* %6}, metadata !73), !dbg !74
+  store float %C, float* %7, align 4
+  call void @llvm.dbg.declare(metadata !{float* %7}, metadata !75), !dbg !74
+  store float* %k_mat_rows, float** %8, align 8
+  call void @llvm.dbg.declare(metadata !{float** %8}, metadata !76), !dbg !74
+  store float* %k_mat_diag, float** %9, align 8
+  call void @llvm.dbg.declare(metadata !{float** %9}, metadata !77), !dbg !74
+  store i32 %row_len, i32* %10, align 4
+  call void @llvm.dbg.declare(metadata !{i32* %10}, metadata !78), !dbg !74
+  store float %eps, float* %11, align 4
+  call void @llvm.dbg.declare(metadata !{float* %11}, metadata !79), !dbg !74
+  store float* %diff_and_bias, float** %12, align 8
+  call void @llvm.dbg.declare(metadata !{float** %12}, metadata !80), !dbg !81
+  call void @llvm.dbg.declare(metadata !{i32** %f_idx2reduce}, metadata !82), !dbg !84
+  store i32* getelementptr inbounds ([256 x i32]* @_ZZ19nu_smo_solve_kernelPKiPfS1_S1_S0_ifPKfS3_ifS1_E10shared_mem, i32 0, i32 0), i32** %f_idx2reduce, align 8, !dbg !84
+  call void @llvm.dbg.declare(metadata !{float** %f_val2reduce}, metadata !85), !dbg !86
+  %13 = load i32* %6, align 4, !dbg !86
+  %14 = sext i32 %13 to i64, !dbg !86
+  %15 = load i32** %f_idx2reduce, align 8, !dbg !86
+  %16 = getelementptr inbounds i32* %15, i64 %14, !dbg !86
+  %17 = bitcast i32* %16 to float*, !dbg !86
+  store float* %17, float** %f_val2reduce, align 8, !dbg !86
+  call void @llvm.dbg.declare(metadata !{float** %alpha_i_diff}, metadata !87), !dbg !88
+  %18 = load i32* %6, align 4, !dbg !88
+  %19 = sext i32 %18 to i64, !dbg !88
+  %20 = load float** %f_val2reduce, align 8, !dbg !88
+  %21 = getelementptr inbounds float* %20, i64 %19, !dbg !88
+  store float* %21, float** %alpha_i_diff, align 8, !dbg !88
+  call void @llvm.dbg.declare(metadata !{float** %alpha_j_diff}, metadata !89), !dbg !90
+  %22 = load float** %alpha_i_diff, align 8, !dbg !90
+  %23 = getelementptr inbounds float* %22, i64 1, !dbg !90
+  store float* %23, float** %alpha_j_diff, align 8, !dbg !90
+  call void @llvm.dbg.declare(metadata !{float** %kd}, metadata !91), !dbg !92
+  %24 = load float** %alpha_j_diff, align 8, !dbg !92
+  %25 = getelementptr inbounds float* %24, i64 1, !dbg !92
+  store float* %25, float** %kd, align 8, !dbg !92
+  call void @llvm.dbg.declare(metadata !{i32* %tid}, metadata !93), !dbg !94
+  %26 = load i32* getelementptr inbounds (%struct.dim3* @threadIdx, i32 0, i32 0), align 4, !dbg !94
+  store i32 %26, i32* %tid, align 4, !dbg !94
+  call void @llvm.dbg.declare(metadata !{i32* %wsi}, metadata !95), !dbg !96
+  %27 = load i32* %tid, align 4, !dbg !96
+  %28 = sext i32 %27 to i64, !dbg !96
+  %29 = load i32** %5, align 8, !dbg !96
+  %30 = getelementptr inbounds i32* %29, i64 %28, !dbg !96
+  %31 = load i32* %30, align 4, !dbg !96
+  store i32 %31, i32* %wsi, align 4, !dbg !96
+  %32 = load i32* %wsi, align 4, !dbg !97
+  %33 = sext i32 %32 to i64, !dbg !97
+  %34 = load float** %9, align 8, !dbg !97
+  %35 = getelementptr inbounds float* %34, i64 %33, !dbg !97
+  %36 = load float* %35, align 4, !dbg !97
+  %37 = load i32* %tid, align 4, !dbg !97
+  %38 = sext i32 %37 to i64, !dbg !97
+  %39 = load float** %kd, align 8, !dbg !97
+  %40 = getelementptr inbounds float* %39, i64 %38, !dbg !97
+  store float %36, float* %40, align 4, !dbg !97
+  call void @llvm.dbg.declare(metadata !{float* %y}, metadata !98), !dbg !99
+  %41 = load i32* %wsi, align 4, !dbg !99
+  %42 = sext i32 %41 to i64, !dbg !99
+  %43 = load i32** %1, align 8, !dbg !99
+  %44 = getelementptr inbounds i32* %43, i64 %42, !dbg !99
+  %45 = load i32* %44, align 4, !dbg !99
+  %46 = sitofp i32 %45 to float, !dbg !99
+  store float %46, float* %y, align 4, !dbg !99
+  call void @llvm.dbg.declare(metadata !{float* %f}, metadata !100), !dbg !101
+  %47 = load i32* %wsi, align 4, !dbg !101
+  %48 = sext i32 %47 to i64, !dbg !101
+  %49 = load float** %2, align 8, !dbg !101
+  %50 = getelementptr inbounds float* %49, i64 %48, !dbg !101
+  %51 = load float* %50, align 4, !dbg !101
+  store float %51, float* %f, align 4, !dbg !101
+  call void @llvm.dbg.declare(metadata !{float* %a}, metadata !102), !dbg !103
+  %52 = load i32* %wsi, align 4, !dbg !103
+  %53 = sext i32 %52 to i64, !dbg !103
+  %54 = load float** %3, align 8, !dbg !103
+  %55 = getelementptr inbounds float* %54, i64 %53, !dbg !103
+  %56 = load float* %55, align 4, !dbg !103
+  store float %56, float* %a, align 4, !dbg !103
+  call void @llvm.dbg.declare(metadata !{float* %aold}, metadata !104), !dbg !105
+  %57 = load float* %a, align 4, !dbg !105
+  store float %57, float* %aold, align 4, !dbg !105
+  call void @__syncthreads(), !dbg !106
+  call void @llvm.dbg.declare(metadata !{float* %local_eps}, metadata !107), !dbg !108
+  store float 0.000000e+00, float* %local_eps, align 4, !dbg !108
+  call void @llvm.dbg.declare(metadata !{i32* %numOfIter}, metadata !109), !dbg !110
+  store i32 0, i32* %numOfIter, align 4, !dbg !110
+  br label %58, !dbg !111
 
+; <label>:58                                      ; preds = %127, %0
+  %59 = load float* %y, align 4, !dbg !112
+  %60 = fcmp ogt float %59, 0.000000e+00, !dbg !112
+  br i1 %60, label %61, label %71, !dbg !112
 
-    ; <label>:58                                      ; preds = %127, %0
-    %59 = load float* %y, align 4, !dbg !112
-    %60 = fcmp ogt float %59, 0.000000e+00, !dbg !112
-    br i1 %60, label %61, label %71, !dbg !112
+; <label>:61                                      ; preds = %58
+  %62 = load float* %a, align 4, !dbg !112
+  %63 = load float* %7, align 4, !dbg !112
+  %64 = fcmp olt float %62, %63, !dbg !112
+  br i1 %64, label %65, label %71, !dbg !112
 
+; <label>:65                                      ; preds = %61
+  %66 = load float* %f, align 4, !dbg !114
+  %67 = load i32* %tid, align 4, !dbg !114
+  %68 = sext i32 %67 to i64, !dbg !114
+  %69 = load float** %f_val2reduce, align 8, !dbg !114
+  %70 = getelementptr inbounds float* %69, i64 %68, !dbg !114
+  store float %66, float* %70, align 4, !dbg !114
+  br label %76, !dbg !114
 
-    ; <label>:61                                      ; preds = %58
-    %62 = load float* %a, align 4, !dbg !112
-    %63 = load float* %7, align 4, !dbg !112
-    %64 = fcmp olt float %62, %63, !dbg !112
-    br i1 %64, label %65, label %71, !dbg !112
+; <label>:71                                      ; preds = %61, %58
+  %72 = load i32* %tid, align 4, !dbg !115
+  %73 = sext i32 %72 to i64, !dbg !115
+  %74 = load float** %f_val2reduce, align 8, !dbg !115
+  %75 = getelementptr inbounds float* %74, i64 %73, !dbg !115
+  store float 0x7FF0000000000000, float* %75, align 4, !dbg !115
+  br label %76
 
+; <label>:76                                      ; preds = %71, %65
 
-    ; <label>:65                                      ; preds = %61
-    %66 = load float* %f, align 4, !dbg !114
-    %67 = load i32* %tid, align 4, !dbg !114
-    %68 = sext i32 %67 to i64, !dbg !114
-    %69 = load float** %f_val2reduce, align 8, !dbg !114
-    %70 = getelementptr inbounds float* %69, i64 %68, !dbg !114
-    store float %66, float* %70, align 4, !dbg !114
-    br label %76, !dbg !114
+  call void @llvm.dbg.declare(metadata !{i32* %ip}, metadata !117), !dbg !118
+  %77 = load float** %f_val2reduce, align 8, !dbg !118
+  %78 = load i32** %f_idx2reduce, align 8, !dbg !118
+  %79 = call i32 @_Z13get_block_minPKfPi(float* %77, i32* %78), !dbg !118
+  store i32 %79, i32* %ip, align 4, !dbg !118
+  call void @llvm.dbg.declare(metadata !{float* %up_value_p}, metadata !119), !dbg !120
+  %80 = load i32* %ip, align 4, !dbg !120
+  %81 = sext i32 %80 to i64, !dbg !120
+  %82 = load float** %f_val2reduce, align 8, !dbg !120
+  %83 = getelementptr inbounds float* %82, i64 %81, !dbg !120
+  %84 = load float* %83, align 4, !dbg !120
+  store float %84, float* %up_value_p, align 4, !dbg !120
+  call void @llvm.dbg.declare(metadata !{float* %kIpwsI}, metadata !121), !dbg !122
+  %85 = load i32* %10, align 4, !dbg !122
+  %86 = load i32* %ip, align 4, !dbg !122
+  %87 = mul nsw i32 %85, %86, !dbg !122
+  %88 = load i32* %wsi, align 4, !dbg !122
+  %89 = add nsw i32 %87, %88, !dbg !122
+  %90 = sext i32 %89 to i64, !dbg !122
+  %91 = load float** %8, align 8, !dbg !122
+  %92 = getelementptr inbounds float* %91, i64 %90, !dbg !122
+  %93 = load float* %92, align 4, !dbg !122
+  store float %93, float* %kIpwsI, align 4, !dbg !122
 
+  call void @llvm.dbg.declare(metadata !{float* %local_diff}, metadata !124), !dbg !125
+  %94 = load float* %up_value_p, align 4, !dbg !125
+  store float %94, float* %local_diff, align 4, !dbg !125
+  %95 = load i32* %numOfIter, align 4, !dbg !126
+  %96 = icmp eq i32 %95, 0, !dbg !126
+  br i1 %96, label %97, label %100, !dbg !126
 
-    ; <label>:71                                      ; preds = %61, %58
-    %72 = load i32* %tid, align 4, !dbg !115
-    %73 = sext i32 %72 to i64, !dbg !115
-    %74 = load float** %f_val2reduce, align 8, !dbg !115
-    %75 = getelementptr inbounds float* %74, i64 %73, !dbg !115
-    store float 0x7FF0000000000000, float* %75, align 4, !dbg !115
-    br label %76
+; <label>:97                                      ; preds = %76
+  %98 = load float* %local_diff, align 4, !dbg !127
+  %99 = fmul float 0x3FB99999A0000000, %98, !dbg !127
+  store float %99, float* %local_eps, align 4, !dbg !127
+  br label %100, !dbg !129
 
+; <label>:100                                     ; preds = %97, %76
+  %101 = load float* %local_diff, align 4, !dbg !130
+  %102 = load float* %local_eps, align 4, !dbg !130
+  %103 = fcmp olt float %101, %102, !dbg !130
+  br i1 %103, label %104, label %127, !dbg !130
 
-    ; <label>:76                                      ; preds = %71, %65
-    call void @__syncthreads()
-    %77 = load float** %f_val2reduce, align 8, !dbg !118
-    %78 = load i32** %f_idx2reduce, align 8, !dbg !118
-    %79 = call i32 @_Z13get_block_minPKfPi(float* %77, i32* %78), !dbg !118
-    store i32 %79, i32* %ip, align 4, !dbg !118
-    %80 = load i32* %ip, align 4, !dbg !120
-    %81 = sext i32 %80 to i64, !dbg !120
-    %82 = load float** %f_val2reduce, align 8, !dbg !120
-    %83 = getelementptr inbounds float* %82, i64 %81, !dbg !120
-    %84 = load float* %83, align 4, !dbg !120
-    store float %84, float* %up_value_p, align 4, !dbg !120
-    %85 = load i32* %10, align 4, !dbg !122
-    %86 = load i32* %ip, align 4, !dbg !122
-    %87 = mul nsw i32 %85, %86, !dbg !122
-    %88 = load i32* %wsi, align 4, !dbg !122
-    %89 = add nsw i32 %87, %88, !dbg !122
-    %90 = sext i32 %89 to i64, !dbg !122
-    %91 = load float** %8, align 8, !dbg !122
-    %92 = getelementptr inbounds float* %91, i64 %90, !dbg !122
-    %93 = load float* %92, align 4, !dbg !122
-    store float %93, float* %kIpwsI, align 4, !dbg !122
-    %94 = load float* %up_value_p, align 4, !dbg !125
-    store float %94, float* %local_diff, align 4, !dbg !125
-    %95 = load i32* %numOfIter, align 4, !dbg !126
-    %96 = icmp eq i32 %95, 0, !dbg !126
-    br i1 %96, label %97, label %100, !dbg !126
+; <label>:104                                     ; preds = %100
+  %105 = load float* %a, align 4, !dbg !131
+  %106 = load i32* %wsi, align 4, !dbg !131
+  %107 = sext i32 %106 to i64, !dbg !131
+  %108 = load float** %3, align 8, !dbg !131
+  %109 = getelementptr inbounds float* %108, i64 %107, !dbg !131
+  store float %105, float* %109, align 4, !dbg !131
+  %110 = load float* %a, align 4, !dbg !133
+  %111 = load float* %aold, align 4, !dbg !133
+  %112 = fsub float %110, %111, !dbg !133
+  %113 = fsub float -0.000000e+00, %112, !dbg !133
+  %114 = load float* %y, align 4, !dbg !133
+  %115 = fmul float %113, %114, !dbg !133
+  %116 = load i32* %tid, align 4, !dbg !133
+  %117 = sext i32 %116 to i64, !dbg !133
+  %118 = load float** %4, align 8, !dbg !133
+  %119 = getelementptr inbounds float* %118, i64 %117, !dbg !133
+  store float %115, float* %119, align 4, !dbg !133
+  %120 = load i32* %tid, align 4, !dbg !134
+  %121 = icmp eq i32 %120, 0, !dbg !134
+  br i1 %121, label %122, label %126, !dbg !134
 
+; <label>:122                                     ; preds = %104
+  %123 = load float* %local_diff, align 4, !dbg !135
+  %124 = load float** %12, align 8, !dbg !135
+  %125 = getelementptr inbounds float* %124, i64 0, !dbg !135
+  store float %123, float* %125, align 4, !dbg !135
+  br label %126, !dbg !137
 
-    ; <label>:97                                      ; preds = %76
-    %98 = load float* %local_diff, align 4, !dbg !127
-    %99 = fmul float 0x3FB99999A0000000, %98, !dbg !127
-    store float %99, float* %local_eps, align 4, !dbg !127
-    br label %100, !dbg !129
+; <label>:126                                     ; preds = %122, %104
+  br label %128, !dbg !138
 
+; <label>:127                                     ; preds = %100
+  br label %58, !dbg !139
 
-    ; <label>:100                                     ; preds = %97, %76
-    %101 = load float* %local_diff, align 4, !dbg !130
-    %102 = load float* %local_eps, align 4, !dbg !130
-    %103 = fcmp olt float %101, %102, !dbg !130
-    br i1 %103, label %104, label %127, !dbg !130
-
-
-    ; <label>:104                                     ; preds = %100
-    %105 = load float* %a, align 4, !dbg !131
-    %106 = load i32* %wsi, align 4, !dbg !131
-    %107 = sext i32 %106 to i64, !dbg !131
-    %108 = load float** %3, align 8, !dbg !131
-    %109 = getelementptr inbounds float* %108, i64 %107, !dbg !131
-    store float %105, float* %109, align 4, !dbg !131
-    %110 = load float* %a, align 4, !dbg !133
-    %111 = load float* %aold, align 4, !dbg !133
-    %112 = fsub float %110, %111, !dbg !133
-    %113 = fsub float -0.000000e+00, %112, !dbg !133
-    %114 = load float* %y, align 4, !dbg !133
-    %115 = fmul float %113, %114, !dbg !133
-    %116 = load i32* %tid, align 4, !dbg !133
-    %117 = sext i32 %116 to i64, !dbg !133
-    %118 = load float** %4, align 8, !dbg !133
-    %119 = getelementptr inbounds float* %118, i64 %117, !dbg !133
-    store float %115, float* %119, align 4, !dbg !133
-    %120 = load i32* %tid, align 4, !dbg !134
-    %121 = icmp eq i32 %120, 0, !dbg !134
-    br i1 %121, label %122, label %126, !dbg !134
-
-
-    ; <label>:122                                     ; preds = %104
-    %123 = load float* %local_diff, align 4, !dbg !135
-    %124 = load float** %12, align 8, !dbg !135
-    %125 = getelementptr inbounds float* %124, i64 0, !dbg !135
-    store float %123, float* %125, align 4, !dbg !135
-    br label %126, !dbg !137
-
-
-    ; <label>:126                                     ; preds = %122, %104
-    br label %128, !dbg !138
-
-
-    ; <label>:127                                     ; preds = %100
-    br label %58, !dbg !139
-    br label %128
-
-
-    ; <label>:128                                     ; preds = %126
-    ret void, !dbg !140
-    }
+; <label>:128                                     ; preds = %126
+  ret void, !dbg !140
+}
 
 !llvm.dbg.cu = !{!0}
 
