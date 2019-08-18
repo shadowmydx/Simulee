@@ -2,7 +2,7 @@
 #define DIMY 1 
 #define THREADS_X 16
 
-    __global__ static void scan_dim_kernel(
+    __global__ void scan_dim_kernel(
                                 uint blocks_x,
                                 uint blocks_y,
                                 uint blocks_dim,
@@ -49,7 +49,6 @@
 
 
             val = val + s_tmp[tidx];
-            __syncthreads();
 
         }
 

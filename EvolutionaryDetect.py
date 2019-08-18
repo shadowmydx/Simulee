@@ -9,7 +9,16 @@ def test_device_global():
     auto_test_target_function("./read_write_test.ll", "@_Z13device_globalPji", {
         "global": "%input_array",
         "shared": None
-    }, fixed_dimension=[(1, 1, 1), (5, 1, 1)], used_default_dimension=True)
+    })
+    # }, fixed_dimension=[(1, 1, 1), (5, 1, 1)], used_default_dimension=True)
+
+
+def test_colonel():
+    auto_test_target_function("./conel.ll", "@_Z7colonelPi", {
+        "global": "%in",
+        "shared": None
+    # })
+    }, fixed_dimension=[(1, 1, 1), (52, 1, 1)], used_default_dimension=True)
 
 
 def test_device_global_repaired():
@@ -24,7 +33,7 @@ def test_sum_reduced():
     auto_test_target_function_advanced("./kaldi-new-bug/fse-func.ll", "@_Z11_sum_reducePd", {
         "global": "%buffer",
         "shared": None
-    })  # race & unnecessary
+    }, fixed_dimension=[(3, 1, 1), (2, 1, 1)], used_default_dimension=True)  # race & unnecessary
 
 
 def test_copy_low_upp():
@@ -32,6 +41,7 @@ def test_copy_low_upp():
         "global": "%A",
         "shared": None
     })
+    # }, fixed_dimension=[(1, 1, 1), (3, 2, 1)], used_default_dimension=True)
 
 
 def test_copy_upp_low():
@@ -66,6 +76,13 @@ def test_splice():
     auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z7_splicePfPKfPKiiiiiii", {
         "global": "%y",
         "shared": None
+    })
+
+
+def test_trace_mat_mat():
+    auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z20_trace_mat_mat_transPKfS0_iiiiPf", {
+        "global": None,
+        "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
     })
 
 
@@ -220,7 +237,8 @@ def test_arrayfire_JacobiSVD():
     auto_test_target_function_dynamical("./arrayfire-repair/JacobiSVD.ll", "@_Z9JacobiSVDPiS_ii", {
         "global": None,
         "shared": "@_ZZ9JacobiSVDPiS_iiE3s_S"
-    }, fixed_dimension=[(1, 1, 1), (3, 3, 1)], used_default_dimension=True)
+    })
+    # }, fixed_dimension=[(1, 1, 1), (3, 3, 1)], used_default_dimension=True)
 
 
 def test_arrayfire_reduce1():
@@ -229,6 +247,12 @@ def test_arrayfire_reduce1():
         "shared": None
     }, fixed_dimension=[(1, 1, 1), (34, 1, 1)], used_default_dimension=True)
 
+
+def test_arrayfire_select_matches():
+    auto_test_target_function_dynamical("./arrayfire-repair/select_matches.ll", "@_Z14select_matchesPKjPKijji", {
+        "global": "%in_idx",
+        "shared": None
+    })
 
 def test_arrayfire_descriptor():
     auto_test_target_function_dynamical("./arrayfire-repair/Descriptor-first.ll", "@_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi", {
@@ -259,12 +283,17 @@ def dummy_data_for_shared_memory_hamming3(global_env):
 
 
 if __name__ == "__main__":
-    test_arrayfire_harris_response()
+    # test_arrayfire_select_matches()
+    # test_copy_low_upp()
+    # test_colonel()
+    # test_device_global()
+    # test_trace_mat_mat()
+    # test_arrayfire_harris_response()
     # test_arrayfire_compute_median()
     # test_arrayfire_hamming_matcher_2()
     # test_arrayfire_descriptor()  #
     # test_arrayfire_reduce1()
-    # test_arrayfire_JacobiSVD()
+    test_arrayfire_JacobiSVD()
     # test_arrayfire_hamming_matcher_1()
     # test_arrayfire_hamming_matcher_unroll_1()
     # test_arrayfire_scan_nofinal_kernel()

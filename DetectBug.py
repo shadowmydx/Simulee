@@ -709,11 +709,11 @@ def test_kaldi_repair_add_mat():
 
 
 if __name__ == "__main__":
-    test_kaldi_repair_add_mat()
+    # test_kaldi_repair_add_mat()
     # test_arrayfire_reduce()
     # test_device_global()
     # global_test_env = parse_function("./kaldi-new-bug/new-func.ll")
-    # test_copy_low_upp()
+    test_copy_low_upp()
     # test_copy_upp_low()
     # test_add_diag_vec_mat()
     # test_copy_from_tp()
