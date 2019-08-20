@@ -4,6 +4,15 @@ from MainProcess import construct_memory_execute_mode_for_barrier
 from MainProcess import construct_memory_execute_mode_dynamically
 from MainProcess import parse_target_memory_and_checking_sync, parse_target_memory_and_checking_sync_dynamically
 import random
+import time
+
+
+def time_cost(target_func):
+    def _new_func():
+        start_time = time.time()
+        target_func()
+        print time.time() - start_time
+    return _new_func
 
 
 def count_star(target_str):
@@ -41,6 +50,7 @@ def parse_function(target_file):
     return global_env
 
 
+@time_cost
 def test_copy_low_upp():
     test_block = Block((-1, -1, 0), (2, 3, 1))
     test_thread = Thread((-1, -1, 0), (5, 5, 1))

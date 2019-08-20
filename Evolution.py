@@ -366,6 +366,7 @@ def auto_test_target_function(target_file_path, function_name, main_memory, used
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
                                                 evolve_dimension=not used_default_dimension,
                                                 fixed_dimension=fixed_dimension)
+    print "Generation time is " + str(time.time() - start_time)
     used_solution = dict()
     for item in solution_lst:
         if item[1][0] < 1:
@@ -396,6 +397,7 @@ def auto_test_target_function_dynamical(target_file_path, function_name, main_me
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
                                                 evolve_dimension=not used_default_dimension,
                                                 fixed_dimension=fixed_dimension)
+    print "Generation time is " + str(time.time() - start_time)
     used_solution = dict()
     executed = False
     for item in solution_lst:
@@ -444,13 +446,15 @@ def auto_test_target_function_dynamical(target_file_path, function_name, main_me
 
 def auto_test_target_function_advanced(target_file_path, function_name, main_memory,
                                        used_default_dimension=False, fixed_dimension=None):
+    start_time = time.time()
     solution_lst = generate_initialized_setting(target_file_path, function_name, main_memory,
                                                 evolve_dimension=not used_default_dimension,
                                                 fixed_dimension=fixed_dimension)
+    print "Generation time is " + str(time.time() - start_time)
     used_solution = dict()
     if solution_lst[0][1][0] >= 1:
         print("=========================================================")
-        print("In case that no conflicts, so all barrier functions located in original code are redundant.")
+        print("__syncthreads() barrier functions located in original code are redundant.")
         print("=========================================================")
     for item in solution_lst:
         if item[1][0] < 1:
@@ -471,6 +475,7 @@ def auto_test_target_function_advanced(target_file_path, function_name, main_mem
             arguments = generate_arguments(global_env.get_value(function_name), arguments)
             arguments["main_memory"] = main_memory
             execute_framework_advanced(blocks, threads, raw_code.raw_codes, arguments, global_env)
+            print "Current cost time is " + str(time.time() - start_time)
 
 
 if __name__ == "__main__":

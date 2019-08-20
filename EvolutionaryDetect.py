@@ -33,7 +33,8 @@ def test_sum_reduced():
     auto_test_target_function_advanced("./kaldi-new-bug/fse-func.ll", "@_Z11_sum_reducePd", {
         "global": "%buffer",
         "shared": None
-    }, fixed_dimension=[(3, 1, 1), (2, 1, 1)], used_default_dimension=True)  # race & unnecessary
+    })
+    # }, fixed_dimension=[(3, 1, 1), (2, 1, 1)], used_default_dimension=True)  # race & unnecessary
 
 
 def test_copy_low_upp():
@@ -104,7 +105,16 @@ def test_gunrock_join():
     auto_test_target_function("./gunrock/new-func2.ll", "@_Z4JoinPKiS0_PiS0_S0_S0_S1_S1_", {
         "global": "%froms_out",
         "shared": None
+    # })
     }, fixed_dimension=[(4, 1, 1), (33, 1, 1)], used_default_dimension=True)
+
+
+def test_gunrock_collect():
+    auto_test_target_function_advanced("./gunrock/gunrock1.ll", "@_Z7CollectiiPKiS0_S0_PiS1_S1_S1_", {
+        "global": "%froms",
+        "shared": None
+    })
+    # }, fixed_dimension=[(4, 1, 1), (33, 1, 1)], used_default_dimension=True)
 
 
 def test_gunrock_join2():
@@ -181,14 +191,16 @@ def test_arrayfire_scan_dim():
     auto_test_target_function_dynamical("./arrayfire-repair/scan_dim.ll", "@_Z15scan_dim_kerneljjjj", {
         "global": None,
         "shared": "@_ZZ15scan_dim_kerneljjjjE5s_tmp"
-    }, fixed_dimension=[(2, 1, 1), (5, 5, 1)], used_default_dimension=True)
+    })
+    # }, fixed_dimension=[(2, 1, 1), (5, 5, 1)], used_default_dimension=True)
 
 
 def test_arrayfire_scan_dim_nofinal_kernel():
     auto_test_target_function_dynamical("./arrayfire-repair/scan_dim_by_key_impl.ll", "@_Z24scan_dim_nonfinal_kerneljjj", {
         "global": None,
         "shared": "@_ZZ24scan_dim_nonfinal_kerneljjjE6s_ftmp"
-    }, fixed_dimension=[(1, 1, 1), (5, 5, 1)], used_default_dimension=True)
+    })
+    # }, fixed_dimension=[(1, 1, 1), (5, 5, 1)], used_default_dimension=True)
 
 
 def test_arrayfire_scan_nofinal_kernel():
@@ -216,6 +228,13 @@ def test_arrayfire_hamming_matcher_unroll_1():
     auto_test_target_function_dynamical("./arrayfire-repair/hamming1.ll", "@_Z22hamming_matcher_unrollPjS_j", {
         "global": None,
         "shared": "@_ZZ22hamming_matcher_unrollPjS_jE6s_dist"
+    }, fixed_dimension=[(1, 1, 1), (36, 1, 1)], used_default_dimension=True)
+
+
+def test_arrayfire_hamming_matcher_unroll_2():
+    auto_test_target_function_dynamical("./arrayfire-repair/hamming5.ll", "@_Z22hamming_matcher_unrollPjS_jj", {
+        "global": "%out_idx",
+        "shared": None
     }, fixed_dimension=[(1, 1, 1), (36, 1, 1)], used_default_dimension=True)
 
 
@@ -254,10 +273,12 @@ def test_arrayfire_select_matches():
         "shared": None
     })
 
+
 def test_arrayfire_descriptor():
-    auto_test_target_function_dynamical("./arrayfire-repair/Descriptor-first.ll", "@_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi", {
+    auto_test_target_function_dynamical("./arrayfire-repair/Descriptor1.ll", "@_Z17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffi", {
         "global": None,
         "shared": "@_ZZ17computeDescriptorPfjjPKfS1_PKjS1_S1_S1_jiiffiE7shrdMem"
+    # })
     }, fixed_dimension=[(1, 1, 1), (3, 10, 1)], used_default_dimension=True)
 
 
@@ -283,6 +304,7 @@ def dummy_data_for_shared_memory_hamming3(global_env):
 
 
 if __name__ == "__main__":
+    # test_add_diag_vec_mat()
     # test_arrayfire_select_matches()
     # test_copy_low_upp()
     # test_colonel()
@@ -293,25 +315,28 @@ if __name__ == "__main__":
     # test_arrayfire_hamming_matcher_2()
     # test_arrayfire_descriptor()  #
     # test_arrayfire_reduce1()
-    test_arrayfire_JacobiSVD()
+    # test_arrayfire_JacobiSVD()
+    # test_arrayfire_hamming_matcher_unroll_2()
     # test_arrayfire_hamming_matcher_1()
     # test_arrayfire_hamming_matcher_unroll_1()
     # test_arrayfire_scan_nofinal_kernel()
-    # test_arrayfire_scan_dim_nofinal_kernel()
+    test_arrayfire_scan_dim_nofinal_kernel()
     # test_gklee_test_barrier3()
     # test_gklee_test_barrier1()
     # test_arrayfire_compute_val_homography()
     # test_arrayfire_scan_dim()
     # test_kaldi_add_diag()
     # test_thundersvm_nu_smo_solve_kernel()
+    # test_thundersvm_c_smo_solve_kernel()
     # test_arrayfire_reduce()
     # test_device_global_repaired()
     # test_device_global()
     # test_gunrock_xmrig()
     # test_gunrock_join2()
+    # test_gunrock_collect()
     # test_gunrock_join()
     # test_sum_reduced()
     # test_sync_cudpp_sparseMatrixVectorSetFlags()
     # test_sync_FindMaxCorr()
-    # test_sync_cuda_cnn_g_geptCost_3()
+    # test_sync_cuda_cnn_g_getCost_3()
     # test_splice()
