@@ -653,7 +653,18 @@ def has_read_write_sync_issue_dynamically(target_read_dict, target_write_dict, p
     return result_read_dict, result_write_dict
 
 
-def parse_target_memory_and_checking_sync(target_memory, program_flow):
+def parse_target_memory_factory(original_function, handler, get_dynamic=False):
+
+    def _new_function(target_memory, program_flow):
+        original_function(target_memory, program_flow, handler)
+
+    def _new_dynamic_function(target_memory, program_flow, statement_path):
+        original_function(target_memory, program_flow, statement_path, handler)
+
+    return _new_dynamic_function if get_dynamic else _new_function
+
+
+def parse_target_memory_and_checking_sync(target_memory, program_flow, result_handler=None):
     memory_lst = target_memory.list
     for single_index in xrange(len(memory_lst)):
         single_memory_item = memory_lst[single_index]
@@ -685,6 +696,8 @@ def parse_target_memory_and_checking_sync(target_memory, program_flow):
                     print 'detect w&w synchronisation issue in ' + str(single_index)
                     print 'write:'
                     show_dict(write_write_issue)
+                    if result_handler is not None:
+                        result_handler(write_write_issue)
                     print '-------------------------------------------------------------------------------'
                 read_write_issue = has_read_write_sync_issue(visit_read_dict, visit_write_dict, program_flow)
                 if len(read_write_issue[0]) != 0:
@@ -694,6 +707,8 @@ def parse_target_memory_and_checking_sync(target_memory, program_flow):
                     show_dict(read_write_issue[0])
                     print 'write:'
                     show_dict(read_write_issue[1])
+                    if result_handler is not None:
+                        result_handler(read_write_issue)
                     print '-------------------------------------------------------------------------------'
 
                 # if len(visit_write_dict) >= 2:
@@ -709,7 +724,7 @@ def parse_target_memory_and_checking_sync(target_memory, program_flow):
                 #     show_dict(visit_write_dict)
 
 
-def parse_target_memory_and_checking_sync_dynamically(target_memory, program_flow, statement_path):
+def parse_target_memory_and_checking_sync_dynamically(target_memory, program_flow, statement_path, result_handler=None):
     memory_lst = target_memory.list
     for single_index in xrange(len(memory_lst)):
         single_memory_item = memory_lst[single_index]
@@ -741,6 +756,8 @@ def parse_target_memory_and_checking_sync_dynamically(target_memory, program_flo
                     print 'detect w&w synchronisation issue in ' + str(single_index)
                     print 'write:'
                     show_dict(write_write_issue)
+                    if result_handler is not None:
+                        result_handler(write_write_issue)
                     print '-------------------------------------------------------------------------------'
                 read_write_issue = has_read_write_sync_issue_dynamically(visit_read_dict, visit_write_dict, program_flow, statement_path)
                 if len(read_write_issue[0]) != 0:
@@ -750,6 +767,8 @@ def parse_target_memory_and_checking_sync_dynamically(target_memory, program_flo
                     show_dict(read_write_issue[0])
                     print 'write:'
                     show_dict(read_write_issue[1])
+                    if result_handler is not None:
+                        result_handler(read_write_issue)
                     print '-------------------------------------------------------------------------------'
 
 

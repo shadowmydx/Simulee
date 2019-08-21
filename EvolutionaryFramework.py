@@ -53,6 +53,7 @@ def evolutionary_framework(generation, population, generator, sorter,
     for single_item in process_pool:
         population_lst.append(single_item)
     population_lst = sorter(population_lst)
+    # population_lst.reverse()
     print "finished."
     for i in range(generation):
         print "In " + str(i) + " generation:"
@@ -74,12 +75,21 @@ def evolutionary_framework(generation, population, generator, sorter,
         for single_item in process_pool:
             child_lst.append(single_item)
         population_lst += child_lst
+        # population_lst = generator(population)
+        # for single_item in population_lst:
+        #     process_pool.send_item(single_item)
+        # population_lst = list()
+        # for single_item in process_pool:
+        #     population_lst.append(single_item)
         population_lst = sorter(population_lst)
+        # population_lst.reverse()
         # if population_lst[0][1] == population_lst[-1][1]:
         #     np.random.shuffle(population_lst)
         population_lst = population_lst[: population]
         if acceptable is not None and acceptable(population_lst):
             process_pool.close()
+            print "Acceptable early in generation " + str(i) + ": "
+            print population_lst
             return population_lst, i
     process_pool.close()
     return population_lst, generation

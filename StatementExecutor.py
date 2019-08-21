@@ -247,7 +247,10 @@ def calculation_factory(cac_flag):
             else:
                 tmp_result.set_value(num(number_one.get_value()) / num(number_two.get_value()))
         elif cac_flag == 4:
-            tmp_result.set_value(num(number_one.get_value()) % num(number_two.get_value()))
+            if num(number_two.get_value()) == 0:
+                tmp_result.set_value(0)
+            else:
+                tmp_result.set_value(num(number_one.get_value()) % num(number_two.get_value()))
         elif cac_flag == 5:
             tmp_result.set_value(num(number_one.get_value()) >> num(number_two.get_value()))
         elif cac_flag == 6:

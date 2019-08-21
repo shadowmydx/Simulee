@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/MemHeuristic.py" line="103" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="7372978a-3061-433c-aa37-b482f0426c28" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DataStructure.py" afterPath="$PROJECT_DIR$/DataStructure.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/llvm-parser.iml" afterPath="$PROJECT_DIR$/.idea/llvm-parser.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Evolution.py" afterPath="$PROJECT_DIR$/Evolution.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EvolutionaryDetect.py" afterPath="$PROJECT_DIR$/EvolutionaryDetect.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EvolutionaryFramework.py" afterPath="$PROJECT_DIR$/EvolutionaryFramework.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MainProcess.py" afterPath="$PROJECT_DIR$/MainProcess.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/StatementExecutor.py" afterPath="$PROJECT_DIR$/StatementExecutor.py" />
     </list>
     <ignored path="llvm-parser.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,11 +35,53 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="DataStructure.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/DataStructure.py">
+      <file leaf-file-name="DetectBug.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/DetectBug.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.4851485">
-              <caret line="167" column="22" selection-start-line="167" selection-start-column="22" selection-end-line="167" selection-end-column="22" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="657" column="60" selection-start-line="657" selection-start-column="60" selection-end-line="657" selection-end-column="60" />
+              <folding>
+                <element signature="e#0#27#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="EvolutionaryDetect.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/EvolutionaryDetect.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.506135">
+              <caret line="315" column="26" selection-start-line="315" selection-start-column="26" selection-end-line="315" selection-end-column="26" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="reduce.ll" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/arrayfire-repair/reduce.ll">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="8" column="14" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gunrock1.ll" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gunrock/gunrock1.ll">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="10" column="126" selection-start-line="10" selection-start-column="121" selection-end-line="10" selection-end-column="126" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fse-func.cu" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/kaldi-new-bug/fse-func.cu">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -37,62 +91,38 @@
         <entry file="file://$PROJECT_DIR$/MainProcess.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="53" column="78" selection-start-line="53" selection-start-column="44" selection-end-line="53" selection-end-column="78" />
-              <folding>
-                <element signature="e#0#27#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="read_write_test.ll" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/read_write_test.ll">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="51" column="45" selection-start-line="51" selection-start-column="45" selection-end-line="51" selection-end-column="45" />
+              <caret line="663" column="66" selection-start-line="663" selection-start-column="66" selection-end-line="663" selection-end-column="66" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tests.ll" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests.ll">
+      <file leaf-file-name="MemHeuristic.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/MemHeuristic.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
+              <caret line="174" column="33" selection-start-line="174" selection-start-column="19" selection-end-line="174" selection-end-column="33" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test2.ll" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test2.ll">
+      <file leaf-file-name="Evolution.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Evolution.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="125" column="0" selection-start-line="125" selection-start-column="0" selection-end-line="126" selection-end-column="21" />
+              <caret line="342" column="56" selection-start-line="342" selection-start-column="56" selection-end-line="342" selection-end-column="56" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="codes.ll" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/codes.ll">
+      <file leaf-file-name="EvolutionaryFramework.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EvolutionaryFramework.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="9" column="92" selection-start-line="9" selection-start-column="92" selection-end-line="9" selection-end-column="92" />
+              <caret line="72" column="47" selection-start-line="72" selection-start-column="47" selection-end-line="72" selection-end-column="47" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="StatementExecutor.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="93" column="35" selection-start-line="93" selection-start-column="35" selection-end-line="93" selection-end-column="35" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -112,21 +142,65 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Thread.py" />
-        <option value="$PROJECT_DIR$/codes.ll" />
-        <option value="$PROJECT_DIR$/tests.ll" />
-        <option value="$PROJECT_DIR$/test2.ll" />
-        <option value="$PROJECT_DIR$/StatementExecutor.py" />
-        <option value="$PROJECT_DIR$/MainProcess.py" />
+        <option value="$PROJECT_DIR$/compare_with_gklee.log" />
+        <option value="$PROJECT_DIR$/prove.py" />
+        <option value="$PROJECT_DIR$/cuda-convnet2-new-bug/new-func.ll" />
+        <option value="$PROJECT_DIR$/thundersvm/new-func.cu" />
+        <option value="$PROJECT_DIR$/test_thundersvm.py" />
+        <option value="$PROJECT_DIR$/test_arrayfire.py" />
+        <option value="$PROJECT_DIR$/cudaSift-new-bug/note" />
+        <option value="$PROJECT_DIR$/cudamat-new-bug/new-func.ll" />
+        <option value="$PROJECT_DIR$/cuda-cnn-new-bug/new-func.ll" />
+        <option value="$PROJECT_DIR$/cudaSift-new-bug/new-func-performance.ll" />
+        <option value="$PROJECT_DIR$/cuda-cnn-new-bug/new-func-performance.ll" />
+        <option value="$PROJECT_DIR$/cudpp-new-bug/new-func-performance.ll" />
+        <option value="$PROJECT_DIR$/thundersvm-new-bug/new-fun.ll" />
+        <option value="$PROJECT_DIR$/parser_code.pd" />
+        <option value="$PROJECT_DIR$/kaldi-new-bug/new-func.cu" />
+        <option value="$PROJECT_DIR$/Total Bugs.log" />
+        <option value="$PROJECT_DIR$/performance.log" />
+        <option value="$PROJECT_DIR$/cudaSift-new-bug/new-func.ll" />
+        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/DataStructure.py" />
+        <option value="$PROJECT_DIR$/read_write_test_repaired.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/reduce.hpp" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/reduce.cu" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/reduce.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/reduce-repair.ll" />
+        <option value="$PROJECT_DIR$/thundersvm-repair/smo_kernel.cu" />
+        <option value="$PROJECT_DIR$/thundersvm-repair/smo_kernel.ll" />
+        <option value="$PROJECT_DIR$/thundersvm-repair/repair.ll" />
+        <option value="$PROJECT_DIR$/kaldi-repair/_add_diag_mat_no.ll" />
+        <option value="$PROJECT_DIR$/kaldi-repair/_add_diag_mat.cu" />
+        <option value="$PROJECT_DIR$/kaldi-repair/_add_diag_mat.ll" />
+        <option value="$PROJECT_DIR$/kaldi-repair/_add_diag_mat_repair.ll" />
+        <option value="$PROJECT_DIR$/MemHeuristic.py" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/scan_dim.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/homography.ll" />
+        <option value="$PROJECT_DIR$/gklee-test-repair/barrier1-delete.ll" />
+        <option value="$PROJECT_DIR$/gklee-test-repair/barrier1.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/scan_dim_by_key_impl.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/Descriptor.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/Descriptor-delete.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/hamming3-4th.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/hamming3-5th.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/Descriptor1.ll" />
+        <option value="$PROJECT_DIR$/arrayfire-repair/hamming4-4th.ll" />
+        <option value="$PROJECT_DIR$/RepairTool.py" />
+        <option value="$PROJECT_DIR$/DetectBug.py" />
+        <option value="$PROJECT_DIR$/StatementExecutor.py" />
+        <option value="$PROJECT_DIR$/Evolution.py" />
+        <option value="$PROJECT_DIR$/MainProcess.py" />
+        <option value="$PROJECT_DIR$/EvolutionaryDetect.py" />
+        <option value="$PROJECT_DIR$/EvolutionaryFramework.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-11" />
-    <option name="y" value="-11" />
-    <option name="width" value="1836" />
-    <option name="height" value="1102" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1843" />
+    <option name="height" value="1096" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -153,6 +227,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -168,23 +243,35 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="llvm-parser" />
+              <option name="myItemId" value="Gunit" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="D:/GVGAI_GYM" />
   </component>
-  <component name="RunManager" selected="Python.MainProcess">
-    <configuration default="false" name="StatementExecutor" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\research\llvm-parser\thundersvm" />
+      <recent name="D:\research\llvm-parser\arrayfire" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\research\Gunit\thundersvm-repair" />
+      <recent name="D:\research\Gunit\arrayfire-repair" />
+      <recent name="D:\research\Gunit" />
+      <recent name="D:\research\Gunit\gunrock" />
+      <recent name="D:\research\Gunit\cudatree" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.EvolutionaryDetect">
+    <configuration default="false" name="DetectBug" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -196,7 +283,41 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="llvm-parser" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/StatementExecutor.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DetectBug.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="EvolutionaryDetect" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="llvm-parser" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/EvolutionaryDetect.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="RepairTool" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="llvm-parser" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/RepairTool.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -207,13 +328,30 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/anaconda3/envs/lec1/bin/python" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="llvm-parser" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MainProcess.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Evolution" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="llvm-parser" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Evolution.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -340,14 +478,20 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="2">
-      <item index="0" class="java.lang.String" itemvalue="Python.StatementExecutor" />
-      <item index="1" class="java.lang.String" itemvalue="Python.MainProcess" />
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="Python.DetectBug" />
+      <item index="1" class="java.lang.String" itemvalue="Python.EvolutionaryDetect" />
+      <item index="2" class="java.lang.String" itemvalue="Python.RepairTool" />
+      <item index="3" class="java.lang.String" itemvalue="Python.MainProcess" />
+      <item index="4" class="java.lang.String" itemvalue="Python.Evolution" />
     </list>
     <recent_temporary>
-      <list size="2">
-        <item index="0" class="java.lang.String" itemvalue="Python.MainProcess" />
-        <item index="1" class="java.lang.String" itemvalue="Python.StatementExecutor" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Python.EvolutionaryDetect" />
+        <item index="1" class="java.lang.String" itemvalue="Python.Evolution" />
+        <item index="2" class="java.lang.String" itemvalue="Python.DetectBug" />
+        <item index="3" class="java.lang.String" itemvalue="Python.RepairTool" />
+        <item index="4" class="java.lang.String" itemvalue="Python.MainProcess" />
       </list>
     </recent_temporary>
   </component>
@@ -364,29 +508,38 @@
     </task>
     <servers />
   </component>
+  <component name="TestHistory">
+    <history-entry file="Unittests_in_Gunit - 2018.11.05 at 14h 30m 24s.xml">
+      <configuration name="Unittests in Gunit" configurationId="tests" />
+    </history-entry>
+  </component>
   <component name="ToolWindowManager">
-    <frame x="-11" y="-11" width="1836" height="1102" extended-state="6" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1843" height="1096" extended-state="1" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13891952" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18732473" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19018742" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39350912" sideWeight="0.5018929" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917964" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29356846" sideWeight="0.49810708" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17610769" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4807892" sideWeight="0.9035281" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3936508" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.523446" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
     </layout>
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.ll" />
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.md" />
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -403,9 +556,155 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DetectBug.py</url>
+          <line>747</line>
+          <option name="timeStamp" value="144" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DetectBug.py</url>
+          <line>265</line>
+          <option name="timeStamp" value="149" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/MainProcess.py</url>
-          <line>74</line>
-          <option name="timeStamp" value="39" />
+          <line>821</line>
+          <option name="timeStamp" value="217" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MainProcess.py</url>
+          <line>817</line>
+          <option name="timeStamp" value="218" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DetectBug.py</url>
+          <line>585</line>
+          <option name="timeStamp" value="224" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MemHeuristic.py</url>
+          <line>337</line>
+          <option name="timeStamp" value="250" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://D:/Python27/Lib/pickle.py</url>
+          <line>311</line>
+          <option name="timeStamp" value="259" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MemHeuristic.py</url>
+          <line>216</line>
+          <option name="timeStamp" value="278" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MemHeuristic.py</url>
+          <line>192</line>
+          <option name="timeStamp" value="300" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MemHeuristic.py</url>
+          <line>197</line>
+          <option name="timeStamp" value="301" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MemHeuristic.py</url>
+          <line>289</line>
+          <option name="timeStamp" value="302" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MemHeuristic.py</url>
+          <line>209</line>
+          <option name="timeStamp" value="303" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DetectBug.py</url>
+          <line>328</line>
+          <option name="timeStamp" value="306" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DetectBug.py</url>
+          <line>601</line>
+          <option name="timeStamp" value="312" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DetectBug.py</url>
+          <line>661</line>
+          <option name="timeStamp" value="349" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/RepairTool.py</url>
+          <line>422</line>
+          <option name="timeStamp" value="365" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/RepairTool.py</url>
+          <line>432</line>
+          <option name="timeStamp" value="387" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MainProcess.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="411" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MainProcess.py</url>
+          <line>174</line>
+          <option name="timeStamp" value="436" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DataStructure.py</url>
+          <line>123</line>
+          <option name="timeStamp" value="439" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <condition expression="block_indexes == (1, 0, 0) and thread_indexes == (27, 0 , 0) and current_stmt.find(&quot;%label71 = load i1 %73&quot;) != -1" language="Python" />
+          <url>file://$PROJECT_DIR$/MainProcess.py</url>
+          <line>79</line>
+          <option name="timeStamp" value="448" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MainProcess.py</url>
+          <line>701</line>
+          <option name="timeStamp" value="454" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/RepairTool.py</url>
+          <line>474</line>
+          <option name="timeStamp" value="469" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/RepairTool.py</url>
+          <line>741</line>
+          <option name="timeStamp" value="470" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DataStructure.py</url>
+          <line>122</line>
+          <option name="timeStamp" value="472" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/DataStructure.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="473" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/EvolutionaryDetect.py</url>
+          <line>306</line>
+          <option name="timeStamp" value="476" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/RepairTool.py</url>
+          <line>568</line>
+          <option name="timeStamp" value="481" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/RepairTool.py</url>
+          <line>194</line>
+          <option name="timeStamp" value="491" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/MainProcess.py</url>
+          <line>164</line>
+          <option name="timeStamp" value="492" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -415,309 +714,391 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="50" />
+      <option name="time" value="495" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="arguments[split_index + 1:]" language="Python" />
-        <watch expression="kernel_codes.get_label_by_mark(if_true)" language="Python" />
-        <watch expression="kernel_codes.get_label_by_mark(if_false)" language="Python" />
-        <watch expression="kernel_codes.is_over()" language="Python" />
+        <watch expression="result_dict[previous_condition[0]]" language="Python" />
+        <watch expression="result_dict[previous_condition[1]]" language="Python" />
+        <watch expression="result_dict[current_node]" language="Python" />
+        <watch expression="result_dict" language="Python" />
+        <watch expression="re.compile(r&quot;%\d+&quot;).findall(&quot;i1 %10&quot;)" language="Python" />
+        <watch expression="current_stmt" language="Python" />
+        <watch expression="thread_indexes" language="Python" />
+        <watch expression="local_env.get_value(&quot;kernel_code&quot;).codes[current_line]" language="Python" />
+        <watch expression="stmt_map[stmt_two]" language="Python" />
       </configuration>
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/DataStructure.py">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/scan_dim.ll">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="-3.3">
+          <caret line="12" column="36" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="36" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MainProcess.py">
+    <entry file="file://$PROJECT_DIR$/raw_data_report_script/five_project_report.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="-17.1">
+          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/read_write_test.ll">
+    <entry file="file://$PROJECT_DIR$/raw_data_report_script/report_thundersvm_current_real.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="51" column="45" selection-start-line="51" selection-start-column="45" selection-end-line="51" selection-end-column="45" />
-          <folding />
+        <state vertical-scroll-proportion="-1.1732746">
+          <caret line="75" column="24" selection-start-line="75" selection-start-column="22" selection-end-line="75" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests.ll">
+    <entry file="file://$PROJECT_DIR$/raw_data_report_script/report_arrayfire_current_real.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
-          <folding />
+        <state vertical-scroll-proportion="0.28342247">
+          <caret line="222" column="0" selection-start-line="222" selection-start-column="0" selection-end-line="222" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test2.ll">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/scan_dim.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="125" column="0" selection-start-line="125" selection-start-column="0" selection-end-line="126" selection-end-column="21" />
-          <folding />
+          <caret line="4" column="42" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="42" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/codes.ll">
+    <entry file="file://$PROJECT_DIR$/raw_data_report_script/report_mshadow_current_real.log">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="92" selection-start-line="9" selection-start-column="92" selection-end-line="9" selection-end-column="92" />
-          <folding />
+          <caret line="31" column="65" selection-start-line="31" selection-start-column="59" selection-end-line="31" selection-end-column="65" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/scan_dim-repair.ll">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="84" column="0" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.020320855">
+          <caret line="131" column="21" selection-start-line="131" selection-start-column="17" selection-end-line="131" selection-end-column="21" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataStructure.py">
+    <entry file="file://$PROJECT_DIR$/raw_data_report_script/report_current_kaldi_real.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="-6.280663">
+          <caret line="252" column="65" selection-start-line="252" selection-start-column="59" selection-end-line="252" selection-end-column="65" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MainProcess.py">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/reduce.cu">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="88" column="28" selection-start-line="88" selection-start-column="28" selection-end-line="88" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
+          <caret line="1" column="31" selection-start-line="1" selection-start-column="20" selection-end-line="1" selection-end-column="31" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/read_write_test.ll">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/homography.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="51" column="45" selection-start-line="51" selection-start-column="45" selection-end-line="51" selection-end-column="45" />
-          <folding />
+          <caret line="12" column="42" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="42" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests.ll">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test2.ll">
+    <entry file="file://$PROJECT_DIR$/gklee-test-repair/barrier1-first.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/codes.ll">
+    <entry file="file://$PROJECT_DIR$/gklee-test-repair/barrier2.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="92" selection-start-line="9" selection-start-column="92" selection-end-line="9" selection-end-column="92" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="84" column="0" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+          <caret line="69" column="1" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/DataStructure.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="3" column="46" selection-start-line="3" selection-start-column="46" selection-end-line="3" selection-end-column="46" />
+          <caret line="127" column="0" selection-start-line="127" selection-start-column="0" selection-end-line="127" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MainProcess.py">
+    <entry file="file://$PROJECT_DIR$/gklee-test-repair/barrier3.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="10" column="20" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gklee-test-repair/barrier1-delete.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="26" selection-start-line="24" selection-start-column="26" selection-end-line="24" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gklee-test-repair/barrier1.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="26" selection-start-line="24" selection-start-column="26" selection-end-line="24" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/scan_first_by_key_impl.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="99" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming1.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5323276">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="109" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming2.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="38" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/JacobiSVD.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.36666667">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/Descriptor-delete.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.9666667">
+          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/Descriptor-first.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="192" column="22" selection-start-line="192" selection-start-column="17" selection-end-line="192" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming3-4th.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33281973">
+          <caret line="498" column="27" selection-start-line="498" selection-start-column="25" selection-end-line="498" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming4.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="45" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming3-5th.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-16.066668">
+          <caret line="497" column="13" selection-start-line="497" selection-start-column="13" selection-end-line="497" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/select_matches.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="37" selection-start-line="9" selection-start-column="1" selection-end-line="9" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/select_matches-delete.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="127" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="127" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/Descriptor.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="89" column="47" selection-start-line="89" selection-start-column="42" selection-end-line="89" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/Descriptor1.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="203" column="49" selection-start-line="203" selection-start-column="49" selection-end-line="203" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming4-4th.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="132" column="12" selection-start-line="132" selection-start-column="12" selection-end-line="132" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/computeMedian.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/harris_response.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="87" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RepairTool.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="29" selection-start-line="29" selection-start-column="29" selection-end-line="29" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#9#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kaldi-new-bug/fse-func.ll">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="85" selection-start-line="17" selection-start-column="85" selection-end-line="17" selection-end-column="98" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kaldi-new-bug/new-func.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/codes.ll">
+    <entry file="file://$PROJECT_DIR$/thundersvm-new-bug/new-fun.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="92" selection-start-line="9" selection-start-column="92" selection-end-line="9" selection-end-column="92" />
-          <folding />
+          <caret line="23" column="40" selection-start-line="23" selection-start-column="40" selection-end-line="23" selection-end-column="40" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
+    <entry file="file://$PROJECT_DIR$/kaldi-repair/_add_diag_mat.cu">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="65" column="13" selection-start-line="65" selection-start-column="13" selection-end-line="65" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+          <caret line="30" column="15" selection-start-line="30" selection-start-column="2" selection-end-line="30" selection-end-column="15" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataStructure.py">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/hamming3.ll">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="77" selection-start-line="11" selection-start-column="77" selection-end-line="11" selection-end-column="77" />
-          <folding />
+        <state vertical-scroll-proportion="0.020320855">
+          <caret line="191" column="19" selection-start-line="191" selection-start-column="13" selection-end-line="191" selection-end-column="19" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MainProcess.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="48" selection-start-line="12" selection-start-column="48" selection-end-line="12" selection-end-column="48" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/codes.ll">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="25" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
+    <entry file="file://$PROJECT_DIR$/kaldi-new-bug/fse-func.cu">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DataStructure.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="39" column="27" selection-start-line="39" selection-start-column="27" selection-end-line="39" selection-end-column="27" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MainProcess.py">
+    <entry file="file://$PROJECT_DIR$/gunrock/gunrock1.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
+          <caret line="10" column="126" selection-start-line="10" selection-start-column="121" selection-end-line="10" selection-end-column="126" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/Descriptor1.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.5141388">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/codes.ll">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/scan_dim_by_key_impl.ll">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="25" selection-start-line="9" selection-start-column="25" selection-end-line="9" selection-end-column="25" />
-          <folding />
+        <state vertical-scroll-proportion="0.29968455">
+          <caret line="145" column="109" selection-start-line="145" selection-start-column="109" selection-end-line="145" selection-end-column="109" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+          <caret line="252" column="22" selection-start-line="252" selection-start-column="22" selection-end-line="252" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+    <entry file="file://$PROJECT_DIR$/MemHeuristic.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="1793" column="0" selection-start-line="1793" selection-start-column="0" selection-end-line="1793" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/read_write_test.ll">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="51" column="45" selection-start-line="51" selection-start-column="45" selection-end-line="51" selection-end-column="45" />
+          <caret line="174" column="33" selection-start-line="174" selection-start-column="19" selection-end-line="174" selection-end-column="33" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests.ll">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/reduce.ll">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
+          <caret line="8" column="14" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="14" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test2.ll">
+    <entry file="file://$PROJECT_DIR$/arrayfire-repair/reduce1.ll">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="125" column="0" selection-start-line="125" selection-start-column="0" selection-end-line="126" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/codes.ll">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="92" selection-start-line="9" selection-start-column="92" selection-end-line="9" selection-end-column="92" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/StatementExecutor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="93" column="35" selection-start-line="93" selection-start-column="35" selection-end-line="93" selection-end-column="35" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="-0.7568134">
+          <caret line="8" column="87" selection-start-line="8" selection-start-column="85" selection-end-line="8" selection-end-column="87" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/MainProcess.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="53" column="78" selection-start-line="53" selection-start-column="44" selection-end-line="53" selection-end-column="78" />
+          <caret line="663" column="66" selection-start-line="663" selection-start-column="66" selection-end-line="663" selection-end-column="66" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DetectBug.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="657" column="60" selection-start-line="657" selection-start-column="60" selection-end-line="657" selection-end-column="60" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataStructure.py">
+    <entry file="file://$PROJECT_DIR$/Evolution.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.4851485">
-          <caret line="167" column="22" selection-start-line="167" selection-start-column="22" selection-end-line="167" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="342" column="56" selection-start-line="342" selection-start-column="56" selection-end-line="342" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EvolutionaryFramework.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="72" column="47" selection-start-line="72" selection-start-column="47" selection-end-line="72" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EvolutionaryDetect.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.506135">
+          <caret line="315" column="26" selection-start-line="315" selection-start-column="26" selection-end-line="315" selection-end-column="26" />
           <folding />
         </state>
       </provider>

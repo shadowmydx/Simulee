@@ -80,7 +80,7 @@ class ArgumentsItem:
     def construct_argus_dict(variable_lst):
         result_dict = dict()
         for item in variable_lst:
-            result_dict[item[0]] = 10 * abs(np.random.standard_cauchy())
+            result_dict[item[0]] = 50 * abs(np.random.standard_cauchy())
         return result_dict
 
     def copy_initial_argus_to_target(self, target_item):
@@ -280,6 +280,9 @@ def mutation(item):
 
 def sorter(population_lst):
     population_lst.sort(key=lambda x: x[1][0])
+    for index in xrange(len(population_lst)):
+        if population_lst[index][1][1] == 0:
+            population_lst[index] = population_lst[index][0], (population_lst[index][1][0], 100)
     if population_lst[0][1][0] == population_lst[-1][1][0]:
         population_lst.sort(key=lambda x: x[1][1])
         if population_lst[0][1][1] == population_lst[-1][1][1]:
@@ -337,7 +340,7 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
                                               Thread((-1, -1, 0), fixed_dimension[1]), evolve_dimension, is_branch)
         generator = generator_for_evolutionary_factory(generator)
 
-        population_lst, current_generation = evolutionary_framework(3, 50, generator, sorter, fitness,
+        population_lst, current_generation = evolutionary_framework(10, 10, generator, sorter, fitness,
                                                                     acceptable_factory(is_branch), selector, mutation,
                                                                     None, 10)
         # population_lst, current_generation = evolutionary_framework_local(20, 1, generator, sorter, fitness, acceptable_factory(is_branch), selector, mutation, None)
@@ -360,6 +363,30 @@ def generate_initialized_setting(target_file_path, function_name, main_memory, i
     return test_result_lst[0]
 
 
+def random_test_target_function(target_file_path, function_name, main_memory, test_round, used_default_dimension=False, fixed_dimension=None):
+    if fixed_dimension is None:
+        fixed_dimension = [(1, 1, 1), (34, 1, 1)]
+    class_arguments = class_generator(target_file_path, function_name, main_memory, False)
+    start_time = time.time()
+    for i in xrange(test_round):
+        argument = ArgumentsItem(target_file_path, function_name, main_memory, class_arguments, Block((-1, -1, 0), fixed_dimension[0]), Thread((-1, -1, 0), fixed_dimension[1]),
+                      not used_default_dimension)
+        global_env = parse_function(target_file_path)
+        generate_memory_container(main_memory.keys(), global_env)
+        raw_code = global_env.get_value(function_name)
+        blocks = argument.blocks
+        threads = argument.threads
+        arguments = argument.construct_running_arguments()
+        for idx, variable in enumerate(raw_code.argument_lst):
+            if variable not in arguments and raw_code.type_lst[idx].find("*") == -1:
+                arguments[variable] = 2  # temp action, need more focus
+        arguments = generate_arguments(global_env.get_value(function_name), arguments)
+        arguments["main_memory"] = main_memory
+        execute_framework(blocks, threads, raw_code.raw_codes, arguments, global_env)
+        current_time = time.time()
+        print "Current solution total cost time is " + str(current_time - start_time)
+
+
 def auto_test_target_function(target_file_path, function_name, main_memory, used_default_dimension=False,
                               fixed_dimension=None):
     start_time = time.time()
@@ -370,6 +397,7 @@ def auto_test_target_function(target_file_path, function_name, main_memory, used
     used_solution = dict()
     for item in solution_lst:
         if item[1][0] < 1:
+            print "Score is " + str(item[1][0])
             solution_str = str(item[0].blocks.grid_dim) + str(item[0].threads.block_dim) + str(
                 item[0].construct_running_arguments())
             if solution_str in used_solution:
@@ -507,11 +535,11 @@ if __name__ == "__main__":
     #     "global": "%A",
     #     "shared": None
     # })
-    auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i",
-                              {
-                                  "global": "%alpha",
-                                  "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
-                              }, used_default_dimension=True)
+    # auto_test_target_function("./thundersvm-new-bug/new-fun.ll", "@_Z18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_i",
+    #                           {
+    #                               "global": "%alpha",
+    #                               "shared": "@_ZZ18c_smo_solve_kernelPKiPfS1_S1_S0_iffPKfS3_ifS1_iE10shared_mem"
+    #                           }, used_default_dimension=True)
     # auto_test_target_function("./kaldi-new-bug/new-func.ll", "@_Z17_add_diag_vec_matfPfiiiPKfS1_iif", {
     #     "global": "%mat",
     #     "shared": None
@@ -552,7 +580,7 @@ if __name__ == "__main__":
     #     "global": None,
     #     "shared": "@_ZZ20_trace_mat_mat_transPKfS0_iiiiPfE4ssum"
     # })
-    # generate_initialized_setting("./arrayfire/arrayfire-Fix-syncthreads-in-cuda-nearest-neighbour.ll", "@_Z14select_matchesPjPiPKjPKijji", {
-    #     "global": None,
-    #     "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"
-    # })
+    generate_initialized_setting("./arrayfire/arrayfire-Fix-syncthreads-in-cuda-nearest-neighbour.ll", "@_Z14select_matchesPjPiPKjPKijji", {
+        "global": None,
+        "shared": "@_ZZ14select_matchesPjPiPKjPKijjiE6s_dist"
+    })

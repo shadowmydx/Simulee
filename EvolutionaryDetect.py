@@ -42,7 +42,7 @@ def test_copy_low_upp():
         "global": "%A",
         "shared": None
     })
-    # }, fixed_dimension=[(1, 1, 1), (3, 2, 1)], used_default_dimension=True)
+    # }, fixed_dimension=[(1, 1, 1), (3, 1, 1)], used_default_dimension=True)
 
 
 def test_copy_upp_low():
@@ -50,6 +50,7 @@ def test_copy_upp_low():
         "global": "%A",
         "shared": None
     })
+    # }, fixed_dimension=[(1, 1, 1), (4, 1, 1)], used_default_dimension=True)
 
 
 def test_add_diag_vec_mat():
@@ -64,6 +65,7 @@ def test_copy_from_tp():
         "global": "%A",
         "shared": None
     })
+    # }, fixed_dimension=[(1, 1, 1), (5, 1, 1)], used_default_dimension=True)
 
 
 def test_copy_from_mat():
@@ -71,6 +73,7 @@ def test_copy_from_mat():
         "global": "%mat_out",
         "shared": None
     })
+    # }, fixed_dimension=[(1, 1, 1), (5, 1, 1)], used_default_dimension=True)
 
 
 def test_splice():
@@ -261,7 +264,7 @@ def test_arrayfire_JacobiSVD():
 
 
 def test_arrayfire_reduce1():
-    auto_test_target_function_dynamical("./arrayfire-repair/reduce1-repair.ll", "@_Z11warp_reducePiPj", {
+    auto_test_target_function_dynamical("./arrayfire-repair/reduce1.ll", "@_Z11warp_reducePiPj", {
         "global": "%s_ptr",
         "shared": None
     }, fixed_dimension=[(1, 1, 1), (34, 1, 1)], used_default_dimension=True)
@@ -304,9 +307,13 @@ def dummy_data_for_shared_memory_hamming3(global_env):
 
 
 if __name__ == "__main__":
-    # test_add_diag_vec_mat()
+    # test_convnet2_kTile()
+    # test_add_diag_vec_mat() # need evolution
     # test_arrayfire_select_matches()
     # test_copy_low_upp()
+    # test_copy_upp_low()
+    test_copy_from_tp()  # need evolution
+    # test_copy_from_mat() # need evolution
     # test_colonel()
     # test_device_global()
     # test_trace_mat_mat()
@@ -314,13 +321,13 @@ if __name__ == "__main__":
     # test_arrayfire_compute_median()
     # test_arrayfire_hamming_matcher_2()
     # test_arrayfire_descriptor()  #
-    # test_arrayfire_reduce1()
+    # test_arrayfire_reduce1()  # recompile barrier divergence version
     # test_arrayfire_JacobiSVD()
     # test_arrayfire_hamming_matcher_unroll_2()
     # test_arrayfire_hamming_matcher_1()
     # test_arrayfire_hamming_matcher_unroll_1()
     # test_arrayfire_scan_nofinal_kernel()
-    test_arrayfire_scan_dim_nofinal_kernel()
+    # test_arrayfire_scan_dim_nofinal_kernel()
     # test_gklee_test_barrier3()
     # test_gklee_test_barrier1()
     # test_arrayfire_compute_val_homography()
