@@ -135,7 +135,7 @@ def test_gunrock_xmrig():
 
 
 def test_arrayfire_compute_median():
-    auto_test_target_function_advanced("./arrayfire-repair/computeMedian-repair.ll", "@_Z13computeMedianj", {
+    auto_test_target_function_advanced("./arrayfire-repair/computeMedian.ll", "@_Z13computeMedianj", {
         'global': None,
         'shared': "@_ZZ13computeMedianjE5s_idx",
     })
@@ -187,7 +187,7 @@ def test_kaldi_add_diag():
     auto_test_target_function("./kaldi-repair/_add_diag_mat.ll", "@_Z17_add_diag_mat_matdPdiPKdiiiS1_iid", {
         "global": None,
         "shared": "@_ZZ17_add_diag_mat_matdPdiPKdiiiS1_iidE9temp_data"
-    }, fixed_dimension=[(1, 1, 1), (33, 1, 1)], used_default_dimension=True)
+    }, fixed_dimension=[(1, 1, 1), (128, 1, 1)], used_default_dimension=True)
 
 
 def test_arrayfire_scan_dim():
@@ -214,7 +214,7 @@ def test_arrayfire_scan_nofinal_kernel():
 
 
 def test_arrayfire_reduce():
-    auto_test_target_function_dynamical("./arrayfire-repair/reduce.ll", "@_Z11warp_reducePd", {
+    auto_test_target_function_dynamical("./arrayfire-repair/reducebd.ll", "@_Z11warp_reducePd", {
         "global": "%s_ptr",
         "shared": None
     }, fixed_dimension=[(1, 1, 1), (34, 1, 1)], used_default_dimension=True)
@@ -245,6 +245,7 @@ def test_arrayfire_hamming_matcher_1():
     auto_test_target_function_dynamical("./arrayfire-repair/hamming2.ll", "@_Z15hamming_matcherPjS_jj", {
         "global": None,
         "shared": "@_ZZ15hamming_matcherPjS_jjE6s_dist"
+    # })
     }, fixed_dimension=[(1, 1, 1), (36, 1, 1)], used_default_dimension=True)
 
 
@@ -252,7 +253,8 @@ def test_arrayfire_hamming_matcher_2():
     auto_test_target_function_dynamical("./arrayfire-repair/hamming3.ll", "@_Z15hamming_matcherPjS_jj", {
         "global": None,
         "shared": "@_ZZ15hamming_matcherPjS_jjE6s_dist"
-    }, fixed_dimension=[(1, 1, 1), (36, 1, 1)], used_default_dimension=True, initial_function=dummy_data_for_shared_memory_hamming3)
+    })
+    # }, fixed_dimension=[(1, 1, 1), (36, 1, 1)], used_default_dimension=True, initial_function=dummy_data_for_shared_memory_hamming3)
 
 
 def test_arrayfire_JacobiSVD():
@@ -264,7 +266,7 @@ def test_arrayfire_JacobiSVD():
 
 
 def test_arrayfire_reduce1():
-    auto_test_target_function_dynamical("./arrayfire-repair/reduce1.ll", "@_Z11warp_reducePiPj", {
+    auto_test_target_function_dynamical("./arrayfire-repair/reduce.ll", "@_Z11warp_reducePiPj", {
         "global": "%s_ptr",
         "shared": None
     }, fixed_dimension=[(1, 1, 1), (34, 1, 1)], used_default_dimension=True)
@@ -293,7 +295,7 @@ def test_gklee_test_barrier1():
 
 
 def test_gklee_test_barrier3():
-    auto_test_target_function_dynamical("./gklee-test-repair/barrier3-delete.ll", "@_Z2dlPi", {
+    auto_test_target_function_dynamical("./gklee-test-repair/barrier3.ll", "@_Z2dlPi", {
         "global": "%in",
         "shared": None,
     }, fixed_dimension=[(1, 1, 1), (64, 1, 1)], used_default_dimension=True)
@@ -312,7 +314,7 @@ if __name__ == "__main__":
     # test_arrayfire_select_matches()
     # test_copy_low_upp()
     # test_copy_upp_low()
-    test_copy_from_tp()  # need evolution
+    # test_copy_from_tp()  # need evolution
     # test_copy_from_mat() # need evolution
     # test_colonel()
     # test_device_global()
@@ -342,7 +344,7 @@ if __name__ == "__main__":
     # test_gunrock_join2()
     # test_gunrock_collect()
     # test_gunrock_join()
-    # test_sum_reduced()
+    test_sum_reduced()
     # test_sync_cudpp_sparseMatrixVectorSetFlags()
     # test_sync_FindMaxCorr()
     # test_sync_cuda_cnn_g_getCost_3()
